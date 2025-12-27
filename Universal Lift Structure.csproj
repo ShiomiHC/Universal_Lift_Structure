@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+            Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{730797A8-A01C-44D8-8FFD-C4BC29519738}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>Universal_Lift_Structure</RootNamespace>
+        <AssemblyName>Universal_Lift_Structure</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>none</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>Universal Lift Structure\1.6\Assemblies\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>C:\Users\CCH\.nuget\packages\lib.harmony\2.4.2\lib\net48\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System"/>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Xml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Source\Components\ULS_Flickable_Pulse.cs" />
+        <Compile Include="Source\Components\ULS_Properties_FlickablePulse.cs" />
+        <Compile Include="Source\Components\ULS_AutoGroupMarker.cs" />
+        <Compile Include="Source\Components\ULS_FlickTrigger.cs" />
+        <Compile Include="Source\Components\ULS_AutoGroupMapComponent.cs"/>
+        <Compile Include="Source\Components\ULS_ControllerGroupMapComponent.cs"/>
+        <Compile Include="Source\Components\ULS_HiddenThingCleanupMapComponent.cs" />
+        <Compile Include="Source\Components\ULS_LiftRequest.cs"/>
+        <Compile Include="Source\Components\ULS_MultiCellGroupMapComponent.cs"/>
+        <Compile Include="Source\Components\ULS_MultiCellGroupRecord.cs"/>
+        <Compile Include="Source\Core\Building_WallController.cs" />
+        <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
+        <Compile Include="Source\Core\Building_WallController_Group.cs" />
+        <Compile Include="Source\Core\Building_WallController_LiftProcess.cs" />
+        <Compile Include="Source\Core\Building_WallController_Power.cs" />
+        <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />
+        <Compile Include="Source\Core\Building_WallController_Utility.cs" />
+        <Compile Include="Source\Core\ULS_GhostRenderer.cs" />
+        <Compile Include="Source\GlobalUsings.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_Building_GetGizmos.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_DrawManager_DynamicThings.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_Thing_Destroy.cs" />
+        <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
+        <Compile Include="Source\Misc\ULS_StatPart_StoredMarketValue.cs" />
+        <Compile Include="Source\Misc\ULS_Dialog_SetControllerGroupId.cs"/>
+        <Compile Include="Source\Misc\ULS_ThingDefOf.cs" />
+        <Compile Include="Source\Rendering\ULS_LiftClipRenderer.cs" />
+        <Compile Include="Source\Rendering\ULS_ShaderTypeDefOf.cs"/>
+        <Compile Include="Source\Rendering\ULS_Textures.cs"/>
+        <Compile Include="Source\Settings\LiftControlMode.cs"/>
+        <Compile Include="Source\Settings\UniversalLiftStructureMod.cs"/>
+        <Compile Include="Source\Settings\UniversalLiftStructureSettings.cs"/>
+        <Compile Include="Source\Utilities\ULS_AutoGroupUtility.cs"/>
+        <Compile Include="Source\Utilities\ULS_FlickUtility.cs"/>
+        <Compile Include="Source\Utilities\ULS_Utility.cs"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Universal Lift Structure\1.6\Assemblies\Universal_Lift_Structure.dll"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4633"/>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>

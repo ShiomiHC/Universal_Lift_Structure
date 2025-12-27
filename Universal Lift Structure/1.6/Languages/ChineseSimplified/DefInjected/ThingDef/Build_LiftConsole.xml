@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- 简体中文：升降控制台（ULS_LiftConsole）显示名与描述 -->
+<LanguageData>
+    <!-- 文件意图：DefInjected 本地化：为 ThingDef（ULS_LiftConsole）提供 label 与 description 的简体中文显示文本。 -->
+
+    <ULS_LiftConsole.label>升降控制台</ULS_LiftConsole.label>
+    <ULS_LiftConsole.description>用于在“控制台模式”下触发升降操作。殖民者将自动前往并执行操作。</ULS_LiftConsole.description>
+</LanguageData>

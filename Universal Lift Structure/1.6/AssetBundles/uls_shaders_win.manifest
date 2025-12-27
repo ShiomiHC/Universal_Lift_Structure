@@ -1,0 +1,20 @@
+ManifestFileVersion: 0
+CRC: 3585986167
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 15afd1415f72d10aaec296443d111b81
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 0df1dec30b5d061d422d3e6493d27647
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 15afd1415f72d10aaec296443d111b81
+HashAppended: 0
+ClassTypes:
+- Class: 48
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Data/Universal Lift Structure/Materials/Map/ULS_GhostEdgeDotted.shader
+Dependencies: []

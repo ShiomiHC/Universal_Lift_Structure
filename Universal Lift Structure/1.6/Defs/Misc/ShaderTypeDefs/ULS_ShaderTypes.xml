@@ -1,0 +1,7 @@
+<Defs>
+    <ShaderTypeDef>
+        <defName>ULS_GhostEdgeDotted</defName>
+        <shaderPath>Map/ULS_GhostEdgeDotted</shaderPath>
+        <!-- 关键注释：该 Shader 位于 AssetBundle 中，路径对应 Assets/Data/Universal Lift Structure/Shaders/Map/ULS_GhostEdgeDotted.shader -->
+    </ShaderTypeDef>
+</Defs>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- 简体中文：结构控制器（ULS_WallController）显示名与描述 -->
+<LanguageData>
+    <!-- 文件意图：DefInjected 本地化：为 ThingDef（ULS_WallController）提供 label 与 description 的简体中文显示文本。 -->
+
+    <!-- 物品显示名（label） -->
+    <ULS_WallController.label>结构控制器</ULS_WallController.label>
+    <!-- 物品描述（description） -->
+    <ULS_WallController.description>结构控制</ULS_WallController.description>
+
+    <!-- 自动控制器（按组）：过滤器在 Gizmo 中设置（敌方/友方/中立）。 -->
+    <ULS_WallController_Auto.label>结构控制器（自动）</ULS_WallController_Auto.label>
+    <ULS_WallController_Auto.description>当匹配过滤器的单位接近时自动降下；离开后延迟升起。过滤器可按组切换。</ULS_WallController_Auto.description>
+</LanguageData>

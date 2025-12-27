@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+    <!-- 文件意图：Keyed 本地化：为 C# 侧 UI 文本提供翻译键，覆盖按钮文本、失败原因提示、以及设置菜单文案等。 -->
+
+    <!-- ULS 结构侧按钮：按控制器显式组（GroupId）执行“降下”。 -->
+    <ULS_LowerGroup>降下</ULS_LowerGroup>
+    <!-- ULS 控制器按钮：按控制器显式组（GroupId）执行“升起”(组)。 -->
+    <ULS_RaiseGroup>升起</ULS_RaiseGroup>
+    <!-- 操作失败原因：控制器内部没有已收纳的建筑，无法执行“升起”。 -->
+    <ULS_NoStored>控制器未收纳结构。</ULS_NoStored>
+    <!-- 操作失败原因：目标格没有可收纳的 edifice（例如：为空地/仅有地板/不可摧毁物体等）。 -->
+    <ULS_NoEdifice>该格没有可收纳的结构。</ULS_NoEdifice>
+    <!-- 操作失败原因：目标结构不属于玩家派系（严格仅允许玩家所有结构降下/收纳）。 -->
+    <ULS_LowerNotPlayerOwned>仅允许降下玩家所有的结构。</ULS_LowerNotPlayerOwned>
+    <!-- 操作失败原因：控制器内部已存在已收纳的建筑；同一时间只能收纳一个目标。 -->
+    <ULS_Stored>结构已收纳。</ULS_Stored>
+
+    <!-- 多格操作失败原因：多格建筑的 footprint 必须每格都有结构控制器。 -->
+    <ULS_MultiCellNeedControllerEveryCell>多格结构要求其占格内每格都有结构控制器。</ULS_MultiCellNeedControllerEveryCell>
+    <!-- 多格操作失败原因：footprint 内存在已收纳结构的控制器。 -->
+    <ULS_MultiCellControllerHasStored>占格内存在已收纳结构的控制器，无法降下多格结构。</ULS_MultiCellControllerHasStored>
+    <!-- 多格操作失败原因：footprint 内存在已属于其它多格隐组的控制器。 -->
+    <ULS_MultiCellControllerInGroup>占格内存在已属于其它多格隐组的控制器，无法降下多格结构。</ULS_MultiCellControllerInGroup>
+    <!-- 多格操作失败原因：该多格结构已处于收纳状态（隐组记录已存在）。 -->
+    <ULS_MultiCellGroupAlreadyExists>该多格结构已处于收纳状态。</ULS_MultiCellGroupAlreadyExists>
+
+    <!-- 组操作失败原因：组升起/降下的可操作规模超过设置阈值。{0}=阈值 -->
+    <ULS_GroupTooLarge>组规模超过上限（上限：{0}）。</ULS_GroupTooLarge>
+    <!-- 组操作失败原因：起点/占格内未找到可作为起点的控制器。 -->
+    <ULS_GroupNoController>未找到结构控制器。</ULS_GroupNoController>
+    <!-- 组操作失败原因：组内存在已收纳的控制器，无法执行全组降下。 -->
+    <ULS_GroupHasStored>组内存在已收纳的控制器。</ULS_GroupHasStored>
+    <!-- 组操作失败原因：某格没有可收纳目标。{0}=坐标 -->
+    <ULS_GroupCannotLower_NoEdificeAt>坐标 {0} 没有可收纳的结构。</ULS_GroupCannotLower_NoEdificeAt>
+    <!-- 组操作失败原因：某格目标未被白名单允许。{0}=坐标 -->
+    <ULS_GroupBlacklistedAt>坐标 {0} 的结构未在白名单中。</ULS_GroupBlacklistedAt>
+
+    <!-- 放置失败原因：同一格已存在结构控制器（或其蓝图/框架），禁止叠放。 -->
+    <ULS_CannotPlace_ControllerExists>该格已存在结构控制器。</ULS_CannotPlace_ControllerExists>
+    <!-- 放置失败原因：该格存在未被白名单允许的结构（含蓝图/框架），禁止在其上叠放控制器。{0}=defName -->
+    <ULS_CannotPlace_BlacklistedOverlay>该格存在未被白名单允许的结构（{0}），无法放置结构控制器。</ULS_CannotPlace_BlacklistedOverlay>
+    <!-- 组操作失败原因：批量降下执行中发生失败，已回滚。 -->
+    <ULS_GroupLowerFailed>批量降下失败，已回滚。</ULS_GroupLowerFailed>
+    <!-- 组操作结果：批量降下（开始执行）。{0}=数量 -->
+    <ULS_GroupLowered>已开始批量降下：{0}</ULS_GroupLowered>
+    <!-- 组操作结果：批量降下（部分可开始执行）。{0}=可开始数量 {1}=跳过数量 -->
+    <ULS_GroupLoweredPartial>已开始批量降下：{0}（跳过：{1}）</ULS_GroupLoweredPartial>
+    <!-- 组操作失败原因：组内没有任何可降下的格（例如：已收纳/空地/未允许(白名单)/不可摧毁等）。 -->
+    <ULS_GroupNoLowerable>组内没有可降下的结构。</ULS_GroupNoLowerable>
+    <!-- 操作失败原因：当前处于升降中间态，避免重复触发。 -->
+    <ULS_LiftInProcess>升降进行中。</ULS_LiftInProcess>
+    <!-- 组操作失败原因：某格还原被阻挡。{0}=坐标 -->
+    <ULS_GroupCannotRaise_BlockedAt>坐标 {0} 被阻挡，无法升起。</ULS_GroupCannotRaise_BlockedAt>
+    <!-- 组操作结果：批量升起（开始执行）。{0}=数量 -->
+    <ULS_GroupRaised>已开始批量升起：{0}</ULS_GroupRaised>
+    <!-- 组操作结果：批量升起（部分可开始执行）。{0}=可开始数量 {1}=跳过数量（被阻挡/数据异常等） -->
+    <ULS_GroupRaisedPartial>已开始批量升起：{0}（跳过：{1}）</ULS_GroupRaisedPartial>
+    <!-- 组操作失败原因：组内存在已收纳结构，但全部因阻挡/异常无法升起。 -->
+    <ULS_GroupNoRaiseable>组内没有可升起的结构（可能被阻挡）。</ULS_GroupNoRaiseable>
+
+    <!-- 设置菜单：分类名 -->
+    <ULS_SettingsCategory>通用升降结构</ULS_SettingsCategory>
+
+    <!-- 设置菜单：标签页 -->
+    <ULS_Tab_General>常规</ULS_Tab_General>
+    <ULS_Tab_Filter>筛选</ULS_Tab_Filter>
+
+    <!-- 设置菜单：升降控制模式 -->
+    <ULS_Settings_LiftControlMode>升降控制模式</ULS_Settings_LiftControlMode>
+    <ULS_Settings_LiftControlMode_Desc>选择点击“升起/降下”按钮后是否需要殖民者执行操作。
+遥控器：立即生效；控制台：需要地图上存在升降控制台；手动：需要殖民者操作控制器本体。</ULS_Settings_LiftControlMode_Desc>
+    <ULS_LiftControlMode_Remote>遥控器</ULS_LiftControlMode_Remote>
+    <ULS_LiftControlMode_Console>控制台</ULS_LiftControlMode_Console>
+    <ULS_LiftControlMode_Manual>手动</ULS_LiftControlMode_Manual>
+    <!-- 设置菜单：批量(组)操作的可操作规模阈值；仅限制“升起/降下”是否允许执行，不限制分组本身规模 -->
+    <ULS_Settings_GroupMaxSize>组规模上限</ULS_Settings_GroupMaxSize>
+
+    <!-- 控制器 Gizmo：设置显式组ID（同时显示当前值）。{0}=GroupId -->
+    <ULS_GroupSetIdWithValue>设置组：{0}</ULS_GroupSetIdWithValue>
+    <!-- 设置组ID窗口：说明文案 -->
+    <ULS_GroupSetId_Desc>输入一个正整数作为组ID。相同组ID的控制器将作为同一组执行升起/降下。</ULS_GroupSetId_Desc>
+    <!-- 设置组ID窗口：字段标签 -->
+    <ULS_GroupSetId_Field>组ID</ULS_GroupSetId_Field>
+    <!-- 设置组ID窗口：确认按钮 -->
+    <ULS_GroupSetId_Accept>确认</ULS_GroupSetId_Accept>
+
+    <!-- 控制器 Gizmo：将多选控制器链接到当前控制器所在组 -->
+    <ULS_GroupMergeToPrimary>链接到主组</ULS_GroupMergeToPrimary>
+    <!-- 控制器 Gizmo：将多选控制器分离到新组 -->
+    <ULS_GroupSplitToNew>分离为新组</ULS_GroupSplitToNew>
+
+    <!-- 分组操作：需要多选 -->
+    <ULS_GroupNeedMultiSelect>需要选中至少两个控制器。</ULS_GroupNeedMultiSelect>
+    <!-- 分组操作：仅玩家控制器可操作 -->
+    <ULS_GroupNotPlayerOwned>仅允许操作玩家所有的控制器。</ULS_GroupNotPlayerOwned>
+
+    <!-- 自动组分组限制：禁止自动控制器与手动控制器混为同一显式组。 -->
+    <ULS_AutoGroup_MixAutoAndManual>自动控制器组与手动控制器组不能混为同一组。</ULS_AutoGroup_MixAutoAndManual>
+
+    <!-- 自动组：过滤器 Gizmo（按组切换；多组选中时统一覆盖） -->
+    <ULS_AutoGroup_FilterWithValue>自动过滤：{0}</ULS_AutoGroup_FilterWithValue>
+    <ULS_AutoGroup_Filter_Mixed>混合</ULS_AutoGroup_Filter_Mixed>
+    <ULS_AutoGroup_Filter_Friendly>友方</ULS_AutoGroup_Filter_Friendly>
+    <ULS_AutoGroup_Filter_Hostile>敌方</ULS_AutoGroup_Filter_Hostile>
+    <ULS_AutoGroup_Filter_Neutral>中立</ULS_AutoGroup_Filter_Neutral>
+
+    <ULS_AutoGroup_SetFilter_Friendly>设为：友方</ULS_AutoGroup_SetFilter_Friendly>
+    <ULS_AutoGroup_SetFilter_Hostile>设为：敌方</ULS_AutoGroup_SetFilter_Hostile>
+    <ULS_AutoGroup_SetFilter_Neutral>设为：中立</ULS_AutoGroup_SetFilter_Neutral>
+    <!-- 设置菜单：DefName 白名单标题（勾选=允许） -->
+    <ULS_Settings_DefNameBlacklist>DefName 白名单</ULS_Settings_DefNameBlacklist>
+    <!-- 设置菜单：白名单搜索框标签 -->
+    <ULS_Settings_Search>搜索</ULS_Settings_Search>
+
+    <!-- 设置菜单：按 Mod 筛选 -->
+    <ULS_Settings_ModFilter>模组</ULS_Settings_ModFilter>
+    <ULS_Settings_ModFilter_All>全部</ULS_Settings_ModFilter_All>
+
+    <!-- 设置菜单：内置规则（合并到筛选列表顶部） -->
+    <ULS_Settings_BuiltInRules>内置规则</ULS_Settings_BuiltInRules>
+    <ULS_Settings_AllowDoors>允许门</ULS_Settings_AllowDoors>
+    <ULS_Settings_AllowNaturalRock>允许自然岩壁</ULS_Settings_AllowNaturalRock>
+    <!-- 设置菜单：向 DefName 白名单添加当前输入 -->
+    <ULS_Settings_Add>添加</ULS_Settings_Add>
+    <!-- 设置菜单：从 DefName 白名单移除当前项 -->
+    <ULS_Settings_Remove>移除</ULS_Settings_Remove>
+    <!-- 设置菜单：重置为默认值 -->
+    <ULS_Settings_ResetToDefault>重置为默认</ULS_Settings_ResetToDefault>
+    <!-- 设置菜单：输入为空 -->
+    <ULS_Settings_InvalidDefName_Empty>请输入 defName。</ULS_Settings_InvalidDefName_Empty>
+    <!-- 设置菜单：输入的 defName 未找到对应 ThingDef -->
+    <ULS_Settings_InvalidDefName>未找到 ThingDef：{0}</ULS_Settings_InvalidDefName>
+
+    <!-- 右下角 Overlay：切换“显示收纳结构虚影”（类蓝图 ghost；半透明紫色）。 -->
+    <ULS_ShowStoredGhostOverlayToggleButton>显示收纳结构虚影</ULS_ShowStoredGhostOverlayToggleButton>
+
+    <!-- 设置菜单：升降耗时倍率（HP 部分）。{0}=倍率 -->
+    <ULS_Settings_LiftDurationHpSet>升降耗时倍率（HP）: {0}</ULS_Settings_LiftDurationHpSet>
+    <!-- 设置菜单：升降耗时倍率（Mass 部分）。{0}=倍率 -->
+    <ULS_Settings_LiftDurationMassSet>升降耗时倍率（质量）: {0}</ULS_Settings_LiftDurationMassSet>
+
+    <!-- 设置菜单：是否启用升降耗电/断电回退逻辑 -->
+    <ULS_Settings_EnableLiftPower>启用升降耗电逻辑</ULS_Settings_EnableLiftPower>
+    <ULS_Settings_EnableLiftPower_Desc>启用后：
+待机功率：标准控制器 0W，自动控制器 5W；
+升降过程：每个参与控制器额外耗电 100W；
+缺电时无法开始升降，升降途中断电会回退（降下还原，升起保留收纳）。</ULS_Settings_EnableLiftPower_Desc>
+
+    <!-- 缺电提示：升降开始时未连接电网（Gizmo 将禁用显示此文本） -->
+    <ULS_PowerOff>未连接电网。</ULS_PowerOff>
+    <!-- 组缺电提示：组内存在未供电控制器，无法开始升起/降下（消息将指向该控制器）。 -->
+    <ULS_GroupPowerInsufficient>组内存在未供电的结构控制器。</ULS_GroupPowerInsufficient>
+    <!-- 缺电提示：升降过程中失去供电，流程已回退。 -->
+    <ULS_PowerLost>升降过程中断电，已回退。</ULS_PowerLost>
+
+    <!-- Console/Manual 模式提示 -->
+    <ULS_LiftConsoleMissing>未找到升降控制台。</ULS_LiftConsoleMissing>
+    <ULS_LiftTriggerMissing>缺少升降触发组件（可能是 Def 未挂 comps）。</ULS_LiftTriggerMissing>
+    <ULS_LiftRequest_ControllerInvalid>升降请求已失效：控制器不存在或已被移除。</ULS_LiftRequest_ControllerInvalid>
+</LanguageData>
