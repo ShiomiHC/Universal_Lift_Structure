@@ -132,7 +132,27 @@
     <ULS_Settings_InvalidDefName>未找到 ThingDef：{0}</ULS_Settings_InvalidDefName>
 
     <!-- 右下角 Overlay：切换“显示收纳结构虚影”（类蓝图 ghost；半透明紫色）。 -->
-    <ULS_ShowStoredGhostOverlayToggleButton>显示收纳结构虚影</ULS_ShowStoredGhostOverlayToggleButton>
+    <ULS_ShowControllerCellshowcellToggleButton>显示收纳结构虚影</ULS_ShowControllerCellshowcellToggleButton>
+
+    <!-- 右下角 Overlay：切换“显示控制器所在地块描边”（MetaOverlays 边框；用于快速定位控制器）。 -->
+    <ULS_ShowControllerCellOutlineToggleButton>显示控制器地块描边</ULS_ShowControllerCellOutlineToggleButton>
+
+    <!-- 右下角 Overlay：切换“显示自动控制器检测区域投影”（MetaOverlays 区域提示；绿/黄/红）。 -->
+    <ULS_ShowAutoGroupDetectionProjectionToggleButton>显示自动检测区域投影</ULS_ShowAutoGroupDetectionProjectionToggleButton>
+
+    <!-- 右下角 Overlay：叠加层显示总开关（统一启用/禁用所有叠加层显示；子项在设置菜单配置）。 -->
+    <ULS_OverlayDisplayMasterToggleButton>叠加层显示（总开关）</ULS_OverlayDisplayMasterToggleButton>
+
+    <!-- 设置菜单：叠加层显示（分组标题） -->
+    <ULS_Settings_OverlayDisplay>叠加层显示</ULS_Settings_OverlayDisplay>
+    <!-- 设置菜单：叠加层显示总开关（总开关=true 且子项=true 才会绘制对应叠加层） -->
+    <ULS_Settings_OverlayDisplay_Master>启用叠加层显示（总开关）</ULS_Settings_OverlayDisplay_Master>
+    <!-- 设置菜单：叠加层显示子项：收纳结构虚影 -->
+    <ULS_Settings_OverlayDisplay_ShowStoredGhost>显示收纳结构虚影</ULS_Settings_OverlayDisplay_ShowStoredGhost>
+    <!-- 设置菜单：叠加层显示子项：控制器所在地块提示 -->
+    <ULS_Settings_OverlayDisplay_ShowControllerCell>显示控制器地块提示</ULS_Settings_OverlayDisplay_ShowControllerCell>
+    <!-- 设置菜单：叠加层显示子项：自动控制器检测区域投影 -->
+    <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>显示自动检测区域投影</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
 
     <!-- 设置菜单：升降耗时倍率（HP 部分）。{0}=倍率 -->
     <ULS_Settings_LiftDurationHpSet>升降耗时倍率（HP）: {0}</ULS_Settings_LiftDurationHpSet>

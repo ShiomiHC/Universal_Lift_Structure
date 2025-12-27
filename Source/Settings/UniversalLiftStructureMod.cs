@@ -90,6 +90,17 @@ public class UniversalLiftStructureMod : Mod
 
             listing.GapLine();
 
+            // 叠加层显示
+            listing.Label("ULS_Settings_OverlayDisplay".Translate());
+            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_Master".Translate(), ref Settings.enableOverlayDisplay);
+
+            // 子项：具体显示项（实际生效条件：总开关=true 且子项=true）
+            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowStoredGhost".Translate(), ref Settings.showStoredGhostOverlay);
+            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowControllerCell".Translate(), ref Settings.ShowControllerCell);
+            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection".Translate(), ref Settings.showAutoGroupDetectionProjection);
+
+            listing.GapLine();
+
                 if (groupMaxSizeBuffer.NullOrEmpty())
                 {
                     groupMaxSizeBuffer = Settings.groupMaxSize.ToString();

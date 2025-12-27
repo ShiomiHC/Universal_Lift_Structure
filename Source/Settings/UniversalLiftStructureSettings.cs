@@ -25,6 +25,18 @@ public class UniversalLiftStructureSettings : ModSettings
      // 是否显示收纳结构虚影（类蓝图 ghost）的可视化提示（默认 true）。
     public bool showStoredGhostOverlay = true;
 
+    // 总开关：是否启用“叠加层显示”功能组（默认 true）。
+    // 说明：具体叠加层是否绘制仍取决于各子项开关；实际生效条件为“总开关=true 且子项=true”。
+    public bool enableOverlayDisplay = true;
+
+    // 是否显示“控制器所在地块描边”（MetaOverlays 边框）。
+    // 默认 false：避免默认 UI 噪音；由右下角 Overlay Toggle 控制。
+    public bool ShowControllerCell = false;
+
+    // 是否显示“自动控制器检测区域投影”（MetaOverlays 区域提示）。
+    // 默认 false：避免默认 UI 噪音；由右下角 Overlay Toggle 控制。
+    public bool showAutoGroupDetectionProjection = false;
+
     
     /// 升降控制模式（默认 Remote）：
     /// - Remote：Gizmo 直接触发
@@ -66,6 +78,9 @@ public class UniversalLiftStructureSettings : ModSettings
         Scribe_Collections.Look(ref defNameBlacklist, "defNameBlacklist", LookMode.Value);
         Scribe_Values.Look(ref groupMaxSize, "groupMaxSize", 20);
         Scribe_Values.Look(ref showStoredGhostOverlay, "showStoredGhostOverlay", true);
+        Scribe_Values.Look(ref enableOverlayDisplay, "enableOverlayDisplay", true);
+        Scribe_Values.Look(ref ShowControllerCell, "ShowControllerCell", false);
+        Scribe_Values.Look(ref showAutoGroupDetectionProjection, "showAutoGroupDetectionProjection", false);
         Scribe_Values.Look(ref liftControlMode, "liftControlMode");
         Scribe_Values.Look(ref liftDurationHpSet, "liftDurationHpSet", 1.0f);
         Scribe_Values.Look(ref liftDurationMassSet, "liftDurationMassSet", 1.0f);
@@ -258,6 +273,7 @@ public class UniversalLiftStructureSettings : ModSettings
         /// - defNameBlacklistSet 清空
         /// - groupMaxSize = 20
         /// - showStoredGhostOverlay = true
+        /// - enableOverlayDisplay = true
         /// - liftControlMode = Remote
         /// - enableLiftPower = true
         
@@ -269,6 +285,7 @@ public class UniversalLiftStructureSettings : ModSettings
             defNameBlacklistSet?.Clear();
             groupMaxSize = 20;
             showStoredGhostOverlay = true;
+            enableOverlayDisplay = true;
             liftControlMode = LiftControlMode.Remote;
             liftDurationHpSet = 1.0f;
             liftDurationMassSet = 1.0f;

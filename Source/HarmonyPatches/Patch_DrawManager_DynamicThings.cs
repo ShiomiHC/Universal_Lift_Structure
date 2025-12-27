@@ -92,7 +92,7 @@ public static class Patch_DrawManager_DynamicThings
             }
 
             UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
-            bool showGhost = settings is null || settings.showStoredGhostOverlay;
+            bool showGhost = settings != null && settings.enableOverlayDisplay && settings.showStoredGhostOverlay;
             if (showGhost && controller.HasStored)
             {
                 ULS_GhostRenderer.DrawStoredBuildingGhost(drawCell, drawRot, storedBuilding.def, storedBuilding.Stuff);

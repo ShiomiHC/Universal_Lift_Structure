@@ -6,6 +6,16 @@ public static class ULS_LiftClipRenderer
 {
     private const int VisibleSteps = 64;
 
+    // 井壁/轨道背景：使用 4x4 Atlas（Basic Linked 规则），作为升降过程的“背景层”绘制。
+    // 约束：
+    // - 仅在升降中绘制（由调用方保证）
+    // - 覆盖被收纳建筑 footprint（而非控制器 footprint）
+    // - linkFlags 固定为 Custom4（与控制器一致）
+    // - linkSet 优先使用控制器缓存的 LinkDirections（收纳瞬间快照），否则用 linkGrid + Custom4 重新计算
+    private const string LiftShaftAtlasTexPath = "Things/Building/Linked/ULS_LiftShaft_Atlas";
+    private const float LiftShaftBackgroundAltitudeOffset = 0.01f;
+    private static Material liftShaftBaseMat;
+
     // 连接贴图：特定 linkMask 不做“从南侧裁切”的效果，仅整体上下移动，用于模拟垂直方向的连接式移动。
     private static bool ShouldSkipClipForLinkMask(int linkMask)
     {
@@ -59,6 +69,9 @@ public static class ULS_LiftClipRenderer
         float altitude = AltitudeLayer.Building.AltitudeFor();
         int visibleStep = Mathf.Clamp(Mathf.RoundToInt(clampedProgress * VisibleSteps), 0, VisibleSteps);
 
+        // 背景井壁/轨道：始终先画在建筑背后。
+        DrawLiftShaftBackground(rootCell, rot, storedBuilding.def.Size, altitude, map, tryGetCachedLinkDirections);
+
         if (graphic is Graphic_Linked linkedGraphic)
         {
             // Linked：逐格绘制时使用 SubGraphic 的 mesh/uv（通常是 1x1 单格），避免错误套用 plane10 导致尺寸/UV 不一致。
@@ -78,6 +91,76 @@ public static class ULS_LiftClipRenderer
         int sizeAlongZ = rot.IsHorizontal ? storedBuilding.def.Size.x : storedBuilding.def.Size.z;
         Mesh nonLinkedMesh = GetClippedMesh(nonLinkedBaseMesh, visibleStep, sizeAlongZ);
         DrawNonLinkedGraphic(graphic, storedBuilding, rot, rootCell, altitude, nonLinkedMesh);
+    }
+
+    /// 绘制升降背景井壁/轨道（逐格 Linked 4x4 Atlas）
+    private static void DrawLiftShaftBackground(
+        IntVec3 rootCell,
+        Rot4 rot,
+        IntVec2 footprintSize,
+        float buildingAltitude,
+        Map map,
+        Func<IntVec3, LinkDirections?> tryGetCachedLinkDirections)
+    {
+        // 开发测试策略：贴图缺失时允许报错暴露问题；但 material 为空会导致后续 NRE，故在这里做一次显式提前返回。
+        if (liftShaftBaseMat == null)
+        {
+            liftShaftBaseMat = MaterialPool.MatFrom(LiftShaftAtlasTexPath, ShaderDatabase.Cutout);
+        }
+
+        if (liftShaftBaseMat == null)
+        {
+            return;
+        }
+
+        float altitude = buildingAltitude - LiftShaftBackgroundAltitudeOffset;
+        CellRect rect = GenAdj.OccupiedRect(rootCell, rot, footprintSize);
+        foreach (IntVec3 cell in rect)
+        {
+            LinkDirections linkSet = GetLiftShaftLinkDirections(cell, map, rootCell, tryGetCachedLinkDirections);
+            Material material = MaterialAtlasPool.SubMaterialFromAtlas(liftShaftBaseMat, linkSet);
+
+            Vector3 center = cell.ToVector3Shifted();
+            center.y = altitude;
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(center, rot.AsQuat, Vector3.one), material, 0);
+        }
+    }
+
+    /// 获取井壁/轨道的连接方向（优先缓存；否则按 Custom4 重算）
+    private static LinkDirections GetLiftShaftLinkDirections(
+        IntVec3 cell,
+        Map map,
+        IntVec3 parentPos,
+        Func<IntVec3, LinkDirections?> tryGetCachedLinkDirections)
+    {
+        LinkDirections? cached = tryGetCachedLinkDirections != null ? tryGetCachedLinkDirections(cell) : null;
+        if (cached.HasValue)
+        {
+            return cached.Value;
+        }
+
+        if (map == null)
+        {
+            return LinkDirections.None;
+        }
+
+        // 固定使用 Custom4，与控制器 linkFlags 一致。
+        const LinkFlags linkFlags = LinkFlags.Custom4;
+
+        int linkMask = 0;
+        int bit = 1;
+        for (int i = 0; i < 4; i++)
+        {
+            IntVec3 neighbor = cell + GenAdj.CardinalDirections[i];
+            if (ShouldLinkWith(map, neighbor, linkFlags, parentPos))
+            {
+                linkMask += bit;
+            }
+
+            bit <<= 1;
+        }
+
+        return (LinkDirections)linkMask;
     }
 
     /// 绘制支持连接的 Graphic（逐格）

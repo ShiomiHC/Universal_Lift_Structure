@@ -12,21 +12,18 @@ public static class Patch_PlaySettings_DoMapControls
             return;
         }
 
-        bool before = settings.showStoredGhostOverlay;
-        bool value = before;
-
+        // 右下角 Overlay：叠加层显示总开关（子项在 Mod 设置菜单中配置）。
+        bool enableBefore = settings.enableOverlayDisplay;
+        bool enableValue = enableBefore;
         row.ToggleableIcon(
-            ref value,
-            ULS_Textures.ShowStoredGhostOverlay,
-            "ULS_ShowStoredGhostOverlayToggleButton".Translate(),
+            ref enableValue,
+            ULS_Textures.OverlayDisplayMasterToggle,
+            "ULS_OverlayDisplayMasterToggleButton".Translate(),
             SoundDefOf.Mouseover_ButtonToggle);
-
-        if (value == before)
+        if (enableValue != enableBefore)
         {
-            return;
+            settings.enableOverlayDisplay = enableValue;
+            settings.Write();
         }
-
-        settings.showStoredGhostOverlay = value;
-        settings.Write();
     }
 }
