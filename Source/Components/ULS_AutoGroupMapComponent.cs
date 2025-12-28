@@ -6,6 +6,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
     {
         public int membershipHash;
         public List<IntVec3> scanCells;
+        public HashSet<IntVec3> scanCellsSet;
 
         public int lastSeenTick = int.MinValue;
         public int nextToggleAllowedTick;
@@ -161,89 +162,107 @@ public class ULS_AutoGroupMapComponent : MapComponent
             return;
         }
 
-        List<int> allGroupIds = new List<int>();
-        groupComp.GetAllGroupIds(allGroupIds);
+        // Optimization: Use SimplePool to avoid allocations
+        List<int> allGroupIds = SimplePool<List<int>>.Get();
+        allGroupIds.Clear();
+        HashSet<int> aliveAutoGroups = SimplePool<HashSet<int>>.Get();
+        aliveAutoGroups.Clear();
+        List<int> toRemove = null;
+        List<int> filterToRemove = null;
 
-
-        HashSet<int> aliveAutoGroups = new HashSet<int>();
-
-        foreach (var groupId in allGroupIds)
+        try
         {
-            if (groupId < 1)
-            {
-                continue;
-            }
+            groupComp.GetAllGroupIds(allGroupIds);
 
-            if (!TryGetGroupMarker(groupId, out ULS_AutoGroupMarker marker, out List<IntVec3> groupCells,
-                    out string error))
+            foreach (var groupId in allGroupIds)
             {
-                if (error != null)
+                if (groupId < 1)
                 {
-                    Log.Error($"[ULS] AutoGroup invalid: groupId={groupId} error={error}");
+                    continue;
                 }
 
-                continue;
+                if (!TryGetGroupMarker(groupId, out ULS_AutoGroupMarker marker, out List<IntVec3> groupCells,
+                        out string error))
+                {
+                    if (error != null)
+                    {
+                        Log.Error($"[ULS] AutoGroup invalid: groupId={groupId} error={error}");
+                    }
+
+                    continue;
+                }
+
+                if (marker == null)
+                {
+                    continue;
+                }
+
+                autoGroupIds.Add(groupId);
+                aliveAutoGroups.Add(groupId);
+
+                if (!runtimeByGroupId.ContainsKey(groupId))
+                {
+                    int phase = groupId % 30;
+                    runtimeByGroupId.Add(groupId, new AutoGroupRuntime { nextCheckTick = tick + phase });
+                }
             }
 
-            if (marker == null)
-            {
-                continue;
-            }
 
-            autoGroupIds.Add(groupId);
-            aliveAutoGroups.Add(groupId);
-
-            if (!runtimeByGroupId.ContainsKey(groupId))
-            {
-                int phase = groupId % 30;
-                runtimeByGroupId.Add(groupId, new AutoGroupRuntime { nextCheckTick = tick + phase });
-            }
-
-
-            if (groupCells is { Count: > 0 } &&
-                ULS_Utility.TryGetControllerAt(map, groupCells[0], out Building_WallController c) && c != null)
-            {
-            }
-        }
-
-
-        List<int> toRemove = null;
-        foreach (var kv in runtimeByGroupId)
-        {
-            if (!aliveAutoGroups.Contains(kv.Key))
-            {
-                toRemove ??= new List<int>();
-                toRemove.Add(kv.Key);
-            }
-        }
-
-        if (toRemove != null)
-        {
-            for (int i = 0; i < toRemove.Count; i++)
-            {
-                runtimeByGroupId.Remove(toRemove[i]);
-            }
-        }
-
-
-        if (filterTypeByGroupId != null)
-        {
-            List<int> filterToRemove = null;
-            foreach (var kv in filterTypeByGroupId)
+            foreach (var kv in runtimeByGroupId)
             {
                 if (!aliveAutoGroups.Contains(kv.Key))
                 {
-                    filterToRemove ??= new List<int>();
-                    filterToRemove.Add(kv.Key);
+                    toRemove ??= SimplePool<List<int>>.Get();
+                    toRemove.Add(kv.Key);
                 }
+            }
+
+            if (toRemove != null)
+            {
+                for (int i = 0; i < toRemove.Count; i++)
+                {
+                    runtimeByGroupId.Remove(toRemove[i]);
+                }
+            }
+
+
+            if (filterTypeByGroupId != null)
+            {
+                foreach (var kv in filterTypeByGroupId)
+                {
+                    if (!aliveAutoGroups.Contains(kv.Key))
+                    {
+                        filterToRemove ??= SimplePool<List<int>>.Get();
+                        filterToRemove.Add(kv.Key);
+                    }
+                }
+
+                if (filterToRemove != null)
+                {
+                    for (int i = 0; i < filterToRemove.Count; i++)
+                    {
+                        filterTypeByGroupId.Remove(filterToRemove[i]);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            allGroupIds.Clear();
+            SimplePool<List<int>>.Return(allGroupIds);
+            aliveAutoGroups.Clear();
+            SimplePool<HashSet<int>>.Return(aliveAutoGroups);
+
+            if (toRemove != null)
+            {
+                toRemove.Clear();
+                SimplePool<List<int>>.Return(toRemove);
             }
 
             if (filterToRemove != null)
             {
-                for (int i = 0; i < filterToRemove.Count; i++)
-                {
-                    filterTypeByGroupId.Remove(filterToRemove[i]);
-                }
+                filterToRemove.Clear();
+                SimplePool<List<int>>.Return(filterToRemove);
             }
         }
 
@@ -353,32 +372,58 @@ public class ULS_AutoGroupMapComponent : MapComponent
         if (runtime.scanCells == null || runtime.scanCells.Count == 0 || runtime.membershipHash != membershipHash)
         {
             runtime.membershipHash = membershipHash;
-            runtime.scanCells = BuildScanCells(groupCells, props.maxRadius);
+            // Replaces BuildScanCells
+            UpdateScanCells(runtime, groupCells, props.maxRadius);
         }
 
 
         bool hasTarget = false;
-        for (int i = 0; i < runtime.scanCells.Count; i++)
-        {
-            IntVec3 cell = runtime.scanCells[i];
-            if (!cell.InBounds(map))
-            {
-                continue;
-            }
+        int cellCount = runtime.scanCells.Count;
+        int pawnCount = map.mapPawns.AllPawnsSpawnedCount;
 
-            List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
-            for (int j = 0; j < things.Count; j++)
+        // Optimization: Heuristic strategy
+        // If pawn count is small relative to scan area, iterate pawns.
+        // Otherwise, iterate scan cells.
+        if (pawnCount <= cellCount && runtime.scanCellsSet != null)
+        {
+            IReadOnlyList<Pawn> pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
             {
-                if (things[j] is Pawn pawn && ULS_AutoGroupUtility.PawnMatchesGroupType(pawn, filterType))
+                Pawn p = pawns[i];
+                if (p is { Spawned: true } && runtime.scanCellsSet.Contains(p.Position))
                 {
-                    hasTarget = true;
-                    break;
+                    if (ULS_AutoGroupUtility.PawnMatchesGroupType(p, filterType))
+                    {
+                        hasTarget = true;
+                        break;
+                    }
                 }
             }
-
-            if (hasTarget)
+        }
+        else
+        {
+            for (int i = 0; i < runtime.scanCells.Count; i++)
             {
-                break;
+                IntVec3 cell = runtime.scanCells[i];
+                if (!cell.InBounds(map))
+                {
+                    continue;
+                }
+
+                List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                for (int j = 0; j < things.Count; j++)
+                {
+                    if (things[j] is Pawn pawn && ULS_AutoGroupUtility.PawnMatchesGroupType(pawn, filterType))
+                    {
+                        hasTarget = true;
+                        break;
+                    }
+                }
+
+                if (hasTarget)
+                {
+                    break;
+                }
             }
         }
 
@@ -477,12 +522,28 @@ public class ULS_AutoGroupMapComponent : MapComponent
         }
     }
 
-    private List<IntVec3> BuildScanCells(List<IntVec3> groupCells, int maxRadius)
+    private void UpdateScanCells(AutoGroupRuntime runtime, List<IntVec3> groupCells, int maxRadius)
     {
         if (maxRadius < 0) maxRadius = 0;
 
-        int estimated = groupCells != null ? groupCells.Count * (2 * maxRadius + 1) * (2 * maxRadius + 1) : 0;
-        HashSet<IntVec3> set = estimated > 0 ? new HashSet<IntVec3>(estimated) : new HashSet<IntVec3>();
+        if (runtime.scanCells == null)
+        {
+            runtime.scanCells = new List<IntVec3>();
+        }
+        else
+        {
+            runtime.scanCells.Clear();
+        }
+
+        if (runtime.scanCellsSet == null)
+        {
+            runtime.scanCellsSet = new HashSet<IntVec3>();
+        }
+        else
+        {
+            runtime.scanCellsSet.Clear();
+        }
+
         if (groupCells != null)
         {
             for (int i = 0; i < groupCells.Count; i++)
@@ -495,13 +556,14 @@ public class ULS_AutoGroupMapComponent : MapComponent
                         IntVec3 cell = new IntVec3(center.x + dx, 0, center.z + dz);
                         if (cell.InBounds(map))
                         {
-                            set.Add(cell);
+                            if (runtime.scanCellsSet.Add(cell))
+                            {
+                                runtime.scanCells.Add(cell);
+                            }
                         }
                     }
                 }
             }
         }
-
-        return new List<IntVec3>(set);
     }
 }

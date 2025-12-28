@@ -43,40 +43,38 @@ public partial class Building_WallController
                     action = delegate
                     {
                         Map mapLocal = Map;
-                        if (mapLocal != null)
+                        if (mapLocal == null) return;
+                        ULS_ControllerGroupMapComponent groupComp =
+                            mapLocal.GetComponent<ULS_ControllerGroupMapComponent>();
+                        if (groupComp != null)
                         {
-                            ULS_ControllerGroupMapComponent groupComp =
-                                mapLocal.GetComponent<ULS_ControllerGroupMapComponent>();
-                            if (groupComp != null)
-                            {
-                                Find.WindowStack.Add(new ULS_Dialog_SetControllerGroupId(controllerGroupId,
-                                    delegate(int newGroupId)
+                            Find.WindowStack.Add(new ULS_Dialog_SetControllerGroupId(controllerGroupId,
+                                delegate(int newGroupId)
+                                {
+                                    List<Building_WallController> expandedList =
+                                        ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
+                                            selectedControllers);
+                                    if (!ULS_AutoGroupUtility.CanAssignControllersToGroup(mapLocal, expandedList,
+                                            newGroupId, out string rejectKey))
                                     {
-                                        List<Building_WallController> expandedList =
-                                            ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
-                                                selectedControllers);
-                                        if (!ULS_AutoGroupUtility.CanAssignControllersToGroup(mapLocal, expandedList,
-                                                newGroupId, out string rejectKey))
+                                        MessageReject(rejectKey, this);
+                                    }
+                                    else
+                                    {
+                                        List<IntVec3> cellsToAssign = new List<IntVec3>();
+                                        foreach (var controller in expandedList)
                                         {
-                                            MessageReject(rejectKey, this);
-                                        }
-                                        else
-                                        {
-                                            List<IntVec3> cellsToAssign = new List<IntVec3>();
-                                            foreach (var controller in expandedList)
+                                            if (controller != null && controller.Map == mapLocal &&
+                                                controller.Spawned)
                                             {
-                                                if (controller != null && controller.Map == mapLocal &&
-                                                    controller.Spawned)
-                                                {
-                                                    cellsToAssign.Add(controller.Position);
-                                                }
+                                                cellsToAssign.Add(controller.Position);
                                             }
-
-                                            groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
-                                            mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
                                         }
-                                    }));
-                            }
+
+                                        groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
+                                        mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+                                    }
+                                }));
                         }
                     }
                 };
@@ -92,48 +90,44 @@ public partial class Building_WallController
                     action = delegate
                     {
                         Map map = Map;
-                        if (map != null)
+                        if (map == null) return;
+                        ULS_ControllerGroupMapComponent groupComp =
+                            map.GetComponent<ULS_ControllerGroupMapComponent>();
+                        if (groupComp == null) return;
+                        int primaryGroupId = controllerGroupId;
+                        if (primaryGroupId < 1)
                         {
-                            ULS_ControllerGroupMapComponent groupComp =
-                                map.GetComponent<ULS_ControllerGroupMapComponent>();
-                            if (groupComp != null)
+                            primaryGroupId = groupComp.CreateNewGroupId();
+                            controllerGroupId = primaryGroupId;
+                            groupComp.RegisterOrUpdateController(this);
+                        }
+
+                        bool primaryIsAuto = ULS_AutoGroupUtility.IsAutoGroup(map, primaryGroupId);
+                        List<Building_WallController> expandedList =
+                            ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers);
+                        HashSet<int> mergedGroupIds = new HashSet<int>();
+
+
+                        foreach (var controller in expandedList)
+                        {
+                            if (controller != null && controller.Map == map && controller.Spawned)
                             {
-                                int primaryGroupId = controllerGroupId;
-                                if (primaryGroupId < 1)
+                                int groupId = controller.ControllerGroupId;
+                                if (groupId >= 1 && groupId != primaryGroupId && mergedGroupIds.Add(groupId))
                                 {
-                                    primaryGroupId = groupComp.CreateNewGroupId();
-                                    controllerGroupId = primaryGroupId;
-                                    groupComp.RegisterOrUpdateController(this);
-                                }
-
-                                bool primaryIsAuto = ULS_AutoGroupUtility.IsAutoGroup(map, primaryGroupId);
-                                List<Building_WallController> expandedList =
-                                    ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers);
-                                HashSet<int> mergedGroupIds = new HashSet<int>();
-
-
-                                foreach (var controller in expandedList)
-                                {
-                                    if (controller != null && controller.Map == map && controller.Spawned)
+                                    bool isAuto = ULS_AutoGroupUtility.IsAutoGroup(map, groupId);
+                                    if (primaryIsAuto != isAuto)
                                     {
-                                        int groupId = controller.ControllerGroupId;
-                                        if (groupId >= 1 && groupId != primaryGroupId && mergedGroupIds.Add(groupId))
-                                        {
-                                            bool isAuto = ULS_AutoGroupUtility.IsAutoGroup(map, groupId);
-                                            if (primaryIsAuto != isAuto)
-                                            {
-                                                MessageReject("ULS_AutoGroup_MixAutoAndManual", this);
-                                                return;
-                                            }
-
-                                            groupComp.MergeGroups(primaryGroupId, groupId);
-                                        }
+                                        MessageReject("ULS_AutoGroup_MixAutoAndManual", this);
+                                        return;
                                     }
-                                }
 
-                                map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+                                    groupComp.MergeGroups(primaryGroupId, groupId);
+                                }
                             }
                         }
+
+                        map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
                     }
                 };
             }

@@ -202,8 +202,18 @@ public class ULS_ControllerGroupMapComponent : MapComponent
         }
 
 
-        List<IntVec3> copy = new(sourceCells);
-        AssignControllerCellsToGroup(copy, targetGroupId);
+        List<IntVec3> copy = SimplePool<List<IntVec3>>.Get();
+        copy.Clear();
+        try
+        {
+            copy.AddRange(sourceCells);
+            AssignControllerCellsToGroup(copy, targetGroupId);
+        }
+        finally
+        {
+            copy.Clear();
+            SimplePool<List<IntVec3>>.Return(copy);
+        }
     }
 
     private void RebuildIndexFromMap()
