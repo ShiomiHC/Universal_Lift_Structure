@@ -35,16 +35,13 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Source\Components\ULS_Flickable_Pulse.cs" />
+        <Compile Include="Source\Components\CompLiftConsole.cs" />
         <Compile Include="Source\Components\ULS_AutoGroupMarker.cs" />
-        <Compile Include="Source\Components\ULS_FlickTrigger.cs" />
         <Compile Include="Source\Components\ULS_AutoGroupMapComponent.cs"/>
         <Compile Include="Source\Components\ULS_ControllerGroupMapComponent.cs"/>
-        <Compile Include="Source\Components\ULS_HiddenThingCleanupMapComponent.cs" />
         <Compile Include="Source\Components\ULS_LiftRequest.cs"/>
         <Compile Include="Source\Components\ULS_MultiCellGroupMapComponent.cs"/>
         <Compile Include="Source\Components\ULS_MultiCellGroupRecord.cs"/>
-        <Compile Include="Source\Components\ULS_Properties_FlickablePulse.cs" />
         <Compile Include="Source\Core\Building_WallController.cs" />
         <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
         <Compile Include="Source\Core\Building_WallController_Group.cs" />
@@ -53,13 +50,15 @@
         <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />
         <Compile Include="Source\Core\Building_WallController_Utility.cs" />
         <Compile Include="Source\Core\ULS_GhostRenderer.cs" />
+        <Compile Include="Source\DefOf\ULS_DesignationDefOf.cs" />
+        <Compile Include="Source\DefOf\ULS_JobDefOf.cs" />
         <Compile Include="Source\GlobalUsings.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_Building_GetGizmos.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_DrawManager_DynamicThings.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_GeothermalGenerator_Fix.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_SelectionDrawer_DrawSelectionOverlays.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_Thing_Destroy.cs" />
+        <Compile Include="Source\Job\JobDriver_FlickWallController.cs" />
         <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
         <Compile Include="Source\Misc\ULS_StatPart_StoredMarketValue.cs" />
         <Compile Include="Source\Misc\ULS_Dialog_SetControllerGroupId.cs"/>
@@ -71,8 +70,8 @@
         <Compile Include="Source\Settings\UniversalLiftStructureMod.cs"/>
         <Compile Include="Source\Settings\UniversalLiftStructureSettings.cs"/>
         <Compile Include="Source\Utilities\ULS_AutoGroupUtility.cs"/>
-        <Compile Include="Source\Utilities\ULS_FlickUtility.cs"/>
         <Compile Include="Source\Utilities\ULS_Utility.cs"/>
+        <Compile Include="Source\WorkGiver\WorkGiver_FlickWallController.cs" />
     </ItemGroup>
     <ItemGroup>
         <Content Include="Universal Lift Structure\1.6\Assemblies\Universal_Lift_Structure.dll"/>

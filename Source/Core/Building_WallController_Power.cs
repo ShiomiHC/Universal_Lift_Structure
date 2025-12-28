@@ -1,23 +1,13 @@
 namespace Universal_Lift_Structure;
 
-
-
 public partial class Building_WallController
 {
-    
-
-
-    private ThingWithComps flickProxy;
-
-
-    private const float ActiveLiftPower = 1000f; 
+    private const float ActiveLiftPower = 1000f;
 
 
     private CompPowerTrader compPower;
-    private float idlePowerConsumption;         
-    private bool activePowerApplied;            
-
-
+    private float idlePowerConsumption;
+    private bool activePowerApplied;
 
 
     private bool PowerFeatureEnabled => UniversalLiftStructureMod.Settings?.enableLiftPower ?? false;
@@ -35,6 +25,7 @@ public partial class Building_WallController
                     idlePowerConsumption = Mathf.Max(0f, compPower.Props.PowerConsumption);
                 }
             }
+
             return compPower;
         }
     }
@@ -51,11 +42,10 @@ public partial class Building_WallController
             {
                 return compPower.PowerOn;
             }
+
             return false;
         }
     }
-
-
 
 
     private void RefreshPowerCacheAndOutput()
@@ -70,7 +60,6 @@ public partial class Building_WallController
     }
 
 
-    
     private void ApplyActivePowerInternal(bool active)
     {
         if (PowerFeatureEnabled)
@@ -80,8 +69,8 @@ public partial class Building_WallController
             {
                 float idlePower = idlePowerConsumption;
                 comp.PowerOutput = active
-                    ? (0f - (idlePower + ActiveLiftPower))  
-                    : (0f - idlePower);                     
+                    ? (0f - (idlePower + ActiveLiftPower))
+                    : (0f - idlePower);
                 activePowerApplied = active;
             }
         }
@@ -102,12 +91,12 @@ public partial class Building_WallController
     {
         if (!PowerFeatureEnabled)
         {
-            return true; 
+            return true;
         }
 
         if (HasPowerComp)
         {
-            return PowerOn; 
+            return PowerOn;
         }
 
         return false;
@@ -124,74 +113,9 @@ public partial class Building_WallController
         Map map = Map;
         if (map != null && previousState == LiftProcessState.Lowering && HasStored)
         {
-            
             TryRaiseNoMessage(map);
         }
 
         MessageReject("ULS_PowerLost", this);
-    }
-
-
-
-
-    private ThingWithComps EnsureFlickProxy()
-    {
-        Map map = Map;
-        IntVec3 pos = Position;
-        if (map == null || !pos.IsValid)
-        {
-            return null;
-        }
-
-
-        if (flickProxy is { Destroyed: false, Spawned: true })
-        {
-            return flickProxy;
-        }
-
-
-        List<Thing> things = map.thingGrid.ThingsListAt(pos);
-        ThingWithComps firstProxy = null;
-        foreach (var t in things)
-        {
-            if (t.def == ULS_ThingDefOf.ULS_FlickProxy)
-            {
-                if (firstProxy == null)
-                {
-                    firstProxy = t as ThingWithComps;
-                    continue;
-                }
-
-                t.Destroy();
-            }
-        }
-
-        if (firstProxy is { Destroyed: false })
-        {
-            flickProxy = firstProxy;
-            return flickProxy;
-        }
-
-
-        ULS_FlickUtility.GetOrCreateFlickProxyTriggerAt(map, pos);
-
-
-        List<Thing> thingsAfterCreate = map.thingGrid.ThingsListAt(pos);
-        foreach (var t in thingsAfterCreate)
-        {
-            if (t.def == ULS_ThingDefOf.ULS_FlickProxy)
-            {
-                flickProxy = t as ThingWithComps;
-                return flickProxy;
-            }
-        }
-
-        return null;
-    }
-
-
-    internal ULS_FlickTrigger GetProxyFlickTrigger()
-    {
-        return EnsureFlickProxy()?.GetComp<ULS_FlickTrigger>();
     }
 }

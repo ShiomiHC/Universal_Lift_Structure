@@ -13,8 +13,8 @@
         <category>Building</category>
 
         <!-- 留空 -->
-        <label/>
-        <description/>
+        <label />
+        <description />
 
         <!-- 不绘制、不可选中：用于“纯逻辑/占位”类结构，避免干扰玩家交互与 UI。 -->
         <drawerType>None</drawerType>
@@ -29,24 +29,6 @@
         <tickerType>Never</tickerType>
     </ThingDef>
 
-    <!-- ULS 升降 flick 代理-->
-
-    <ThingDef ParentName="ULS_HiddenBuildingBase">
-        <defName>ULS_FlickProxy</defName>
-        <!-- 不使用交互点 -->
-
-        <!-- 不占用通行，允许与地形/其他非 edifice 共存。 -->
-        <passability>Standable</passability>
-
-        <building>
-            <isEdifice>false</isEdifice>
-        </building>
-
-        <comps>
-            <li Class="Universal_Lift_Structure.ULS_Properties_FlickablePulse"/>
-            <li Class="Universal_Lift_Structure.CompProperties_ULS_FlickTrigger"/>
-        </comps>
-    </ThingDef>
 
     <!-- 临时阻挡物 -->
 

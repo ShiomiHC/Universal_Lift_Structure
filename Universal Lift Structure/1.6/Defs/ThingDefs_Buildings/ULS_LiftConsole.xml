@@ -8,8 +8,8 @@
         <thingClass>Building</thingClass>
         <category>Building</category>
         <!-- 名称/描述留空，使用 DefInjected 本地化 -->
-        <label/>
-        <description/>
+        <label />
+        <description />
 
         <graphicData>
             <!-- 临时占位贴图：复用原版 CommsConsole 贴图路径（若未来替换资源，可改为自有贴图）。 -->
@@ -43,9 +43,10 @@
                 <compClass>CompPowerTrader</compClass>
                 <basePowerConsumption>20</basePowerConsumption>
             </li>
+            <!-- 电源开关：允许玩家指派开关电源 -->
+            <li Class="CompProperties_Flickable" />
             <!-- flick 触发器：Pulse 版本隐藏开关 Gizmo。 -->
-            <li Class="Universal_Lift_Structure.ULS_Properties_FlickablePulse" />
-            <li Class="Universal_Lift_Structure.CompProperties_ULS_FlickTrigger" />
+            <li Class="Universal_Lift_Structure.CompProperties_LiftConsole" />
         </comps>
     </ThingDef>
 </Defs>

@@ -411,25 +411,16 @@ public partial class Building_WallController
             {
                 case LiftControlMode.Manual:
                 {
-                    ULS_FlickTrigger trigger = GetProxyFlickTrigger();
-                    if (trigger == null)
-                    {
-                        MessageReject("ULS_LiftTriggerMissing", this);
-                    }
-                    else
-                    {
-                        trigger.EnqueueRequest(new ULS_LiftRequest(ULS_LiftRequestType.RaiseGroup, this,
-                            IntVec3.Invalid));
-                    }
-
+                    // 在控制器上直接设置挂起状态并添加 Flick 指定
+                    QueueLiftAction(isRaise: true, IntVec3.Invalid);
                     break;
                 }
 
                 case LiftControlMode.Console:
                 {
-                    if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(Map, Position, out ThingWithComps console))
+                    if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(Map, Position, out ThingWithComps consoleThing))
                     {
-                        // 检查是否是因为没电导致 TryGetNearest 返回 null
+                        // 检查是否因为没电
                         ThingDef consoleDef = DefDatabase<ThingDef>.GetNamedSilentFail("ULS_LiftConsole");
                         bool anyConsoleExists = consoleDef != null && Map.listerThings.ThingsOfDef(consoleDef)
                             .Any(t => t.Faction == Faction.OfPlayer);
@@ -445,15 +436,15 @@ public partial class Building_WallController
                         break;
                     }
 
-                    ULS_FlickTrigger consoleTrigger =
-                        ULS_FlickUtility.GetOrCreateFlickProxyTriggerAt(console.Map, console.Position);
-                    if (consoleTrigger == null)
+                    CompLiftConsole consoleComp = consoleThing.GetComp<CompLiftConsole>();
+                    if (consoleComp == null)
                     {
-                        MessageReject("ULS_LiftTriggerMissing", this);
+                        // 兼容性保护：如果是旧存档，可能还没更到
+                        MessageReject("ULS_LiftConsoleMissing", this);
                     }
                     else
                     {
-                        consoleTrigger.EnqueueRequest(new ULS_LiftRequest(ULS_LiftRequestType.RaiseGroup, this,
+                        consoleComp.EnqueueRequest(new ULS_LiftRequest(ULS_LiftRequestType.RaiseGroup, this,
                             IntVec3.Invalid));
                     }
 

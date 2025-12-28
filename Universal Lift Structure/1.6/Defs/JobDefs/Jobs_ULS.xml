@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <JobDef>
+        <defName>ULS_FlickLiftStructure</defName>
+        <driverClass>Universal_Lift_Structure.JobDriver_FlickLiftStructure</driverClass>
+        <reportString /> <!-- 正在扳动目标。 -->
+        <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+    </JobDef>
+
+    <WorkGiverDef>
+        <defName>ULS_FlickLiftStructure</defName>
+        <label /> <!-- 扳动升降结构 -->
+        <giverClass>Universal_Lift_Structure.WorkGiver_FlickLiftStructure</giverClass>
+        <workType>BasicWorker</workType>
+        <priorityInType>100</priorityInType>
+        <verb>flick</verb>
+        <gerund /> <!-- 正在扳动 -->
+        <requiredCapacities>
+            <li>Manipulation</li>
+        </requiredCapacities>
+        <prioritizeSustains>true</prioritizeSustains>
+    </WorkGiverDef>
+
+</Defs>

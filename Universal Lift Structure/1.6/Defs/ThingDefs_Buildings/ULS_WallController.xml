@@ -2,7 +2,8 @@
 <Defs>
     <!-- 文件意图：控制器建筑的 Def 定义。 -->
 
-    <!-- 抽象基类意图：统一指定 thingClass=Universal_Lift_Structure.Building_WallController，并设置为 isEdifice=false 以允许与结构共格；同时允许覆盖墙放置（canPlaceOverWall / isPlaceOverableWall）。 -->
+    <!-- 抽象基类意图：统一指定 thingClass=Universal_Lift_Structure.Building_WallController，并设置为
+    isEdifice=false 以允许与结构共格；同时允许覆盖墙放置（canPlaceOverWall / isPlaceOverableWall）。 -->
     <ThingDef ParentName="BuildingBase" Name="ULS_WallControllerBase" Abstract="True">
         <!-- 逻辑类 -->
         <thingClass>Universal_Lift_Structure.Building_WallController</thingClass>
@@ -30,6 +31,7 @@
             <linkFlags>
                 <li>Custom4</li>
             </linkFlags>
+            <drawSize>(1,1)</drawSize>
         </graphicData>
         <!-- UI 图标 -->
         <useSameGraphicForGhost>false</useSameGraphicForGhost>
@@ -47,19 +49,16 @@
             <!-- 允许作为结构上的叠放对象 -->
             <isPlaceOverableWall>true</isPlaceOverableWall>
         </building>
-    </ThingDef>
 
-    <!-- 实体 Def 意图：控制器实体 Def：占位贴图与 UI 图标、通行/不填充体积以共格、建造类别与造价/耐久等基础数值。
-         注意：<label/>、<description/> 留空，显示文本由 Languages/ChineseSimplified/DefInjected 提供。
-         〇：部分数值（如造价/耐久/WorkToBuild）当前为开发测试占位，后续可调优。 -->
-    <ThingDef ParentName="ULS_WallControllerBase">
-        <defName>ULS_WallController</defName>
         <!-- 名称留空，使用本地化 -->
-        <label/>
+        <label />
         <!-- 描述留空，使用本地化 -->
-        <description/>
+        <description />
+        <!-- UI 图标 -->
+        <uiIconPath>Things/Building/Linked/ULS_WallController_Icon</uiIconPath>
         <!-- 尺寸 -->
         <size>(1,1)</size>
+
         <!-- 工作量/耐久/燃烧/价值 -->
         <statBases>
             <WorkToBuild>400</WorkToBuild>
@@ -67,25 +66,18 @@
             <Flammability>0.1</Flammability>
             <MarketValue>50</MarketValue>
         </statBases>
-        <comps>
-            <!-- 电力：待机 1W -->
-            <li Class="CompProperties_Power">
-                <compClass>CompPowerTrader</compClass>
-                <basePowerConsumption>1</basePowerConsumption>
-            </li>
-            <!-- flick 触发器：用于 Manual/Console 模式下走原版 flick 自动派工链路；Pulse 版本隐藏开关 Gizmo。 -->
-            <li Class="Universal_Lift_Structure.ULS_Properties_FlickablePulse"/>
-            <li Class="Universal_Lift_Structure.CompProperties_ULS_FlickTrigger"/>
-        </comps>
+
         <!-- 造价 -->
         <costList>
             <Steel>30</Steel>
             <ComponentIndustrial>1</ComponentIndustrial>
         </costList>
+
         <!-- 建筑菜单类别：结构 -->
         <designationCategory>Structure</designationCategory>
         <!-- 填充样式：2D -->
         <drawStyleCategory>Default2D</drawStyleCategory>
+
         <!-- 放置规则 -->
         <placeWorkers>
             <li>Universal_Lift_Structure.ULS_PlaceRule_WallController</li>
@@ -94,48 +86,36 @@
         <drawerType>MapMeshOnly</drawerType>
     </ThingDef>
 
+    <!-- 实体 Def 意图：控制器实体 Def：占位贴图与 UI 图标、通行/不填充体积以共格、建造类别与造价/耐久等基础数值。
+         注意：<label/>、<description/> 留空，显示文本由 Languages/ChineseSimplified/DefInjected 提供。
+         〇：部分数值（如造价/耐久/WorkToBuild）当前为开发测试占位，后续可调优。 -->
+    <ThingDef ParentName="ULS_WallControllerBase">
+        <defName>ULS_WallController</defName>
+        <comps>
+            <!-- 电力：待机 1W -->
+            <li Class="CompProperties_Power">
+                <compClass>CompPowerTrader</compClass>
+                <basePowerConsumption>1</basePowerConsumption>
+            </li>
+            <!-- 电源开关：允许玩家指派开关电源 -->
+            <li Class="CompProperties_Flickable" />
+        </comps>
+    </ThingDef>
+
     <!-- 自动控制器 Def 意图：结构控制器（自动）。
          行为：当（过滤器匹配的）Pawn 接近该组任意控制器时自动“降下/收纳(开)”；离开后延迟自动“升起/放出(关)”。
          过滤器：由控制器 Gizmo 按组切换（敌方/友方/中立）；本 Def 中的 autoGroupType 仅作为“新组默认值”。
          注意：自动组与手动组禁止混组。 -->
     <ThingDef ParentName="ULS_WallControllerBase">
         <defName>ULS_WallController_Auto</defName>
-        <!-- 名称留空，使用本地化 -->
-        <label/>
-        <!-- 描述留空，使用本地化 -->
-        <description/>
-        <!-- 贴图 -->
-        <graphicData>
-            <texPath>Things/Building/Linked/ULS_WallController_Atlas</texPath>
-            <graphicClass>Graphic_Single</graphicClass>
-            <drawSize>(1,1)</drawSize>
-            <!-- 连接类型：基础 4x4 Atlas -->
-            <linkType>Basic</linkType>
-            <!-- 连接标志：使用 Custom4 避免与原版电缆自动连接，但允许同类连接 -->
-            <linkFlags>
-                <li>Custom4</li>
-            </linkFlags>
-        </graphicData>
-        <!-- UI 图标 -->
-        <uiIconPath>Things/Building/Linked/ULS_WallController_Icon</uiIconPath>
-        <!-- 尺寸 -->
-        <size>(1,1)</size>
-        <!-- 数值沿用基础控制器 -->
-        <statBases>
-            <WorkToBuild>400</WorkToBuild>
-            <MaxHitPoints>200</MaxHitPoints>
-            <Flammability>0.1</Flammability>
-            <MarketValue>50</MarketValue>
-        </statBases>
         <comps>
             <!-- 电力：待机 5W，升降耗电由代码控制（开启功能时按每控制器+100W）。 -->
             <li Class="CompProperties_Power">
                 <compClass>CompPowerTrader</compClass>
                 <basePowerConsumption>5</basePowerConsumption>
             </li>
-            <!-- flick 触发器：保留以兼容当前 Remote/Console/Manual 模式按钮逻辑。 -->
-            <li Class="Universal_Lift_Structure.ULS_Properties_FlickablePulse"/>
-            <li Class="Universal_Lift_Structure.CompProperties_ULS_FlickTrigger"/>
+            <!-- 电源开关：允许玩家指派开关电源 -->
+            <li Class="CompProperties_Flickable" />
 
             <!-- 自动组标记：MapComponent 将按组扫描并执行自动开闭。 -->
             <li Class="Universal_Lift_Structure.CompProperties_ULS_AutoGroupMarker">
@@ -151,21 +131,6 @@
                 <toggleCooldownTicks>60</toggleCooldownTicks>
             </li>
         </comps>
-        <!-- 造价 -->
-        <costList>
-            <Steel>30</Steel>
-            <ComponentIndustrial>1</ComponentIndustrial>
-        </costList>
-        <!-- 建筑菜单类别：结构 -->
-        <designationCategory>Structure</designationCategory>
-        <!-- 填充样式：2D -->
-        <drawStyleCategory>Default2D</drawStyleCategory>
-        <!-- 放置规则 -->
-        <placeWorkers>
-            <li>Universal_Lift_Structure.ULS_PlaceRule_WallController</li>
-        </placeWorkers>
-        <!-- 绘制方式：仅地图网格 -->
-        <drawerType>MapMeshOnly</drawerType>
     </ThingDef>
     <!-- 状态定义 收纳物价值叠加 -->
     <StatDef>
@@ -176,7 +141,7 @@
         <category>Building</category>
         <displayPriorityInCategory>10</displayPriorityInCategory>
         <parts>
-            <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue"/>
+            <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue" />
         </parts>
     </StatDef>
 

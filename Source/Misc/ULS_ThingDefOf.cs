@@ -10,7 +10,6 @@ public static class ULS_ThingDefOf
 
     public static ThingDef ULS_LiftBlocker;
 
-    public static ThingDef ULS_FlickProxy;
 
     public static ThingDef ULS_LiftConsole;
 }

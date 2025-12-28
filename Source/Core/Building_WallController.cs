@@ -15,6 +15,46 @@ public partial class Building_WallController : Building, IThingHolder
 
     private float storedThingMarketValueIgnoreHp;
 
+    // --- Lift Action State ---
+    private bool liftActionPending;
+    private bool liftActionIsRaise;
+    private IntVec3 liftActionStartCell = IntVec3.Invalid;
+
+    public bool LiftActionPending => liftActionPending;
+
+    public void Notify_FlickedBy(Pawn pawn)
+    {
+        if (!liftActionPending)
+        {
+            return;
+        }
+
+        // Execute valid action
+        if (liftActionIsRaise)
+        {
+            TryRaiseGroup(showMessage: true);
+        }
+        else
+        {
+            TryLowerGroup(liftActionStartCell, showMessage: true);
+        }
+
+        liftActionPending = false;
+        liftActionStartCell = IntVec3.Invalid;
+    }
+
+    public void QueueLiftAction(bool isRaise, IntVec3 lowerStartCell)
+    {
+        liftActionPending = true;
+        liftActionIsRaise = isRaise;
+        liftActionStartCell = lowerStartCell;
+
+        if (Map.designationManager.DesignationOn(this, ULS_DesignationDefOf.ULS_FlickLiftStructure) == null)
+        {
+            Map.designationManager.AddDesignation(new Designation(this, ULS_DesignationDefOf.ULS_FlickLiftStructure));
+        }
+    }
+
 
     private IntVec3 multiCellGroupRootCell = IntVec3.Invalid;
 
@@ -81,12 +121,6 @@ public partial class Building_WallController : Building, IThingHolder
 
 
         RefreshPowerCacheAndOutput();
-
-
-        if (!respawningAfterLoad)
-        {
-            EnsureFlickProxy();
-        }
 
         if (map != null)
         {
@@ -180,8 +214,9 @@ public partial class Building_WallController : Building, IThingHolder
         Scribe_Values.Look(ref liftBlockerCell, "liftBlockerCell", IntVec3.Invalid);
         Scribe_Values.Look(ref liftFinalizeOnComplete, "liftFinalizeOnComplete", defaultValue: false);
 
-
-        Scribe_References.Look(ref flickProxy, "flickProxy");
+        Scribe_Values.Look(ref liftActionPending, "liftActionPending");
+        Scribe_Values.Look(ref liftActionIsRaise, "liftActionIsRaise");
+        Scribe_Values.Look(ref liftActionStartCell, "liftActionStartCell", IntVec3.Invalid);
 
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -199,13 +234,6 @@ public partial class Building_WallController : Building, IThingHolder
             {
                 storedThingMarketValueIgnoreHp = building.GetStatValue(StatDefOf.MarketValueIgnoreHp);
             }
-
-
-            if (flickProxy != null && (flickProxy.Destroyed || !flickProxy.Spawned))
-            {
-                flickProxy = null;
-            }
-
 
             storedLinkMaskCells ??= new List<IntVec3>();
             storedLinkMaskValues ??= new List<byte>();
