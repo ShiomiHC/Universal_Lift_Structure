@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Patch>
-  <!-- ULS：让控制器把“收纳的建筑价值”叠加到自身 MarketValueIgnoreHp，从而计入 WealthBuildings -->
+    <!-- 收纳的建筑价值叠自身-->
 
-  <!-- 若已有 parts，则直接追加一个 StatPart -->
-  <Operation Class="Verse.PatchOperationConditional">
-    <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]/parts</xpath>
-    <match Class="Verse.PatchOperationAdd">
-      <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]/parts</xpath>
-      <value>
-        <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue" />
-      </value>
-    </match>
-    <nomatch Class="Verse.PatchOperationAdd">
-      <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]</xpath>
-      <value>
-        <parts>
-          <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue" />
-        </parts>
-      </value>
-    </nomatch>
-  </Operation>
+    <!-- 已有parts追加StatPart -->
+    <Operation Class="Verse.PatchOperationConditional">
+        <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]/parts</xpath>
+        <match Class="Verse.PatchOperationAdd">
+            <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]/parts</xpath>
+            <value>
+                <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue"/>
+            </value>
+        </match>
+        <nomatch Class="Verse.PatchOperationAdd">
+            <xpath>/Defs/StatDef[defName="MarketValueIgnoreHp"]</xpath>
+            <value>
+                <parts>
+                    <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue"/>
+                </parts>
+            </value>
+        </nomatch>
+    </Operation>
 </Patch>

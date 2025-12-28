@@ -1,7 +1,0 @@
-ManifestFileVersion: 0
-CRC: 564600707
-AssetBundleManifest:
-  AssetBundleInfos:
-    Info_0:
-      Name: uls_shaders_win
-      Dependencies: {}

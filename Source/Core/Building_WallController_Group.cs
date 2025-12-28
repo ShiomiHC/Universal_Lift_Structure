@@ -1,12 +1,12 @@
 namespace Universal_Lift_Structure;
 
-/// 文件意图：Building_WallController - 分组管理逻辑。
-/// 包含：分组查询方法、分组扩展方法、分组验证方法、多格隐组处理。
+
+
 public partial class Building_WallController
 {
-    // ==================== 分组查询方法 ====================
+    
 
-    /// 获取当前选中的所有控制器
+
     private static List<Building_WallController> GetSelectedControllers()
     {
         List<Building_WallController> result = new List<Building_WallController>();
@@ -33,11 +33,10 @@ public partial class Building_WallController
         return result;
     }
 
-    /// 获取多格隐组成员控制器（或返回自身）
+
     private HashSet<Building_WallController> GetMultiCellMemberControllersOrSelf(Map map)
     {
-        HashSet<Building_WallController> result = new HashSet<Building_WallController>();
-        result.Add(this);
+        HashSet<Building_WallController> result = new HashSet<Building_WallController> { this };
 
         if (map == null)
         {
@@ -58,9 +57,8 @@ public partial class Building_WallController
             return result;
         }
 
-        for (int i = 0; i < record.memberControllerCells.Count; i++)
+        foreach (var cell in record.memberControllerCells)
         {
-            IntVec3 cell = record.memberControllerCells[i];
             if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
             {
                 result.Add(controller);
@@ -70,9 +68,9 @@ public partial class Building_WallController
         return result;
     }
 
-    // ==================== 分组扩展方法 ====================
 
-    /// 检查选中的控制器中是否有任何一个属于多格隐组
+
+
     private static bool AnySelectedControllerInMultiCellHiddenGroup(List<Building_WallController> selectedControllers)
     {
         if (selectedControllers == null || selectedControllers.Count <= 0)
@@ -80,10 +78,9 @@ public partial class Building_WallController
             return false;
         }
 
-        for (int i = 0; i < selectedControllers.Count; i++)
+        foreach (var controller in selectedControllers)
         {
-            Building_WallController controller = selectedControllers[i];
-            if (controller != null && controller.MultiCellGroupRootCell.IsValid)
+            if (controller is { MultiCellGroupRootCell.IsValid: true })
             {
                 return true;
             }
@@ -92,7 +89,7 @@ public partial class Building_WallController
         return false;
     }
 
-    /// 将选中的控制器扩展到多格隐组成员
+
     private static List<Building_WallController> ExpandSelectedControllersToMultiCellHiddenGroupMembers(
         Map map,
         List<Building_WallController> selectedControllers)
@@ -107,23 +104,22 @@ public partial class Building_WallController
         ULS_MultiCellGroupMapComponent multiCellComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
         HashSet<IntVec3> uniqueCells = new HashSet<IntVec3>();
 
-        // 收集所有相关的控制器格子
-        for (int i = 0; i < selectedControllers.Count; i++)
+
+        foreach (var controller in selectedControllers)
         {
-            Building_WallController controller = selectedControllers[i];
             if (controller == null || controller.Map != map || !controller.Spawned)
             {
                 continue;
             }
 
-            // 不在多格隐组中：直接添加
+
             if (!controller.MultiCellGroupRootCell.IsValid || multiCellComp == null)
             {
                 uniqueCells.Add(controller.Position);
                 continue;
             }
 
-            // 在多格隐组中：添加所有成员
+
             if (!multiCellComp.TryGetGroup(controller.MultiCellGroupRootCell, out var record) || record == null)
             {
                 uniqueCells.Add(controller.Position);
@@ -137,13 +133,13 @@ public partial class Building_WallController
                 continue;
             }
 
-            for (int j = 0; j < memberCells.Count; j++)
+            foreach (var t in memberCells)
             {
-                uniqueCells.Add(memberCells[j]);
+                uniqueCells.Add(t);
             }
         }
 
-        // 根据格子获取控制器
+
         foreach (IntVec3 cell in uniqueCells)
         {
             if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)

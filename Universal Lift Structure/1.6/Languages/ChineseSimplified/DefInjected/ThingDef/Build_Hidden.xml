@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- 简体中文：隐藏建筑类（ULS_HiddenBuildingBase）显示名与描述 -->
+<!-- 隐藏建筑类-->
 <LanguageData>
     <!-- ULS_FlickProxy -->
-
     <ULS_FlickProxy.label>ULS开关结构</ULS_FlickProxy.label>
     <ULS_FlickProxy.description>ULS开关结构</ULS_FlickProxy.description>
     <!-- ULS_LiftBlocker -->
-
     <ULS_LiftBlocker.label>ULS临时结构</ULS_LiftBlocker.label>
     <ULS_LiftBlocker.description>ULS临时结构</ULS_LiftBlocker.description>
 </LanguageData>

@@ -36,7 +36,6 @@
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Source\Components\ULS_Flickable_Pulse.cs" />
-        <Compile Include="Source\Components\ULS_Properties_FlickablePulse.cs" />
         <Compile Include="Source\Components\ULS_AutoGroupMarker.cs" />
         <Compile Include="Source\Components\ULS_FlickTrigger.cs" />
         <Compile Include="Source\Components\ULS_AutoGroupMapComponent.cs"/>
@@ -45,6 +44,7 @@
         <Compile Include="Source\Components\ULS_LiftRequest.cs"/>
         <Compile Include="Source\Components\ULS_MultiCellGroupMapComponent.cs"/>
         <Compile Include="Source\Components\ULS_MultiCellGroupRecord.cs"/>
+        <Compile Include="Source\Components\ULS_Properties_FlickablePulse.cs" />
         <Compile Include="Source\Core\Building_WallController.cs" />
         <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
         <Compile Include="Source\Core\Building_WallController_Group.cs" />

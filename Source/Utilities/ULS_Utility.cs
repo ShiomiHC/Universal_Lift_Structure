@@ -1,10 +1,7 @@
 ﻿namespace Universal_Lift_Structure;
 
-/// 文件意图：业务判定工具集。集中维护“是否注入结构侧 Gizmo”的规则与控制器查找逻辑，避免把规则堆在 Harmony Patch 里。
-
 public static class ULS_Utility
 {
-    /// 方法意图：从指定格子的 thingGrid 中查找 Building_WallController，用于把结构侧按钮绑定到“同格控制器”的实际执行逻辑。
     public static bool TryGetControllerAt(Map map, IntVec3 cell, out Building_WallController controller)
     {
         controller = null;
@@ -14,9 +11,9 @@ public static class ULS_Utility
         }
 
         var things = map.thingGrid.ThingsListAtFast(cell);
-        for (int i = 0; i < things.Count; i++)
+        foreach (var t in things)
         {
-            if (things[i] is Building_WallController found)
+            if (t is Building_WallController found)
             {
                 controller = found;
                 return true;
@@ -26,8 +23,9 @@ public static class ULS_Utility
         return false;
     }
 
-    // 查找：在指定建筑的占格内找到任意一个控制器（用于处理多格建筑 root cell 与控制器不在同一格的情况）
-    public static bool TryGetAnyControllerUnderBuilding(Building building, out Building_WallController controller, out IntVec3 controllerCell)
+
+    public static bool TryGetAnyControllerUnderBuilding(Building building, out Building_WallController controller,
+        out IntVec3 controllerCell)
     {
         controller = null;
         controllerCell = IntVec3.Invalid;
@@ -62,11 +60,11 @@ public static class ULS_Utility
                 return true;
             }
         }
+
         return false;
     }
 
-        
-    /// 方法意图：依据 UniversalLiftStructureSettings 判断结构是否应被排除（门/自然岩壁/DefName 白名单未允许）。该判定用于“不给按钮”，而不是在按钮点击后兜底。
+
     public static bool IsEdificeBlacklisted(Building edifice)
     {
         if (edifice is null)
@@ -80,7 +78,7 @@ public static class ULS_Utility
             return false;
         }
 
-        if (settings.excludeDoors && edifice is Building_Door)
+        if (edifice is Building_Door || edifice.def?.IsDoor == true)
         {
             return true;
         }
@@ -90,7 +88,7 @@ public static class ULS_Utility
             return true;
         }
 
-        if (settings.IsDefNameBlacklisted(edifice.def.defName))
+        if (settings.IsDefNameBlacklisted(edifice.def?.defName))
         {
             return true;
         }
@@ -98,8 +96,7 @@ public static class ULS_Utility
         return false;
     }
 
-        
-    /// 方法意图：综合判定是否应在该结构上注入“降下”按钮：必须是可摧毁的 edifice、非 Frame、且白名单允许（未被排除）。
+
     public static bool CanInjectLowerGizmo(Building edifice)
     {
         if (edifice is null or { Destroyed: true } or Frame)
@@ -131,9 +128,7 @@ public static class ULS_Utility
         return true;
     }
 
-        
-    /// 方法意图：Console 模式下按“距离口径”寻找最近的控制台（不做可达性判断，交由原版派工自然失败/挂起）。
-    /// 说明：仅返回玩家派系的控制台。
+
     public static bool TryGetNearestLiftConsoleByDistance(Map map, IntVec3 origin, out ThingWithComps console)
     {
         console = null;
@@ -155,9 +150,9 @@ public static class ULS_Utility
         }
 
         int bestDistSq = int.MaxValue;
-        for (int i = 0; i < consoles.Count; i++)
+        foreach (var t in consoles)
         {
-            if (!(consoles[i] is ThingWithComps twc) || !twc.Spawned)
+            if (!(t is ThingWithComps twc) || !twc.Spawned)
             {
                 continue;
             }
@@ -170,6 +165,12 @@ public static class ULS_Utility
             int distSq = origin.DistanceToSquared(twc.Position);
             if (distSq < bestDistSq)
             {
+                var power = twc.GetComp<CompPowerTrader>();
+                if (power is { PowerOn: false })
+                {
+                    continue;
+                }
+
                 bestDistSq = distSq;
                 console = twc;
             }

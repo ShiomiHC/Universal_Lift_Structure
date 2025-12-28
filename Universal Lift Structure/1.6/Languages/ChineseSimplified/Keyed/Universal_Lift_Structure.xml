@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
-    <!-- 文件意图：Keyed 本地化：为 C# 侧 UI 文本提供翻译键，覆盖按钮文本、失败原因提示、以及设置菜单文案等。 -->
+    <!-- Keyed 本地化: C# 侧UI文本 -->
 
     <!-- ULS 结构侧按钮：按控制器显式组（GroupId）执行“降下”。 -->
     <ULS_LowerGroup>降下</ULS_LowerGroup>
@@ -68,7 +68,8 @@
     <!-- 设置菜单：升降控制模式 -->
     <ULS_Settings_LiftControlMode>升降控制模式</ULS_Settings_LiftControlMode>
     <ULS_Settings_LiftControlMode_Desc>选择点击“升起/降下”按钮后是否需要殖民者执行操作。
-遥控器：立即生效；控制台：需要地图上存在升降控制台；手动：需要殖民者操作控制器本体。</ULS_Settings_LiftControlMode_Desc>
+        遥控器：立即生效；控制台：需要地图上存在升降控制台；手动：需要殖民者操作控制器本体。
+    </ULS_Settings_LiftControlMode_Desc>
     <ULS_LiftControlMode_Remote>遥控器</ULS_LiftControlMode_Remote>
     <ULS_LiftControlMode_Console>控制台</ULS_LiftControlMode_Console>
     <ULS_LiftControlMode_Manual>手动</ULS_LiftControlMode_Manual>
@@ -118,7 +119,6 @@
 
     <!-- 设置菜单：内置规则（合并到筛选列表顶部） -->
     <ULS_Settings_BuiltInRules>内置规则</ULS_Settings_BuiltInRules>
-    <ULS_Settings_AllowDoors>允许门</ULS_Settings_AllowDoors>
     <ULS_Settings_AllowNaturalRock>允许自然岩壁</ULS_Settings_AllowNaturalRock>
     <!-- 设置菜单：向 DefName 白名单添加当前输入 -->
     <ULS_Settings_Add>添加</ULS_Settings_Add>
@@ -130,15 +130,6 @@
     <ULS_Settings_InvalidDefName_Empty>请输入 defName。</ULS_Settings_InvalidDefName_Empty>
     <!-- 设置菜单：输入的 defName 未找到对应 ThingDef -->
     <ULS_Settings_InvalidDefName>未找到 ThingDef：{0}</ULS_Settings_InvalidDefName>
-
-    <!-- 右下角 Overlay：切换“显示收纳结构虚影”（类蓝图 ghost；半透明紫色）。 -->
-    <ULS_ShowControllerCellshowcellToggleButton>显示收纳结构虚影</ULS_ShowControllerCellshowcellToggleButton>
-
-    <!-- 右下角 Overlay：切换“显示控制器所在地块描边”（MetaOverlays 边框；用于快速定位控制器）。 -->
-    <ULS_ShowControllerCellOutlineToggleButton>显示控制器地块描边</ULS_ShowControllerCellOutlineToggleButton>
-
-    <!-- 右下角 Overlay：切换“显示自动控制器检测区域投影”（MetaOverlays 区域提示；绿/黄/红）。 -->
-    <ULS_ShowAutoGroupDetectionProjectionToggleButton>显示自动检测区域投影</ULS_ShowAutoGroupDetectionProjectionToggleButton>
 
     <!-- 右下角 Overlay：叠加层显示总开关（统一启用/禁用所有叠加层显示；子项在设置菜单配置）。 -->
     <ULS_OverlayDisplayMasterToggleButton>叠加层显示（总开关）</ULS_OverlayDisplayMasterToggleButton>
@@ -162,9 +153,10 @@
     <!-- 设置菜单：是否启用升降耗电/断电回退逻辑 -->
     <ULS_Settings_EnableLiftPower>启用升降耗电逻辑</ULS_Settings_EnableLiftPower>
     <ULS_Settings_EnableLiftPower_Desc>启用后：
-待机功率：标准控制器 0W，自动控制器 5W；
-升降过程：每个参与控制器额外耗电 100W；
-缺电时无法开始升降，升降途中断电会回退（降下还原，升起保留收纳）。</ULS_Settings_EnableLiftPower_Desc>
+        待机功率：标准控制器 0W，自动控制器 5W；
+        升降过程：每个参与控制器额外耗电 100W；
+        缺电时无法开始升降，升降途中断电会回退（降下还原，升起保留收纳）。
+    </ULS_Settings_EnableLiftPower_Desc>
 
     <!-- 缺电提示：升降开始时未连接电网（Gizmo 将禁用显示此文本） -->
     <ULS_PowerOff>未连接电网。</ULS_PowerOff>
@@ -174,7 +166,8 @@
     <ULS_PowerLost>升降过程中断电，已回退。</ULS_PowerLost>
 
     <!-- Console/Manual 模式提示 -->
-    <ULS_LiftConsoleMissing>未找到升降控制台。</ULS_LiftConsoleMissing>
+    <ULS_LiftConsoleMissing>未找到可用的升降控制台。</ULS_LiftConsoleMissing>
+    <ULS_LiftConsolePowerOff>升降控制台已断电。</ULS_LiftConsolePowerOff>
     <ULS_LiftTriggerMissing>缺少升降触发组件（可能是 Def 未挂 comps）。</ULS_LiftTriggerMissing>
     <ULS_LiftRequest_ControllerInvalid>升降请求已失效：控制器不存在或已被移除。</ULS_LiftRequest_ControllerInvalid>
 </LanguageData>

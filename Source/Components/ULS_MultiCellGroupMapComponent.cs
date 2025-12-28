@@ -1,13 +1,11 @@
 ﻿namespace Universal_Lift_Structure;
 
-/// 文件意图：多格隐组持久化 —— MapComponent：地图级注册表，维护 rootCell 到 ULS_MultiCellGroupRecord 的映射。
-/// 提供隐组的创建、查询、销毁与读档后成员状态重建。
 public class ULS_MultiCellGroupMapComponent : MapComponent
 {
     private List<ULS_MultiCellGroupRecord> groupRecords = new();
 
-    // 运行时索引：不直接存档，PostLoadInit 时由 groupRecords 重建。
-    private Dictionary<IntVec3, ULS_MultiCellGroupRecord> groupByRootCell = new();
+
+    private readonly Dictionary<IntVec3, ULS_MultiCellGroupRecord> groupByRootCell = new();
 
     public ULS_MultiCellGroupMapComponent(Map map) : base(map)
     {
@@ -29,9 +27,8 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
         groupByRootCell.Clear();
         groupRecords ??= new();
 
-        for (int i = 0; i < groupRecords.Count; i++)
+        foreach (var record in groupRecords)
         {
-            ULS_MultiCellGroupRecord record = groupRecords[i];
             if (record is null || !record.rootCell.IsValid)
             {
                 continue;
@@ -93,20 +90,20 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
             return;
         }
 
-        Map map = this.map;
-        if (map is not null)
+        Map mapInstance = map;
+        if (mapInstance is not null)
         {
-            // 正常情况下 masterControllerCell 就是根格控制器。
-            if (ULS_Utility.TryGetControllerAt(map, record.masterControllerCell, out Building_WallController master))
+            if (ULS_Utility.TryGetControllerAt(mapInstance, record.masterControllerCell,
+                    out Building_WallController master))
             {
-                master.RefundStored(map);
+                master.RefundStored(mapInstance);
             }
             else
             {
-                // 数据异常时，尝试在成员中兜底找到实际存货者（不做 try/catch；找不到就直接跳过）。
-                for (int i = 0; i < record.memberControllerCells.Count; i++)
+                foreach (var t in record.memberControllerCells)
                 {
-                    if (!ULS_Utility.TryGetControllerAt(map, record.memberControllerCells[i], out Building_WallController controller))
+                    if (!ULS_Utility.TryGetControllerAt(mapInstance, t,
+                            out Building_WallController controller))
                     {
                         continue;
                     }
@@ -116,7 +113,7 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
                         continue;
                     }
 
-                    controller.RefundStored(map);
+                    controller.RefundStored(mapInstance);
                     break;
                 }
             }
@@ -127,16 +124,15 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
 
     private void ClearMemberControllerFlags(ULS_MultiCellGroupRecord record)
     {
-        Map map = this.map;
-        if (map is null || record?.memberControllerCells is null)
+        Map mapInstance = map;
+        if (mapInstance is null || record?.memberControllerCells is null)
         {
             return;
         }
 
-        for (int i = 0; i < record.memberControllerCells.Count; i++)
+        foreach (var cell in record.memberControllerCells)
         {
-            IntVec3 cell = record.memberControllerCells[i];
-            if (!ULS_Utility.TryGetControllerAt(map, cell, out Building_WallController controller))
+            if (!ULS_Utility.TryGetControllerAt(mapInstance, cell, out Building_WallController controller))
             {
                 continue;
             }

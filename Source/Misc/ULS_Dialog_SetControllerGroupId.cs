@@ -1,8 +1,5 @@
 ﻿namespace Universal_Lift_Structure;
 
-/// 文件意图：UI 对话框：为控制器显式分组提供“输入数字组ID”的窗口。
-/// - 仅负责数字输入与回调；具体分组逻辑由调用方执行。
-/// - 所有 UI 文本使用翻译键（Keyed）。
 public class ULS_Dialog_SetControllerGroupId : Window
 {
     private int groupId;
@@ -30,9 +27,7 @@ public class ULS_Dialog_SetControllerGroupId : Window
         this.onAccept = onAccept;
     }
 
-    /// 方法意图：合并“关闭/确定”的轻量逻辑。
-    /// - 所有关闭入口（底部按钮 / 右上角 X / 点击外部 / Accept/Cancel 键）都视为“确认并关闭”。
-    /// - 为避免重复触发回调，使用 `accepted` 保证仅执行一次。
+
     public override void Close(bool doCloseSound = true)
     {
         if (!accepted)

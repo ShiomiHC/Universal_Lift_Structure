@@ -1,8 +1,5 @@
 ﻿namespace Universal_Lift_Structure;
 
-/// 文件意图：方案 B（原版选择/覆盖层系统）——在 `SelectionDrawer.DrawSelectionOverlays` 末尾追加“控制器所在格子的整格填充高亮”。
-/// - 仅覆盖殖民者控制器（`allBuildingsColonist`）。
-/// - 由右下角 Overlay Toggle（`ShowControllerCell`）控制显示（当前语义为“填充”，保留原开关名）。
 [HarmonyPatch(typeof(SelectionDrawer), nameof(SelectionDrawer.DrawSelectionOverlays))]
 public static class Patch_SelectionDrawer_DrawSelectionOverlays
 {
@@ -66,9 +63,9 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         if (showFill)
         {
             TmpFillCells.Clear();
-            for (int i = 0; i < colonistBuildings.Count; i++)
+            foreach (var t in colonistBuildings)
             {
-                if (colonistBuildings[i] is not Building_WallController controller)
+                if (t is not Building_WallController controller)
                 {
                     continue;
                 }
@@ -78,19 +75,17 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
 
             if (TmpFillCells.Count > 0)
             {
-                // 整格填充：临时调试开关，优先“立刻看见效果”。
-                // altOffset：固定值，避免与其他 overlay/地面发生 z-fighting。
                 const float altOffset = 0.001f;
                 Color fillColor = new Color(0.98f, 0.97f, 0.96f, 0.35f);
 
-                // 纯色材质：用白图 + Transparent shader 以支持 alpha。
-                Material fillMat = MaterialPool.MatFrom(BaseContent.WhiteTex, ShaderDatabase.Transparent, fillColor, renderQueue: 2900);
+
+                Material fillMat = MaterialPool.MatFrom(BaseContent.WhiteTex, ShaderDatabase.Transparent, fillColor,
+                    renderQueue: 2900);
                 fillMat.enableInstancing = true;
 
                 TmpFillMatrices.Clear();
-                for (int i = 0; i < TmpFillCells.Count; i++)
+                foreach (var cell in TmpFillCells)
                 {
-                    IntVec3 cell = TmpFillCells[i];
                     if (!cell.InBounds(map))
                     {
                         continue;
@@ -114,7 +109,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             return;
         }
 
-        // 自动控制器检测区域投影：按组读取 maxRadius + 当前过滤器类型，并生成与检测一致的 scanCells（方形并集）。
+
         ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
         if (groupComp is null)
         {
@@ -138,24 +133,24 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         TmpHostileCells.Clear();
         TmpNeutralCells.Clear();
 
-        for (int i = 0; i < TmpGroupIds.Count; i++)
+        foreach (var groupId in TmpGroupIds)
         {
-            int groupId = TmpGroupIds[i];
             if (groupId < 1)
             {
                 continue;
             }
 
-            if (!groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) || groupCells is not { Count: > 0 })
+            if (!groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) ||
+                groupCells is not { Count: > 0 })
             {
                 continue;
             }
 
-            // 找到一个代表控制器（用于读取自动组 marker props）。
+
             Building_WallController representative = null;
-            for (int j = 0; j < groupCells.Count; j++)
+            foreach (var t in groupCells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, groupCells[j], out Building_WallController c) && c != null)
+                if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) && c != null)
                 {
                     representative = c;
                     break;
@@ -177,7 +172,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             int maxRadius = props.maxRadius;
             ULS_AutoGroupType filterType = autoGroupComp.GetOrInitGroupFilterType(groupId, props.autoGroupType);
 
-            // scanCells 缓存：仅在成员/半径变化时重建，避免每帧 HashSet 分配与枚举。
+
             int membershipHash = ComputeMembershipHash(groupCells);
             if (!ScanCacheByGroupId.TryGetValue(groupId, out ScanCache cache) || cache == null)
             {
@@ -185,7 +180,8 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
                 ScanCacheByGroupId[groupId] = cache;
             }
 
-            if (cache.scanCells == null || cache.scanCells.Count == 0 || cache.membershipHash != membershipHash || cache.maxRadius != maxRadius)
+            if (cache.scanCells == null || cache.scanCells.Count == 0 || cache.membershipHash != membershipHash ||
+                cache.maxRadius != maxRadius)
             {
                 cache.membershipHash = membershipHash;
                 cache.maxRadius = maxRadius;
@@ -211,8 +207,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             }
         }
 
-        // 颜色语义：绿=友方，黄=中立，红=敌方。
-        // altOffset：为三种颜色提供不同固定高度，避免叠加时 Z-fight。
+
         if (TmpFriendlyCells.Count > 0)
         {
             GenDraw.DrawDiagonalStripes(TmpFriendlyCells, new Color(0.25f, 1.00f, 0.25f, 0.22f), altOffset: 0.0020f);
@@ -236,9 +231,8 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             int h = 17;
             if (cells != null)
             {
-                for (int i = 0; i < cells.Count; i++)
+                foreach (var c in cells)
                 {
-                    IntVec3 c = cells[i];
                     h = h * 31 + c.x;
                     h = h * 31 + c.z;
                 }
@@ -255,9 +249,8 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         TmpScanSet.Clear();
         if (groupCells != null)
         {
-            for (int i = 0; i < groupCells.Count; i++)
+            foreach (var center in groupCells)
             {
-                IntVec3 center = groupCells[i];
                 for (int dx = -maxRadius; dx <= maxRadius; dx++)
                 {
                     for (int dz = -maxRadius; dz <= maxRadius; dz++)
