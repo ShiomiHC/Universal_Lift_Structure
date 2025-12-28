@@ -22,6 +22,20 @@ public class ULS_AutoGroupMapComponent : MapComponent
     private int lastRefreshTick;
 
     private readonly Dictionary<int, AutoGroupRuntime> runtimeByGroupId = new();
+    private ULS_ControllerGroupMapComponent cachedGroupComp;
+
+    private ULS_ControllerGroupMapComponent GroupComp
+    {
+        get
+        {
+            if (cachedGroupComp == null && map != null)
+            {
+                cachedGroupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+            }
+
+            return cachedGroupComp;
+        }
+    }
 
     public ULS_AutoGroupMapComponent(Map map) : base(map)
     {
@@ -141,7 +155,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
         lastRefreshTick = tick;
         autoGroupIds.Clear();
 
-        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        ULS_ControllerGroupMapComponent groupComp = GroupComp;
         if (groupComp == null)
         {
             return;
@@ -247,7 +261,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
         groupCells = null;
         error = null;
 
-        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        ULS_ControllerGroupMapComponent groupComp = GroupComp;
         if (groupComp == null)
         {
             return false;

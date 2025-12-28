@@ -104,7 +104,7 @@ public static class ULS_LiftClipRenderer
 
             Vector3 center = cell.ToVector3Shifted();
             center.y = altitude;
-            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(center, rot.AsQuat, Vector3.one), material, 0);
+            Graphics.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(center, Quaternion.identity, Vector3.one), material, 0);
         }
     }
 
@@ -170,7 +170,7 @@ public static class ULS_LiftClipRenderer
 
             Vector3 center = cell.ToVector3Shifted();
             center.y = baseAltitude;
-            Graphics.DrawMesh(mesh, Matrix4x4.TRS(center, rot.AsQuat, Vector3.one), material, 0);
+            Graphics.DrawMesh(mesh, Matrix4x4.TRS(center, Quaternion.identity, Vector3.one), material, 0);
         }
     }
 
@@ -180,7 +180,9 @@ public static class ULS_LiftClipRenderer
     {
         Material material = graphic.MatAt(rot, storedBuilding);
         Vector3 center = GenThing.TrueCenter(rootCell, rot, storedBuilding.def.Size, baseAltitude);
-        Graphics.DrawMesh(mesh, Matrix4x4.TRS(center, rot.AsQuat, Vector3.one), material, 0);
+
+        Quaternion rotation = graphic.ShouldDrawRotated ? rot.AsQuat : Quaternion.identity;
+        Graphics.DrawMesh(mesh, Matrix4x4.TRS(center, rotation, Vector3.one), material, 0);
     }
 
 

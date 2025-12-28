@@ -361,7 +361,7 @@ public partial class Building_WallController
         IntVec3 rootCell = multiCellGroupRootCell;
 
 
-        GenSpawn.Spawn(storedThing, spawnLoc, map, storedRotation, WipeMode.VanishOrMoveAside);
+        GenSpawn.Spawn(storedThing, spawnLoc, map, storedRotation);
         storedCell = IntVec3.Invalid;
 
 

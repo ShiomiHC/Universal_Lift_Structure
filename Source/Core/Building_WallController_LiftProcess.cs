@@ -252,7 +252,8 @@ public partial class Building_WallController
             }
             else
             {
-                GenSpawn.Spawn(ThingMaker.MakeThing(ULS_ThingDefOf.ULS_LiftBlocker), liftBlockerCell, map);
+                GenSpawn.Spawn(ThingMaker.MakeThing(ULS_ThingDefOf.ULS_LiftBlocker), liftBlockerCell, map,
+                    WipeMode.VanishOrMoveAside);
             }
         }
     }

@@ -137,7 +137,7 @@ public static class ULS_Utility
             return false;
         }
 
-        ThingDef consoleDef = DefDatabase<ThingDef>.GetNamedSilentFail("ULS_LiftConsole");
+        ThingDef consoleDef = ULS_ThingDefOf.ULS_LiftConsole;
         if (consoleDef == null)
         {
             return false;
