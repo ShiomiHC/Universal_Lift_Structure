@@ -14,6 +14,8 @@
           控制器本体默认可能为 Never，从而导致升/降过程永远不结束。
         -->
         <tickerType>Normal</tickerType>
+        <!-- 需求地形 -->
+        <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
         <!-- 绘制：电缆层 -->
         <altitudeLayer>Conduits</altitudeLayer>
         <!-- 不可旋转 -->
@@ -88,8 +90,6 @@
         <placeWorkers>
             <li>Universal_Lift_Structure.ULS_PlaceRule_WallController</li>
         </placeWorkers>
-        <!-- 需求地形 -->
-        <terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
         <!-- 绘制方式：仅地图网格 -->
         <drawerType>MapMeshOnly</drawerType>
     </ThingDef>
@@ -164,8 +164,6 @@
         <placeWorkers>
             <li>Universal_Lift_Structure.ULS_PlaceRule_WallController</li>
         </placeWorkers>
-        <!-- 需求地形 -->
-        <terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
         <!-- 绘制方式：仅地图网格 -->
         <drawerType>MapMeshOnly</drawerType>
     </ThingDef>

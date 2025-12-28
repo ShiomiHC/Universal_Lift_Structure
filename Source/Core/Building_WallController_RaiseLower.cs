@@ -43,95 +43,113 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = new List<IntVec3>();
-        HashSet<IntVec3> seenRoots = new HashSet<IntVec3>();
+        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
+        uniqueRootCells.Clear();
+        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
+        seenRoots.Clear();
+        List<Building_WallController> raisableControllers = SimplePool<List<Building_WallController>>.Get();
+        raisableControllers.Clear();
+        HashSet<Building_WallController> processedControllers = SimplePool<HashSet<Building_WallController>>.Get();
+        processedControllers.Clear();
 
-        foreach (var cell in cells)
+        try
         {
-            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+            foreach (var cell in cells)
             {
-                IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
-                    ? controller.MultiCellGroupRootCell
-                    : controller.Position;
-
-                if (seenRoots.Add(rootCell))
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
                 {
-                    uniqueRootCells.Add(rootCell);
+                    IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
+                        ? controller.MultiCellGroupRootCell
+                        : controller.Position;
+
+                    if (seenRoots.Add(rootCell))
+                    {
+                        uniqueRootCells.Add(rootCell);
+                    }
+                }
+                else if (seenRoots.Add(cell))
+                {
+                    uniqueRootCells.Add(cell);
                 }
             }
-            else if (seenRoots.Add(cell))
+
+
+            int storedCount = 0;
+
+            foreach (var t in uniqueRootCells)
             {
-                uniqueRootCells.Add(cell);
-            }
-        }
-
-
-        int storedCount = 0;
-        List<Building_WallController> raisableControllers = new List<Building_WallController>();
-
-        foreach (var t in uniqueRootCells)
-        {
-            if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                controller is { HasStored: true })
-            {
-                storedCount++;
-
-                Thing storedThing = controller.StoredThing;
-                if (storedThing == null)
+                if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
+                    controller is { HasStored: true })
                 {
-                    controller.storedCell = IntVec3.Invalid;
-                    return false;
+                    storedCount++;
+
+                    Thing storedThing = controller.StoredThing;
+                    if (storedThing == null)
+                    {
+                        controller.storedCell = IntVec3.Invalid;
+                        return false;
+                    }
+
+                    IntVec3 spawnCell = controller.storedCell.IsValid ? controller.storedCell : controller.Position;
+                    if (controller.IsBlockedForRaise(map, spawnCell, storedThing))
+                    {
+                        return false;
+                    }
+
+                    raisableControllers.Add(controller);
                 }
-
-                IntVec3 spawnCell = controller.storedCell.IsValid ? controller.storedCell : controller.Position;
-                if (controller.IsBlockedForRaise(map, spawnCell, storedThing))
-                {
-                    return false;
-                }
-
-                raisableControllers.Add(controller);
-            }
-        }
-
-
-        if (storedCount <= 0 || raisableControllers.Count != storedCount)
-        {
-            return false;
-        }
-
-
-        HashSet<Building_WallController> processedControllers = new HashSet<Building_WallController>();
-
-        foreach (var controller in raisableControllers)
-        {
-            if (controller == null)
-            {
-                continue;
             }
 
-            HashSet<Building_WallController> memberControllers = controller.GetMultiCellMemberControllersOrSelf(map);
 
-            if (!controller.TryStartRaisingProcess(map))
+            if (storedCount <= 0 || raisableControllers.Count != storedCount)
             {
-                foreach (Building_WallController processed in processedControllers)
-                {
-                    processed?.ClearLiftProcessAndRemoveBlocker();
-                }
-
                 return false;
             }
 
 
-            foreach (Building_WallController member in memberControllers)
+            foreach (var controller in raisableControllers)
             {
-                if (member != null)
+                if (controller == null)
                 {
-                    processedControllers.Add(member);
+                    continue;
+                }
+
+                HashSet<Building_WallController> memberControllers =
+                    controller.GetMultiCellMemberControllersOrSelf(map);
+
+                if (!controller.TryStartRaisingProcess(map))
+                {
+                    foreach (Building_WallController processed in processedControllers)
+                    {
+                        processed?.ClearLiftProcessAndRemoveBlocker();
+                    }
+
+                    return false;
+                }
+
+
+                foreach (Building_WallController member in memberControllers)
+                {
+                    if (member != null)
+                    {
+                        processedControllers.Add(member);
+                    }
                 }
             }
-        }
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            uniqueRootCells.Clear();
+            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
+            seenRoots.Clear();
+            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
+            raisableControllers.Clear();
+            SimplePool<List<Building_WallController>>.Return(raisableControllers);
+            processedControllers.Clear();
+            SimplePool<HashSet<Building_WallController>>.Return(processedControllers);
+        }
     }
 
 
@@ -174,120 +192,135 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = new List<IntVec3>();
-        HashSet<IntVec3> seenRoots = new HashSet<IntVec3>();
+        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
+        uniqueRootCells.Clear();
+        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
+        seenRoots.Clear();
+        List<Building_WallController> raisableControllers = SimplePool<List<Building_WallController>>.Get();
+        raisableControllers.Clear();
 
-        foreach (var cell in cells)
+        try
         {
-            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+            foreach (var cell in cells)
             {
-                IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
-                    ? controller.MultiCellGroupRootCell
-                    : controller.Position;
-
-                if (seenRoots.Add(rootCell))
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
                 {
-                    uniqueRootCells.Add(rootCell);
+                    IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
+                        ? controller.MultiCellGroupRootCell
+                        : controller.Position;
+
+                    if (seenRoots.Add(rootCell))
+                    {
+                        uniqueRootCells.Add(rootCell);
+                    }
+                }
+                else if (seenRoots.Add(cell))
+                {
+                    uniqueRootCells.Add(cell);
                 }
             }
-            else if (seenRoots.Add(cell))
+
+
+            int storedCount = 0;
+            int failedCount = 0;
+
+            if (PowerFeatureEnabled)
             {
-                uniqueRootCells.Add(cell);
+                foreach (var t in uniqueRootCells)
+                {
+                    if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
+                        controller != null &&
+                        !controller.IsReadyForLiftPower())
+                    {
+                        if (showMessage)
+                        {
+                            MessageReject("ULS_GroupPowerInsufficient", controller);
+                        }
+
+                        return;
+                    }
+                }
             }
-        }
 
 
-        int storedCount = 0;
-        int failedCount = 0;
-        List<Building_WallController> raisableControllers = new List<Building_WallController>();
-
-        if (PowerFeatureEnabled)
-        {
             foreach (var t in uniqueRootCells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                    controller != null &&
-                    !controller.IsReadyForLiftPower())
+                if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) ||
+                    controller == null ||
+                    !controller.HasStored)
+                {
+                    continue;
+                }
+
+                storedCount++;
+
+                Thing storedThing = controller.StoredThing;
+                if (storedThing == null)
+                {
+                    controller.storedCell = IntVec3.Invalid;
+                    failedCount++;
+                    continue;
+                }
+
+                IntVec3 spawnCell = controller.storedCell.IsValid ? controller.storedCell : controller.Position;
+                if (controller.IsBlockedForRaise(map, spawnCell, storedThing))
+                {
+                    failedCount++;
+                }
+                else
+                {
+                    raisableControllers.Add(controller);
+                }
+            }
+
+
+            if (raisableControllers.Count == 0)
+            {
+                if (storedCount <= 0)
                 {
                     if (showMessage)
                     {
-                        MessageReject("ULS_GroupPowerInsufficient", controller);
+                        MessageReject("ULS_NoStored", this);
                     }
+                }
+                else if (showMessage)
+                {
+                    MessageReject("ULS_GroupNoRaiseable", this);
+                }
 
-                    return;
+                return;
+            }
+
+
+            foreach (var t in raisableControllers)
+            {
+                if (!t.TryStartRaisingProcess(map))
+                {
+                    failedCount++;
                 }
             }
-        }
 
 
-        foreach (var t in uniqueRootCells)
-        {
-            if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) ||
-                controller == null ||
-                !controller.HasStored)
-            {
-                continue;
-            }
-
-            storedCount++;
-
-            Thing storedThing = controller.StoredThing;
-            if (storedThing == null)
-            {
-                controller.storedCell = IntVec3.Invalid;
-                failedCount++;
-                continue;
-            }
-
-            IntVec3 spawnCell = controller.storedCell.IsValid ? controller.storedCell : controller.Position;
-            if (controller.IsBlockedForRaise(map, spawnCell, storedThing))
-            {
-                failedCount++;
-            }
-            else
-            {
-                raisableControllers.Add(controller);
-            }
-        }
-
-
-        if (raisableControllers.Count == 0)
-        {
-            if (storedCount <= 0)
+            if (failedCount <= 0)
             {
                 if (showMessage)
                 {
-                    MessageReject("ULS_NoStored", this);
+                    MessageNeutral("ULS_GroupRaised", this, raisableControllers.Count);
                 }
             }
             else if (showMessage)
             {
-                MessageReject("ULS_GroupNoRaiseable", this);
-            }
-
-            return;
-        }
-
-
-        foreach (var t in raisableControllers)
-        {
-            if (!t.TryStartRaisingProcess(map))
-            {
-                failedCount++;
+                MessageNeutral("ULS_GroupRaisedPartial", this, raisableControllers.Count, failedCount);
             }
         }
-
-
-        if (failedCount <= 0)
+        finally
         {
-            if (showMessage)
-            {
-                MessageNeutral("ULS_GroupRaised", this, raisableControllers.Count);
-            }
-        }
-        else if (showMessage)
-        {
-            MessageNeutral("ULS_GroupRaisedPartial", this, raisableControllers.Count, failedCount);
+            uniqueRootCells.Clear();
+            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
+            seenRoots.Clear();
+            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
+            raisableControllers.Clear();
+            SimplePool<List<Building_WallController>>.Return(raisableControllers);
         }
     }
 
@@ -411,162 +444,180 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = new List<IntVec3>();
-        HashSet<IntVec3> seenRoots = new HashSet<IntVec3>();
+        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
+        uniqueRootCells.Clear();
+        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
+        seenRoots.Clear();
+        HashSet<Building> processedMultiCellBuildings = SimplePool<HashSet<Building>>.Get();
+        processedMultiCellBuildings.Clear();
+        List<(Building_WallController controller, IntVec3 position, Building edifice)> oneCellLowerTargets =
+            SimplePool<List<(Building_WallController controller, IntVec3 position, Building edifice)>>.Get();
+        oneCellLowerTargets.Clear();
 
-        foreach (var cell in cells)
+        try
         {
-            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+            foreach (var cell in cells)
             {
-                IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
-                    ? controller.MultiCellGroupRootCell
-                    : controller.Position;
-
-                if (seenRoots.Add(rootCell))
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
                 {
-                    uniqueRootCells.Add(rootCell);
+                    IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
+                        ? controller.MultiCellGroupRootCell
+                        : controller.Position;
+
+                    if (seenRoots.Add(rootCell))
+                    {
+                        uniqueRootCells.Add(rootCell);
+                    }
+                }
+                else if (seenRoots.Add(cell))
+                {
+                    uniqueRootCells.Add(cell);
                 }
             }
-            else if (seenRoots.Add(cell))
+
+
+            if (PowerFeatureEnabled)
             {
-                uniqueRootCells.Add(cell);
+                foreach (var t in uniqueRootCells)
+                {
+                    if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
+                        controller != null &&
+                        !controller.IsReadyForLiftPower())
+                    {
+                        if (showMessage)
+                        {
+                            MessageReject("ULS_GroupPowerInsufficient", controller);
+                        }
+
+                        return;
+                    }
+                }
             }
-        }
 
 
-        if (PowerFeatureEnabled)
-        {
+            int loweredCount = 0;
+            int skippedCount = 0;
+
+
             foreach (var t in uniqueRootCells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                    controller != null &&
-                    !controller.IsReadyForLiftPower())
-                {
-                    if (showMessage)
-                    {
-                        MessageReject("ULS_GroupPowerInsufficient", controller);
-                    }
-
-                    return;
-                }
-            }
-        }
-
-
-        int loweredCount = 0;
-        int skippedCount = 0;
-        HashSet<Building> processedMultiCellBuildings = new HashSet<Building>();
-
-
-        List<(Building_WallController controller, IntVec3 position, Building edifice)> oneCellLowerTargets =
-            new List<(Building_WallController controller, IntVec3 position, Building edifice)>();
-
-        foreach (var t in uniqueRootCells)
-        {
-            if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) || controller == null)
-            {
-                skippedCount++;
-                continue;
-            }
-
-            if (controller.InLiftProcess)
-            {
-                skippedCount++;
-                continue;
-            }
-
-            if (controller.HasStored)
-            {
-                skippedCount++;
-                continue;
-            }
-
-            IntVec3 position = controller.Position;
-            Building edifice = map.edificeGrid[position];
-
-
-            if (edifice == null ||
-                edifice.Destroyed ||
-                !edifice.Spawned ||
-                edifice is Frame ||
-                !edifice.def.destroyable)
-            {
-                skippedCount++;
-            }
-            else if (ULS_Utility.IsEdificeBlacklisted(edifice))
-            {
-                skippedCount++;
-            }
-            else if (edifice.Faction != Faction.OfPlayer)
-            {
-                skippedCount++;
-            }
-            else if (edifice.def.Size == IntVec2.One)
-            {
-                oneCellLowerTargets.Add((controller, position, edifice));
-            }
-            else if (!processedMultiCellBuildings.Contains(edifice))
-            {
-                if (!TryLowerMultiCellBuildingInternal(edifice, showMessage: false))
+                if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) || controller == null)
                 {
                     skippedCount++;
-                    processedMultiCellBuildings.Add(edifice);
+                    continue;
                 }
-                else
+
+                if (controller.InLiftProcess)
                 {
-                    loweredCount++;
-                    processedMultiCellBuildings.Add(edifice);
+                    skippedCount++;
+                    continue;
+                }
+
+                if (controller.HasStored)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                IntVec3 position = controller.Position;
+                Building edifice = map.edificeGrid[position];
+
+
+                if (edifice == null ||
+                    edifice.Destroyed ||
+                    !edifice.Spawned ||
+                    edifice is Frame ||
+                    !edifice.def.destroyable)
+                {
+                    skippedCount++;
+                }
+                else if (ULS_Utility.IsEdificeBlacklisted(edifice))
+                {
+                    skippedCount++;
+                }
+                else if (edifice.Faction != Faction.OfPlayer)
+                {
+                    skippedCount++;
+                }
+                else if (edifice.def.Size == IntVec2.One)
+                {
+                    oneCellLowerTargets.Add((controller, position, edifice));
+                }
+                else if (!processedMultiCellBuildings.Contains(edifice))
+                {
+                    if (!TryLowerMultiCellBuildingInternal(edifice, showMessage: false))
+                    {
+                        skippedCount++;
+                        processedMultiCellBuildings.Add(edifice);
+                    }
+                    else
+                    {
+                        loweredCount++;
+                        processedMultiCellBuildings.Add(edifice);
+                    }
                 }
             }
-        }
 
 
-        foreach (var t in oneCellLowerTargets)
-        {
-            if (t is { controller: not null, edifice: not null })
+            foreach (var t in oneCellLowerTargets)
             {
-                t.controller.CacheStoredLinkMaskForBuilding(t.edifice, map);
-            }
-        }
-
-
-        foreach (var t in oneCellLowerTargets)
-        {
-            if (t.controller == null || t.edifice == null)
-            {
-                skippedCount++;
-                continue;
+                if (t is { controller: not null, edifice: not null })
+                {
+                    t.controller.CacheStoredLinkMaskForBuilding(t.edifice, map);
+                }
             }
 
-            int ticks = CalculateLiftTicks(t.edifice);
-            if (!t.controller.TryLowerNoMessage(map, t.position, t.edifice, cacheLinkMask: false))
+
+            foreach (var t in oneCellLowerTargets)
             {
-                skippedCount++;
-                continue;
+                if (t.controller == null || t.edifice == null)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                int ticks = CalculateLiftTicks(t.edifice);
+                if (!t.controller.TryLowerNoMessage(map, t.position, t.edifice, cacheLinkMask: false))
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                t.controller.TryStartLoweringProcess(t.position, ticks);
+                loweredCount++;
             }
 
-            t.controller.TryStartLoweringProcess(t.position, ticks);
-            loweredCount++;
-        }
 
-
-        if (loweredCount <= 0)
-        {
-            if (showMessage)
+            if (loweredCount <= 0)
             {
-                MessageReject("ULS_GroupNoLowerable", this);
+                if (showMessage)
+                {
+                    MessageReject("ULS_GroupNoLowerable", this);
+                }
+            }
+            else if (skippedCount <= 0)
+            {
+                if (showMessage)
+                {
+                    MessageNeutral("ULS_GroupLowered", this, loweredCount);
+                }
+            }
+            else if (showMessage)
+            {
+                MessageNeutral("ULS_GroupLoweredPartial", this, loweredCount, skippedCount);
             }
         }
-        else if (skippedCount <= 0)
+        finally
         {
-            if (showMessage)
-            {
-                MessageNeutral("ULS_GroupLowered", this, loweredCount);
-            }
-        }
-        else if (showMessage)
-        {
-            MessageNeutral("ULS_GroupLoweredPartial", this, loweredCount, skippedCount);
+            uniqueRootCells.Clear();
+            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
+            seenRoots.Clear();
+            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
+            processedMultiCellBuildings.Clear();
+            SimplePool<HashSet<Building>>.Return(processedMultiCellBuildings);
+            oneCellLowerTargets.Clear();
+            SimplePool<List<(Building_WallController controller, IntVec3 position, Building edifice)>>.Return(
+                oneCellLowerTargets);
         }
     }
 
