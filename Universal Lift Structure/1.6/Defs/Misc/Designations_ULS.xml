@@ -6,7 +6,8 @@
         <!-- 操控升降结构 -->
         <texturePath>UI/ULS_Flick</texturePath>
         <targetType>Thing</targetType>
-        <designateCancelable>true</designateCancelable>
+        <!-- 禁用原版右键取消：使用自定义取消 Gizmo 以确保正确清除期望状态和控制台队列 -->
+        <designateCancelable>false</designateCancelable>
     </DesignationDef>
 
 </Defs>

@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-using RimWorld;
-using Verse;
+
 using Verse.AI;
 
 namespace Universal_Lift_Structure
@@ -18,7 +16,19 @@ namespace Universal_Lift_Structure
             this.FailOn(delegate
             {
                 Thing thing = TargetA.Thing;
-                if (Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure) == null)
+
+                // 如果是控制器，必须有 Designation
+                if (thing is Building_WallController)
+                {
+                    if (Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure) ==
+                        null)
+                    {
+                        return true;
+                    }
+                }
+                // 如果是控制台，不强制检查 Designation（因为全局队列任务不需要控制台有标记）
+                // 而是检查是否仍有待处理请求（防止任务在该 Pawn 走路过程中被解决了）
+                else if (thing.TryGetComp<CompLiftConsole>() is { HasPendingRequests: false })
                 {
                     return true;
                 }
@@ -51,30 +61,32 @@ namespace Universal_Lift_Structure
                 .FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch)
                 .WithProgressBarToilDelay(TargetIndex.A);
 
-            Toil finalize = new Toil();
-            finalize.initAction = delegate
+            Toil finalize = new Toil
             {
-                Thing thing = TargetA.Thing;
-                Pawn actor = this.pawn;
+                initAction = delegate
+                {
+                    Thing thing = TargetA.Thing;
+                    Pawn actor = pawn;
 
-                if (thing is Building_WallController controller)
-                {
-                    controller.Notify_FlickedBy(actor);
-                }
-                else if (thing.TryGetComp<CompLiftConsole>() is CompLiftConsole console)
-                {
-                    console.NotifyFlicked();
-                }
+                    if (thing is Building_WallController controller)
+                    {
+                        controller.Notify_FlickedBy(actor);
+                    }
+                    else if (thing.TryGetComp<CompLiftConsole>() is { } console)
+                    {
+                        console.NotifyFlicked();
+                    }
 
-                // 移除 designations (虽然 controllers/console 内部可能已经移除了，这里再次确保)
-                Designation des =
-                    Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure);
-                if (des != null)
-                {
-                    des.Delete();
-                }
+                    // 移除 designations (虽然 controllers/console 内部可能已经移除了，这里再次确保)
+                    Designation des =
+                        Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure);
+                    if (des != null)
+                    {
+                        des.Delete();
+                    }
+                },
+                defaultCompleteMode = ToilCompleteMode.Instant
             };
-            finalize.defaultCompleteMode = ToilCompleteMode.Instant;
             yield return finalize;
         }
     }

@@ -181,7 +181,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
                     continue;
                 }
 
-                if (!TryGetGroupMarker(groupId, out ULS_AutoGroupMarker marker, out List<IntVec3> groupCells,
+                if (!TryGetGroupMarker(groupId, out ULS_AutoGroupMarker marker, out _,
                         out string error))
                 {
                     if (error != null)
@@ -219,9 +219,9 @@ public class ULS_AutoGroupMapComponent : MapComponent
 
             if (toRemove != null)
             {
-                for (int i = 0; i < toRemove.Count; i++)
+                foreach (var t in toRemove)
                 {
-                    runtimeByGroupId.Remove(toRemove[i]);
+                    runtimeByGroupId.Remove(t);
                 }
             }
 
@@ -239,9 +239,9 @@ public class ULS_AutoGroupMapComponent : MapComponent
 
                 if (filterToRemove != null)
                 {
-                    for (int i = 0; i < filterToRemove.Count; i++)
+                    foreach (var t in filterToRemove)
                     {
-                        filterTypeByGroupId.Remove(filterToRemove[i]);
+                        filterTypeByGroupId.Remove(t);
                     }
                 }
             }
@@ -294,9 +294,9 @@ public class ULS_AutoGroupMapComponent : MapComponent
 
 
         Building_WallController representative = null;
-        for (int i = 0; i < groupCells.Count; i++)
+        foreach (var t in groupCells)
         {
-            if (ULS_Utility.TryGetControllerAt(map, groupCells[i], out Building_WallController c) && c != null)
+            if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) && c != null)
             {
                 representative = c;
                 break;
@@ -315,9 +315,9 @@ public class ULS_AutoGroupMapComponent : MapComponent
         }
 
 
-        for (int i = 0; i < groupCells.Count; i++)
+        foreach (var t in groupCells)
         {
-            if (!ULS_Utility.TryGetControllerAt(map, groupCells[i], out Building_WallController c) || c == null)
+            if (!ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) || c == null)
             {
                 continue;
             }
@@ -387,9 +387,8 @@ public class ULS_AutoGroupMapComponent : MapComponent
         if (pawnCount <= cellCount && runtime.scanCellsSet != null)
         {
             IReadOnlyList<Pawn> pawns = map.mapPawns.AllPawnsSpawned;
-            for (int i = 0; i < pawns.Count; i++)
+            foreach (var p in pawns)
             {
-                Pawn p = pawns[i];
                 if (p is { Spawned: true } && runtime.scanCellsSet.Contains(p.Position))
                 {
                     if (ULS_AutoGroupUtility.PawnMatchesGroupType(p, filterType))
@@ -402,18 +401,17 @@ public class ULS_AutoGroupMapComponent : MapComponent
         }
         else
         {
-            for (int i = 0; i < runtime.scanCells.Count; i++)
+            foreach (var cell in runtime.scanCells)
             {
-                IntVec3 cell = runtime.scanCells[i];
                 if (!cell.InBounds(map))
                 {
                     continue;
                 }
 
                 List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
-                for (int j = 0; j < things.Count; j++)
+                foreach (var t in things)
                 {
-                    if (things[j] is Pawn pawn && ULS_AutoGroupUtility.PawnMatchesGroupType(pawn, filterType))
+                    if (t is Pawn pawn && ULS_AutoGroupUtility.PawnMatchesGroupType(pawn, filterType))
                     {
                         hasTarget = true;
                         break;
@@ -437,9 +435,9 @@ public class ULS_AutoGroupMapComponent : MapComponent
         IntVec3 controllerCell = IntVec3.Invalid;
         bool groupHasAnyStored = false;
         bool groupHasAnyNotStored = false;
-        for (int i = 0; i < groupCells.Count; i++)
+        foreach (var t in groupCells)
         {
-            if (!ULS_Utility.TryGetControllerAt(map, groupCells[i], out Building_WallController c) || c == null)
+            if (!ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) || c == null)
             {
                 continue;
             }
@@ -447,7 +445,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
             if (controller == null)
             {
                 controller = c;
-                controllerCell = groupCells[i];
+                controllerCell = t;
             }
 
             if (c.HasStored)
@@ -510,9 +508,8 @@ public class ULS_AutoGroupMapComponent : MapComponent
             int h = 17;
             if (cells != null)
             {
-                for (int i = 0; i < cells.Count; i++)
+                foreach (var c in cells)
                 {
-                    IntVec3 c = cells[i];
                     h = h * 31 + c.x;
                     h = h * 31 + c.z;
                 }
@@ -546,9 +543,8 @@ public class ULS_AutoGroupMapComponent : MapComponent
 
         if (groupCells != null)
         {
-            for (int i = 0; i < groupCells.Count; i++)
+            foreach (var center in groupCells)
             {
-                IntVec3 center = groupCells[i];
                 for (int dx = -maxRadius; dx <= maxRadius; dx++)
                 {
                     for (int dz = -maxRadius; dz <= maxRadius; dz++)

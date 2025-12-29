@@ -170,4 +170,7 @@
     <ULS_LiftConsolePowerOff>升降控制台已断电。</ULS_LiftConsolePowerOff>
     <ULS_LiftTriggerMissing>缺少升降触发组件（可能是 Def 未挂 comps）。</ULS_LiftTriggerMissing>
     <ULS_LiftRequest_ControllerInvalid>升降请求已失效：控制器不存在或已被移除。</ULS_LiftRequest_ControllerInvalid>
+
+    <!-- 取消升降委托 Gizmo -->
+    <ULS_CancelLift>取消升降</ULS_CancelLift>
 </LanguageData>

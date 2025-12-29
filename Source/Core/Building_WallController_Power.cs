@@ -13,7 +13,7 @@ public partial class Building_WallController
     private bool PowerFeatureEnabled => UniversalLiftStructureMod.Settings?.enableLiftPower ?? false;
 
 
-    private CompPowerTrader PowerCompInternal
+    public CompPowerTrader PowerTraderComp
     {
         get
         {
@@ -31,7 +31,7 @@ public partial class Building_WallController
     }
 
 
-    private bool HasPowerComp => PowerCompInternal != null;
+    private bool HasPowerComp => PowerTraderComp != null;
 
 
     private bool PowerOn
@@ -64,7 +64,7 @@ public partial class Building_WallController
     {
         if (PowerFeatureEnabled)
         {
-            CompPowerTrader comp = PowerCompInternal;
+            CompPowerTrader comp = PowerTraderComp;
             if (comp != null)
             {
                 float idlePower = idlePowerConsumption;

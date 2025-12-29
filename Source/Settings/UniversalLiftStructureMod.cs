@@ -13,7 +13,7 @@ public class UniversalLiftStructureMod : Mod
 
     public static UniversalLiftStructureSettings Settings;
 
-    private SettingsTab currentTab = SettingsTab.Filter;
+    private SettingsTab currentTab = SettingsTab.General;
 
 
     private string selectedModPackageId;
@@ -139,6 +139,7 @@ public class UniversalLiftStructureMod : Mod
             {
                 Settings.ResetToDefault();
                 Settings.Write();
+                groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
             }
 
             listing.End();
@@ -316,6 +317,7 @@ public class UniversalLiftStructureMod : Mod
         {
             Settings.ResetToDefault();
             Settings.Write();
+            groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
         }
 
         listing.End();

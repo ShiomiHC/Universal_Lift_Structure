@@ -17,10 +17,6 @@ public partial class Building_WallController
         }
 
 
-        ULS_AutoGroupMapComponent autoGroupComp;
-        HashSet<int> groupIds;
-
-
         if (selectedControllers.Count <= 0 || selectedControllers[0] == this)
         {
             bool anyNotPlayerOwned = false;
@@ -40,43 +36,7 @@ public partial class Building_WallController
                 {
                     defaultLabel = "ULS_GroupSetIdWithValue".Translate(controllerGroupId),
                     icon = TexCommand.ForbidOff,
-                    action = delegate
-                    {
-                        Map mapLocal = Map;
-                        if (mapLocal == null) return;
-                        ULS_ControllerGroupMapComponent groupComp =
-                            mapLocal.GetComponent<ULS_ControllerGroupMapComponent>();
-                        if (groupComp != null)
-                        {
-                            Find.WindowStack.Add(new ULS_Dialog_SetControllerGroupId(controllerGroupId,
-                                delegate(int newGroupId)
-                                {
-                                    List<Building_WallController> expandedList =
-                                        ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
-                                            selectedControllers);
-                                    if (!ULS_AutoGroupUtility.CanAssignControllersToGroup(mapLocal, expandedList,
-                                            newGroupId, out string rejectKey))
-                                    {
-                                        MessageReject(rejectKey, this);
-                                    }
-                                    else
-                                    {
-                                        List<IntVec3> cellsToAssign = new List<IntVec3>();
-                                        foreach (var controller in expandedList)
-                                        {
-                                            if (controller != null && controller.Map == mapLocal &&
-                                                controller.Spawned)
-                                            {
-                                                cellsToAssign.Add(controller.Position);
-                                            }
-                                        }
-
-                                        groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
-                                        mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
-                                    }
-                                }));
-                        }
-                    }
+                    action = delegate { OnGizmoAction_SetGroupId(selectedControllers); }
                 };
             }
 
@@ -87,48 +47,7 @@ public partial class Building_WallController
                 {
                     defaultLabel = "ULS_GroupMergeToPrimary".Translate(),
                     icon = TexCommand.ForbidOff,
-                    action = delegate
-                    {
-                        Map map = Map;
-                        if (map == null) return;
-                        ULS_ControllerGroupMapComponent groupComp =
-                            map.GetComponent<ULS_ControllerGroupMapComponent>();
-                        if (groupComp == null) return;
-                        int primaryGroupId = controllerGroupId;
-                        if (primaryGroupId < 1)
-                        {
-                            primaryGroupId = groupComp.CreateNewGroupId();
-                            controllerGroupId = primaryGroupId;
-                            groupComp.RegisterOrUpdateController(this);
-                        }
-
-                        bool primaryIsAuto = ULS_AutoGroupUtility.IsAutoGroup(map, primaryGroupId);
-                        List<Building_WallController> expandedList =
-                            ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers);
-                        HashSet<int> mergedGroupIds = new HashSet<int>();
-
-
-                        foreach (var controller in expandedList)
-                        {
-                            if (controller != null && controller.Map == map && controller.Spawned)
-                            {
-                                int groupId = controller.ControllerGroupId;
-                                if (groupId >= 1 && groupId != primaryGroupId && mergedGroupIds.Add(groupId))
-                                {
-                                    bool isAuto = ULS_AutoGroupUtility.IsAutoGroup(map, groupId);
-                                    if (primaryIsAuto != isAuto)
-                                    {
-                                        MessageReject("ULS_AutoGroup_MixAutoAndManual", this);
-                                        return;
-                                    }
-
-                                    groupComp.MergeGroups(primaryGroupId, groupId);
-                                }
-                            }
-                        }
-
-                        map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
-                    }
+                    action = delegate { OnGizmoAction_MergeGroups(selectedControllers); }
                 };
             }
 
@@ -139,42 +58,19 @@ public partial class Building_WallController
                 {
                     defaultLabel = "ULS_GroupSplitToNew".Translate(),
                     icon = TexCommand.ForbidOff,
-                    action = delegate
-                    {
-                        Map map = Map;
-                        if (map != null)
-                        {
-                            ULS_ControllerGroupMapComponent groupComp =
-                                map.GetComponent<ULS_ControllerGroupMapComponent>();
-                            if (groupComp != null)
-                            {
-                                int newGroupId = groupComp.CreateNewGroupId();
-                                List<IntVec3> cellsToAssign = new List<IntVec3>();
-                                foreach (var controller in selectedControllers)
-                                {
-                                    if (controller != null && controller.Map == map && controller.Spawned)
-                                    {
-                                        cellsToAssign.Add(controller.Position);
-                                    }
-                                }
-
-                                groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
-                                map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
-                            }
-                        }
-                    }
+                    action = delegate { OnGizmoAction_SplitToNewGroup(selectedControllers); }
                 };
             }
 
 
             if (!anyNotPlayerOwned && Map != null && GetComp<ULS_AutoGroupMarker>() != null)
             {
-                autoGroupComp = Map.GetComponent<ULS_AutoGroupMapComponent>();
+                ULS_AutoGroupMapComponent autoGroupComp = Map.GetComponent<ULS_AutoGroupMapComponent>();
                 if (autoGroupComp != null)
                 {
                     List<Building_WallController> expandedList =
                         ExpandSelectedControllersToMultiCellHiddenGroupMembers(Map, selectedControllers);
-                    groupIds = new HashSet<int>();
+                    HashSet<int> groupIds = new HashSet<int>();
                     bool allAreAutoGroup = true;
 
 
@@ -230,37 +126,16 @@ public partial class Building_WallController
                             }).Translate()
                             : "ULS_AutoGroup_Filter_Mixed".Translate();
 
-                        List<FloatMenuOption> options;
                         yield return new Command_Action
                         {
                             defaultLabel = "ULS_AutoGroup_FilterWithValue".Translate(labelText),
                             icon = TexCommand.ForbidOff,
-                            action = delegate
-                            {
-                                options = new List<FloatMenuOption>();
-                                AddOption(ULS_AutoGroupType.Friendly, "ULS_AutoGroup_SetFilter_Friendly");
-                                AddOption(ULS_AutoGroupType.Hostile, "ULS_AutoGroup_SetFilter_Hostile");
-                                AddOption(ULS_AutoGroupType.Neutral, "ULS_AutoGroup_SetFilter_Neutral");
-                                Find.WindowStack.Add(new FloatMenu(options));
-
-
-                                void AddOption(ULS_AutoGroupType type, string labelKey)
-                                {
-                                    options.Add(new FloatMenuOption(labelKey.Translate(), delegate
-                                    {
-                                        foreach (int gid in groupIds)
-                                        {
-                                            autoGroupComp.SetGroupFilterType(gid, type);
-                                        }
-                                    }));
-                                }
-                            }
+                            action = delegate { OnGizmoAction_SetAutoGroupFilter(groupIds); }
                         };
                     }
                 }
             }
         }
-
 
         if (GetComp<ULS_AutoGroupMarker>() != null)
         {
@@ -278,14 +153,14 @@ public partial class Building_WallController
         bool disabled = false;
         Map currentMap = Map;
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
+
         int groupMaxSize = GetGroupMaxSize();
-
-
         if (currentMap == null)
         {
             raiseCommand.Disable("ULS_NoStored".Translate());
             disabled = true;
         }
+
         else
         {
             ULS_ControllerGroupMapComponent groupComp = currentMap.GetComponent<ULS_ControllerGroupMapComponent>();
@@ -352,7 +227,6 @@ public partial class Building_WallController
             }
         }
 
-
         if (!disabled && (settings?.liftControlMode ?? LiftControlMode.Remote) == LiftControlMode.Console)
         {
             if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(currentMap, Position, out ThingWithComps _))
@@ -369,12 +243,28 @@ public partial class Building_WallController
                 {
                     raiseCommand.Disable("ULS_LiftConsoleMissing".Translate());
                 }
-
-                disabled = true;
             }
         }
 
         yield return raiseCommand;
+
+        // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
+        if (wantedLiftAction != ULS_LiftActionRequest.None &&
+            settings is { liftControlMode: not LiftControlMode.Remote })
+        {
+            Command_Action cancelCommand = new Command_Action
+            {
+                defaultLabel = "ULS_CancelLift".Translate(),
+                icon = TexCommand.ClearPrioritizedWork,
+                action = delegate
+                {
+                    // 重置期望状态并更新 Designation
+                    wantedLiftAction = ULS_LiftActionRequest.None;
+                    UpdateLiftDesignation();
+                }
+            };
+            yield return cancelCommand;
+        }
     }
 
 
@@ -389,68 +279,22 @@ public partial class Building_WallController
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
         LiftControlMode controlMode = settings?.liftControlMode ?? LiftControlMode.Remote;
 
-
+        // 电力检查
         if (settings is { enableLiftPower: true } && !IsReadyForLiftPower())
         {
             return;
         }
 
-
+        // Remote 模式：直接执行
         if (controlMode == LiftControlMode.Remote)
         {
             TryRaiseGroup(showMessage: true);
         }
+        // Manual/Console 模式：设置期望状态
         else
         {
-            if (Map == null)
-            {
-                return;
-            }
-
-            switch (controlMode)
-            {
-                case LiftControlMode.Manual:
-                {
-                    // 在控制器上直接设置挂起状态并添加 Flick 指定
-                    QueueLiftAction(isRaise: true, IntVec3.Invalid);
-                    break;
-                }
-
-                case LiftControlMode.Console:
-                {
-                    if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(Map, Position, out ThingWithComps consoleThing))
-                    {
-                        // 检查是否因为没电
-                        ThingDef consoleDef = DefDatabase<ThingDef>.GetNamedSilentFail("ULS_LiftConsole");
-                        bool anyConsoleExists = consoleDef != null && Map.listerThings.ThingsOfDef(consoleDef)
-                            .Any(t => t.Faction == Faction.OfPlayer);
-                        if (anyConsoleExists)
-                        {
-                            MessageReject("ULS_LiftConsolePowerOff", this);
-                        }
-                        else
-                        {
-                            MessageReject("ULS_LiftConsoleMissing", this);
-                        }
-
-                        break;
-                    }
-
-                    CompLiftConsole consoleComp = consoleThing.GetComp<CompLiftConsole>();
-                    if (consoleComp == null)
-                    {
-                        // 兼容性保护：如果是旧存档，可能还没更到
-                        MessageReject("ULS_LiftConsoleMissing", this);
-                    }
-                    else
-                    {
-                        consoleComp.EnqueueRequest(new ULS_LiftRequest(ULS_LiftRequestType.RaiseGroup, this,
-                            IntVec3.Invalid));
-                    }
-
-                    break;
-                }
-            }
+            wantedLiftAction = ULS_LiftActionRequest.Raise;
+            UpdateLiftDesignation();
         }
     }
 
@@ -470,6 +314,136 @@ public partial class Building_WallController
         else
         {
             TryLowerMultiCellBuilding(building);
+        }
+    }
+
+    private void OnGizmoAction_SetGroupId(List<Building_WallController> selectedControllers)
+    {
+        Map mapLocal = Map;
+        if (mapLocal == null) return;
+        ULS_ControllerGroupMapComponent groupComp =
+            mapLocal.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp != null)
+        {
+            Find.WindowStack.Add(new ULS_Dialog_SetControllerGroupId(controllerGroupId,
+                delegate(int newGroupId)
+                {
+                    List<Building_WallController> expandedList =
+                        ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
+                            selectedControllers);
+                    if (!ULS_AutoGroupUtility.CanAssignControllersToGroup(mapLocal, expandedList,
+                            newGroupId, out string rejectKey))
+                    {
+                        MessageReject(rejectKey, this);
+                    }
+                    else
+                    {
+                        List<IntVec3> cellsToAssign = new List<IntVec3>();
+                        foreach (var controller in expandedList)
+                        {
+                            if (controller != null && controller.Map == mapLocal &&
+                                controller.Spawned)
+                            {
+                                cellsToAssign.Add(controller.Position);
+                            }
+                        }
+
+                        groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
+                        mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+                    }
+                }));
+        }
+    }
+
+    private void OnGizmoAction_MergeGroups(List<Building_WallController> selectedControllers)
+    {
+        Map map = Map;
+        if (map == null) return;
+        ULS_ControllerGroupMapComponent groupComp =
+            map.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp == null) return;
+        int primaryGroupId = controllerGroupId;
+        if (primaryGroupId < 1)
+        {
+            primaryGroupId = groupComp.CreateNewGroupId();
+            controllerGroupId = primaryGroupId;
+            groupComp.RegisterOrUpdateController(this);
+        }
+
+        bool primaryIsAuto = ULS_AutoGroupUtility.IsAutoGroup(map, primaryGroupId);
+        List<Building_WallController> expandedList =
+            ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers);
+        HashSet<int> mergedGroupIds = new HashSet<int>();
+
+
+        foreach (var controller in expandedList)
+        {
+            if (controller != null && controller.Map == map && controller.Spawned)
+            {
+                int groupId = controller.ControllerGroupId;
+                if (groupId >= 1 && groupId != primaryGroupId && mergedGroupIds.Add(groupId))
+                {
+                    bool isAuto = ULS_AutoGroupUtility.IsAutoGroup(map, groupId);
+                    if (primaryIsAuto != isAuto)
+                    {
+                        MessageReject("ULS_AutoGroup_MixAutoAndManual", this);
+                        return;
+                    }
+
+                    groupComp.MergeGroups(primaryGroupId, groupId);
+                }
+            }
+        }
+
+        map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+    }
+
+    private void OnGizmoAction_SplitToNewGroup(List<Building_WallController> selectedControllers)
+    {
+        Map map = Map;
+        if (map != null)
+        {
+            ULS_ControllerGroupMapComponent groupComp =
+                map.GetComponent<ULS_ControllerGroupMapComponent>();
+            if (groupComp != null)
+            {
+                int newGroupId = groupComp.CreateNewGroupId();
+                List<IntVec3> cellsToAssign = new List<IntVec3>();
+                foreach (var controller in selectedControllers)
+                {
+                    if (controller != null && controller.Map == map && controller.Spawned)
+                    {
+                        cellsToAssign.Add(controller.Position);
+                    }
+                }
+
+                groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
+                map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+            }
+        }
+    }
+
+    private void OnGizmoAction_SetAutoGroupFilter(HashSet<int> groupIds)
+    {
+        ULS_AutoGroupMapComponent autoGroupComp = Map.GetComponent<ULS_AutoGroupMapComponent>();
+        if (autoGroupComp == null) return;
+
+        List<FloatMenuOption> options = new List<FloatMenuOption>();
+        AddOption(ULS_AutoGroupType.Friendly, "ULS_AutoGroup_SetFilter_Friendly");
+        AddOption(ULS_AutoGroupType.Hostile, "ULS_AutoGroup_SetFilter_Hostile");
+        AddOption(ULS_AutoGroupType.Neutral, "ULS_AutoGroup_SetFilter_Neutral");
+        Find.WindowStack.Add(new FloatMenu(options));
+
+
+        void AddOption(ULS_AutoGroupType type, string labelKey)
+        {
+            options.Add(new FloatMenuOption(labelKey.Translate(), delegate
+            {
+                foreach (int gid in groupIds)
+                {
+                    autoGroupComp.SetGroupFilterType(gid, type);
+                }
+            }));
         }
     }
 }

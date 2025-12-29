@@ -1,5 +1,13 @@
 namespace Universal_Lift_Structure;
 
+// 期望的升降动作类型
+public enum ULS_LiftActionRequest
+{
+    None, // 无操作
+    Raise, // 期望升起
+    Lower // 期望降下
+}
+
 public partial class Building_WallController : Building, IThingHolder
 {
     private ThingOwner<Thing> innerContainer;
@@ -20,7 +28,11 @@ public partial class Building_WallController : Building, IThingHolder
     private bool liftActionIsRaise;
     private IntVec3 liftActionStartCell = IntVec3.Invalid;
 
+    // 期望的升降动作（用于 Gizmo 取消功能）
+    private ULS_LiftActionRequest wantedLiftAction = ULS_LiftActionRequest.None;
+
     public bool LiftActionPending => liftActionPending;
+    public ULS_LiftActionRequest WantedLiftAction => wantedLiftAction;
 
     public void Notify_FlickedBy(Pawn pawn)
     {
@@ -41,6 +53,10 @@ public partial class Building_WallController : Building, IThingHolder
 
         liftActionPending = false;
         liftActionStartCell = IntVec3.Invalid;
+
+        // 重置期望状态并更新 Designation
+        wantedLiftAction = ULS_LiftActionRequest.None;
+        UpdateLiftDesignation();
     }
 
     public void QueueLiftAction(bool isRaise, IntVec3 lowerStartCell)
@@ -49,10 +65,124 @@ public partial class Building_WallController : Building, IThingHolder
         liftActionIsRaise = isRaise;
         liftActionStartCell = lowerStartCell;
 
+        // 同步期望状态
+        wantedLiftAction = isRaise ? ULS_LiftActionRequest.Raise : ULS_LiftActionRequest.Lower;
+
         if (Map.designationManager.DesignationOn(this, ULS_DesignationDefOf.ULS_FlickLiftStructure) == null)
         {
             Map.designationManager.AddDesignation(new Designation(this, ULS_DesignationDefOf.ULS_FlickLiftStructure));
         }
+    }
+
+    // 更新升降 Designation（参考 RW FlickUtility.UpdateFlickDesignation）
+    public void UpdateLiftDesignation()
+    {
+        if (Map == null) return;
+
+        UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
+        LiftControlMode controlMode = settings?.liftControlMode ?? LiftControlMode.Remote;
+
+        // Remote 模式不使用期望状态机制
+        if (controlMode == LiftControlMode.Remote)
+        {
+            wantedLiftAction = ULS_LiftActionRequest.None;
+            return;
+        }
+
+        // 判断是否需要 Designation
+        bool needsDesignation = false;
+        switch (wantedLiftAction)
+        {
+            case ULS_LiftActionRequest.Raise:
+            case ULS_LiftActionRequest.Lower:
+                needsDesignation = true;
+                break;
+            case ULS_LiftActionRequest.None:
+                break;
+        }
+
+        // Manual 模式：直接在本地设置
+        if (controlMode == LiftControlMode.Manual)
+        {
+            liftActionPending = needsDesignation;
+            if (needsDesignation)
+            {
+                liftActionIsRaise = (wantedLiftAction == ULS_LiftActionRequest.Raise);
+                liftActionStartCell = (wantedLiftAction == ULS_LiftActionRequest.Lower)
+                    ? Position
+                    : IntVec3.Invalid;
+            }
+            else
+            {
+                liftActionStartCell = IntVec3.Invalid;
+            }
+        }
+        // Console 模式：同步到全局队列
+        else if (controlMode == LiftControlMode.Console)
+        {
+            var mapComp = Map.GetComponent<ULS_LiftRequestMapComponent>();
+            if (mapComp != null)
+            {
+                if (needsDesignation)
+                {
+                    // 添加请求到全局队列
+                    ULS_LiftRequestType requestType = (wantedLiftAction == ULS_LiftActionRequest.Raise)
+                        ? ULS_LiftRequestType.RaiseGroup
+                        : ULS_LiftRequestType.LowerGroup;
+                    IntVec3 startCell = (wantedLiftAction == ULS_LiftActionRequest.Lower)
+                        ? Position
+                        : IntVec3.Invalid;
+                    mapComp.EnqueueRequest(new ULS_LiftRequest(requestType, this, startCell));
+                }
+                else
+                {
+                    // 取消：从全局队列移除针对本控制器的请求
+                    mapComp.RemoveRequestsForController(this);
+                }
+            }
+        }
+
+        // 同步 Designation（参考 FlickUtility.UpdateFlickDesignation 的模式）
+        // 在 Console 模式下，Designation 基于全局队列中是否有针对此控制器的请求
+        if (controlMode == LiftControlMode.Console)
+        {
+            var mapComp = Map.GetComponent<ULS_LiftRequestMapComponent>();
+            needsDesignation = (mapComp != null && mapComp.HasRequestForController(this));
+        }
+
+        Designation des = Map.designationManager.DesignationOn(this, ULS_DesignationDefOf.ULS_FlickLiftStructure);
+        if (needsDesignation && des == null)
+        {
+            Map.designationManager.AddDesignation(new Designation(this, ULS_DesignationDefOf.ULS_FlickLiftStructure));
+        }
+        else if (!needsDesignation && des != null)
+        {
+            des.Delete();
+        }
+    }
+
+    // 设置期望升降动作（用于 Gizmo 和 Harmony Patch 调用）
+    public void SetWantedLiftAction(ULS_LiftActionRequest action, IntVec3 lowerStartCell)
+    {
+        wantedLiftAction = action;
+
+        // 对于降下动作，需要记录起始位置
+        if (action == ULS_LiftActionRequest.Lower)
+        {
+            liftActionStartCell = lowerStartCell;
+        }
+
+        UpdateLiftDesignation();
+    }
+
+    /// <summary>
+    /// 取消当前的升降请求。
+    /// 在 Console 模式下，当控制台处理完请求后，也调用此方法来"完成"请求并清除状态。
+    /// </summary>
+    public void CancelLiftAction()
+    {
+        wantedLiftAction = ULS_LiftActionRequest.None;
+        UpdateLiftDesignation();
     }
 
 
@@ -217,6 +347,7 @@ public partial class Building_WallController : Building, IThingHolder
         Scribe_Values.Look(ref liftActionPending, "liftActionPending");
         Scribe_Values.Look(ref liftActionIsRaise, "liftActionIsRaise");
         Scribe_Values.Look(ref liftActionStartCell, "liftActionStartCell", IntVec3.Invalid);
+        Scribe_Values.Look(ref wantedLiftAction, "wantedLiftAction");
 
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -349,23 +480,30 @@ public partial class Building_WallController : Building, IThingHolder
     {
         ClearLiftProcessAndRemoveBlocker();
 
-
+        // 记录销毁前的状态（用于后续操作）
         Map map = Map;
         IntVec3 position = Position;
 
+        // 从全局升降队列移除针对本控制器的请求
+        if (map != null)
+        {
+            var liftReqComp = map.GetComponent<ULS_LiftRequestMapComponent>();
+            liftReqComp?.RemoveRequestsForController(this);
+        }
 
+        // 从控制器组移除
         if (map != null)
         {
             map.GetComponent<ULS_ControllerGroupMapComponent>()?.RemoveControllerCell(position);
 
-
+            // 如果是自动组控制器，通知自动组系统
             if (GetComp<ULS_AutoGroupMarker>() != null)
             {
                 map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
             }
         }
 
-
+        // 如果是多格组根控制器，退费并移除整个组
         if (map != null && multiCellGroupRootCell.IsValid)
         {
             ULS_MultiCellGroupMapComponent multiCellComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
@@ -377,7 +515,7 @@ public partial class Building_WallController : Building, IThingHolder
             }
         }
 
-
+        // 普通销毁：退费存储的建筑
         RefundStored(map);
         base.Destroy(mode);
     }

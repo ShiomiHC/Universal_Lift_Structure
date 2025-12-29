@@ -8,7 +8,7 @@ public class ULS_MultiCellGroupRecord : IExposable
 
     public ULS_MultiCellGroupRecord()
     {
-        this.memberControllerCells = new();
+        memberControllerCells = new();
     }
 
     public ULS_MultiCellGroupRecord(IntVec3 rootCell, IntVec3 masterControllerCell, List<IntVec3> memberControllerCells)

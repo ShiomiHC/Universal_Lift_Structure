@@ -42,36 +42,8 @@ public static class Patch_Building_GetGizmos
                     return;
                 }
 
-                if (mode is LiftControlMode.Manual)
-                {
-                    // 直接在控制器排队 Lower 操作
-                    controller.QueueLiftAction(isRaise: false, controllerCell);
-                    return;
-                }
-
-                if (mode is LiftControlMode.Console)
-                {
-                    if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(__instance.Map, controllerCell,
-                            out ThingWithComps console))
-                    {
-                        ThingDef consoleDef = DefDatabase<ThingDef>.GetNamedSilentFail("ULS_LiftConsole");
-                        bool anyConsoleExists = consoleDef != null && __instance.Map.listerThings
-                            .ThingsOfDef(consoleDef).Any(t => t.Faction == Faction.OfPlayer);
-                        string messageKey = anyConsoleExists ? "ULS_LiftConsolePowerOff" : "ULS_LiftConsoleMissing";
-                        Messages.Message(messageKey.Translate(), MessageTypeDefOf.RejectInput, false);
-                        return;
-                    }
-
-                    CompLiftConsole consoleComp = console.GetComp<CompLiftConsole>();
-                    if (consoleComp == null)
-                    {
-                        Messages.Message("ULS_LiftConsoleMissing".Translate(), MessageTypeDefOf.RejectInput, false);
-                        return;
-                    }
-
-                    consoleComp.EnqueueRequest(new ULS_LiftRequest(ULS_LiftRequestType.LowerGroup, controller,
-                        controllerCell));
-                }
+                // Manual/Console 模式：设置期望状态
+                controller.SetWantedLiftAction(ULS_LiftActionRequest.Lower, controllerCell);
             }
         };
 
@@ -207,6 +179,23 @@ public static class Patch_Building_GetGizmos
 
 
         __result = Append(__result, lowerCommand);
+
+        // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
+        if (controller.WantedLiftAction != ULS_LiftActionRequest.None &&
+            mode is not LiftControlMode.Remote)
+        {
+            Command_Action cancelCommand = new Command_Action
+            {
+                defaultLabel = "ULS_CancelLift".Translate(),
+                icon = TexCommand.ClearPrioritizedWork,
+                action = () =>
+                {
+                    // 重置期望状态并更新 Designation
+                    controller.CancelLiftAction();
+                }
+            };
+            __result = Append(__result, cancelCommand);
+        }
     }
 
 

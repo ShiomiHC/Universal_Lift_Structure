@@ -1,6 +1,3 @@
-using RimWorld;
-using Verse;
-
 namespace Universal_Lift_Structure
 {
     [DefOf]

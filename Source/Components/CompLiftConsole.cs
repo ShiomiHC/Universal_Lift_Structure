@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using RimWorld;
-using UnityEngine;
-using Verse;
-
 namespace Universal_Lift_Structure;
 
 public class CompProperties_LiftConsole : CompProperties
@@ -15,104 +10,80 @@ public class CompProperties_LiftConsole : CompProperties
 
 public class CompLiftConsole : ThingComp
 {
-    private List<ULS_LiftRequest> pendingRequests = new List<ULS_LiftRequest>();
+    private CompPowerTrader cachedPowerComp;
 
     public CompProperties_LiftConsole Props => (CompProperties_LiftConsole)props;
 
-    public bool HasPendingRequests => pendingRequests.Count > 0;
-
-    public override void PostExposeData()
+    // 查询全局队列是否有待处理请求（用于 UI 提示等）
+    public bool HasPendingRequests
     {
-        base.PostExposeData();
-        Scribe_Collections.Look(ref pendingRequests, "pendingRequests", LookMode.Deep);
-        if (Scribe.mode == LoadSaveMode.PostLoadInit && pendingRequests == null)
+        get
         {
-            pendingRequests = new List<ULS_LiftRequest>();
+            if (parent?.Map == null) return false;
+            var mapComp = parent.Map.GetComponent<ULS_LiftRequestMapComponent>();
+            return mapComp is { HasPendingRequests: true };
         }
     }
 
-    public void EnqueueRequest(ULS_LiftRequest request)
+    public CompPowerTrader PowerTraderComp
     {
-        if (request == null)
+        get
         {
-            return;
-        }
+            cachedPowerComp ??= parent.GetComp<CompPowerTrader>();
 
-        if (pendingRequests == null)
-        {
-            pendingRequests = new List<ULS_LiftRequest>();
+            return cachedPowerComp;
         }
-
-        // 移除针对同一控制器的旧请求
-        for (int i = pendingRequests.Count - 1; i >= 0; i--)
-        {
-            if (pendingRequests[i].controller == request.controller)
-            {
-                pendingRequests.RemoveAt(i);
-            }
-        }
-
-        pendingRequests.Add(request);
-        UpdateLiftDesignation();
     }
 
+    // 控制台被"flick"时，执行全局队列中的所有请求
     public void NotifyFlicked()
     {
-        if (pendingRequests == null || pendingRequests.Count == 0)
+        if (parent?.Map == null)
         {
             return;
         }
 
-        // 复制列表以避免在迭代中修改（尽管我们是清空）
-        List<ULS_LiftRequest> requestsToExecute = new List<ULS_LiftRequest>(pendingRequests);
-        pendingRequests.Clear();
-
-        foreach (var request in requestsToExecute)
+        var mapComp = parent.Map.GetComponent<ULS_LiftRequestMapComponent>();
+        if (mapComp == null)
         {
-            if (request.controller == null || request.controller.Destroyed || !request.controller.Spawned)
-            {
-                continue;
-            }
-
-            if (request.type == ULS_LiftRequestType.RaiseGroup)
-            {
-                request.controller.GizmoRaiseGroup();
-            }
-            else
-            {
-                request.controller.GizmoLowerGroup(request.startCell);
-            }
+            return;
         }
 
-        UpdateLiftDesignation();
-    }
+        // 使用 SimplePool 减少内存分配
+        List<ULS_LiftRequest> requestsToExecute = SimplePool<List<ULS_LiftRequest>>.Get();
+        requestsToExecute.Clear();
 
-    private void UpdateLiftDesignation()
-    {
-        if (parent.Map == null) return;
-
-        Designation designation =
-            parent.Map.designationManager.DesignationOn(parent, ULS_DesignationDefOf.ULS_FlickLiftStructure);
-        bool hasRequests = pendingRequests.Count > 0;
-
-        if (hasRequests && designation == null)
+        try
         {
-            parent.Map.designationManager.AddDesignation(new Designation(parent,
-                ULS_DesignationDefOf.ULS_FlickLiftStructure));
+            // 从全局队列取出所有请求
+            mapComp.DequeueAllRequests(requestsToExecute);
+
+            // 执行所有请求
+            foreach (var request in requestsToExecute)
+            {
+                if (request.controller == null || request.controller.Destroyed || !request.controller.Spawned)
+                {
+                    continue;
+                }
+
+                if (request.type == ULS_LiftRequestType.RaiseGroup)
+                {
+                    request.controller.GizmoRaiseGroup();
+                }
+                else
+                {
+                    request.controller.GizmoLowerGroup(request.startCell);
+                }
+
+                // 执行完毕后，清除控制器的期望状态（视为请求已完成）
+                // 这也会触发 UpdateLiftDesignation，移除视觉标记
+                request.controller.CancelLiftAction();
+            }
         }
-        else if (!hasRequests && designation != null)
+        finally
         {
-            designation.Delete();
-        }
-    }
-
-    public override void PostSpawnSetup(bool respawningAfterLoad)
-    {
-        base.PostSpawnSetup(respawningAfterLoad);
-        if (respawningAfterLoad)
-        {
-            // 确保 Designation 状态与 pendingRequests 同步
-            UpdateLiftDesignation();
+            requestsToExecute.Clear();
+            SimplePool<List<ULS_LiftRequest>>.Return(requestsToExecute);
         }
     }
 }
