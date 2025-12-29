@@ -56,7 +56,7 @@ public partial class Building_WallController
         {
             foreach (var cell in cells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
                 {
                     IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
                         ? controller.MultiCellGroupRootCell
@@ -203,7 +203,7 @@ public partial class Building_WallController
         {
             foreach (var cell in cells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
                 {
                     IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
                         ? controller.MultiCellGroupRootCell
@@ -229,7 +229,6 @@ public partial class Building_WallController
                 foreach (var t in uniqueRootCells)
                 {
                     if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                        controller != null &&
                         !controller.IsReadyForLiftPower())
                     {
                         if (showMessage)
@@ -246,7 +245,6 @@ public partial class Building_WallController
             foreach (var t in uniqueRootCells)
             {
                 if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) ||
-                    controller == null ||
                     !controller.HasStored)
                 {
                     continue;
@@ -458,7 +456,7 @@ public partial class Building_WallController
         {
             foreach (var cell in cells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
                 {
                     IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
                         ? controller.MultiCellGroupRootCell
@@ -481,7 +479,6 @@ public partial class Building_WallController
                 foreach (var t in uniqueRootCells)
                 {
                     if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                        controller != null &&
                         !controller.IsReadyForLiftPower())
                     {
                         if (showMessage)
@@ -501,7 +498,7 @@ public partial class Building_WallController
 
             foreach (var t in uniqueRootCells)
             {
-                if (!ULS_Utility.TryGetControllerAt(map, t, out var controller) || controller == null)
+                if (!ULS_Utility.TryGetControllerAt(map, t, out var controller))
                 {
                     skippedCount++;
                     continue;

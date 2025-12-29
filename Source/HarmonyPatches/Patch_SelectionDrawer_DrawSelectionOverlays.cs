@@ -150,7 +150,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             Building_WallController representative = null;
             foreach (var t in groupCells)
             {
-                if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) && c != null)
+                if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c))
                 {
                     representative = c;
                     break;

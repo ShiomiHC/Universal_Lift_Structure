@@ -1,12 +1,7 @@
 namespace Universal_Lift_Structure;
 
-
-
 public partial class Building_WallController
 {
-    
-
-
     private static List<Building_WallController> GetSelectedControllers()
     {
         List<Building_WallController> result = new List<Building_WallController>();
@@ -59,7 +54,7 @@ public partial class Building_WallController
 
         foreach (var cell in record.memberControllerCells)
         {
-            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
             {
                 result.Add(controller);
             }
@@ -67,8 +62,6 @@ public partial class Building_WallController
 
         return result;
     }
-
-
 
 
     private static bool AnySelectedControllerInMultiCellHiddenGroup(List<Building_WallController> selectedControllers)
@@ -142,7 +135,7 @@ public partial class Building_WallController
 
         foreach (IntVec3 cell in uniqueCells)
         {
-            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller) && controller != null)
+            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
             {
                 result.Add(controller);
             }

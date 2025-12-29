@@ -268,7 +268,7 @@ public partial class Building_WallController : Building, IThingHolder
                 {
                     if (controllerGroupId < 1)
                     {
-                        bool isAutoController = GetComp<ULS_AutoGroupMarker>() != null;
+                        bool isAutoController = ULS_AutoGroupUtility.IsAutoController(this);
                         int minNeighborGroupId = int.MaxValue;
 
                         foreach (var t in GenAdj.CardinalDirections)
@@ -278,7 +278,7 @@ public partial class Building_WallController : Building, IThingHolder
                                 ULS_Utility.TryGetControllerAt(map, neighborCell,
                                     out Building_WallController neighborController))
                             {
-                                bool neighborIsAuto = neighborController.GetComp<ULS_AutoGroupMarker>() != null;
+                                bool neighborIsAuto = ULS_AutoGroupUtility.IsAutoController(neighborController);
                                 if (neighborIsAuto != isAutoController)
                                 {
                                     continue;
@@ -305,7 +305,7 @@ public partial class Building_WallController : Building, IThingHolder
                 groupComp.RegisterOrUpdateController(this);
 
 
-                if (GetComp<ULS_AutoGroupMarker>() != null)
+                if (ULS_AutoGroupUtility.IsAutoController(this))
                 {
                     map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
                 }
@@ -497,7 +497,7 @@ public partial class Building_WallController : Building, IThingHolder
             map.GetComponent<ULS_ControllerGroupMapComponent>()?.RemoveControllerCell(position);
 
             // 如果是自动组控制器，通知自动组系统
-            if (GetComp<ULS_AutoGroupMarker>() != null)
+            if (ULS_AutoGroupUtility.IsAutoController(this))
             {
                 map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
             }

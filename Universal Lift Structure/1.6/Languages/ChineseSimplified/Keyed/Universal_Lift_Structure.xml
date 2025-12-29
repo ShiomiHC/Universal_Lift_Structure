@@ -65,6 +65,11 @@
     <ULS_Tab_General>常规</ULS_Tab_General>
     <ULS_Tab_Filter>筛选</ULS_Tab_Filter>
 
+    <!-- 设置菜单：常规页子栏目 -->
+    <ULS_Section_Core>核心设置</ULS_Section_Core>
+    <ULS_Section_Visual>视觉辅助</ULS_Section_Visual>
+    <ULS_Section_Performance>性能参数</ULS_Section_Performance>
+
     <!-- 设置菜单：升降控制模式 -->
     <ULS_Settings_LiftControlMode>升降控制模式</ULS_Settings_LiftControlMode>
     <ULS_Settings_LiftControlMode_Desc>选择点击“升起/降下”按钮后是否需要殖民者执行操作。

@@ -24,8 +24,7 @@ public static class ULS_AutoGroupUtility
 
         foreach (var t in cells)
         {
-            if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController controller) &&
-                controller != null)
+            if (ULS_Utility.TryGetControllerAt(map, t, out Building_WallController controller))
             {
                 return IsAutoController(controller);
             }
@@ -51,7 +50,7 @@ public static class ULS_AutoGroupUtility
 
         foreach (var t in cells)
         {
-            if (!ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c) || c == null)
+            if (!ULS_Utility.TryGetControllerAt(map, t, out Building_WallController c))
             {
                 continue;
             }
@@ -113,10 +112,6 @@ public static class ULS_AutoGroupUtility
             }
 
             return true;
-        }
-
-        if (anyAuto)
-        {
         }
 
 

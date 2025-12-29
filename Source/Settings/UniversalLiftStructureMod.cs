@@ -11,9 +11,17 @@ public class UniversalLiftStructureMod : Mod
         Filter
     }
 
+    private enum GeneralSection
+    {
+        Core,
+        Visual,
+        Performance
+    }
+
     public static UniversalLiftStructureSettings Settings;
 
     private SettingsTab currentTab = SettingsTab.General;
+    private GeneralSection currentSection = GeneralSection.Core;
 
 
     private string selectedModPackageId;
@@ -58,90 +66,53 @@ public class UniversalLiftStructureMod : Mod
 
         if (currentTab is SettingsTab.General)
         {
-            Rect liftModeRow = listing.GetRect(Text.LineHeight);
-            Rect liftModeLabelRect = new(liftModeRow.x, liftModeRow.y, liftModeRow.width - 160f, liftModeRow.height);
-            Rect liftModeButtonRect = new(liftModeRow.xMax - 160f, liftModeRow.y, 160f, liftModeRow.height);
-            Widgets.Label(liftModeLabelRect, "ULS_Settings_LiftControlMode".Translate());
+            Rect contentRect = new Rect(tabBaseRect.x, tabBaseRect.y, tabBaseRect.width, tabBaseRect.height);
 
-            string liftModeLabel = GetLiftControlModeLabel(Settings.liftControlMode);
-            if (Widgets.ButtonText(liftModeButtonRect, liftModeLabel))
+            // Left Navigation Column (160px width)
+            float leftNavWidth = 160f;
+            float gap = 10f;
+            Rect leftNavRect = new Rect(contentRect.x, contentRect.y, leftNavWidth, contentRect.height);
+            Rect rightContentRect = new Rect(contentRect.x + leftNavWidth + gap, contentRect.y,
+                contentRect.width - leftNavWidth - gap, contentRect.height);
+
+            // Draw Left Navigation
+            Listing_Standard navListing = new Listing_Standard();
+            navListing.Begin(leftNavRect);
+
+            DrawSectionButton(navListing, GeneralSection.Core, "ULS_Section_Core".Translate());
+            DrawSectionButton(navListing, GeneralSection.Visual, "ULS_Section_Visual".Translate());
+            DrawSectionButton(navListing, GeneralSection.Performance, "ULS_Section_Performance".Translate());
+
+            navListing.End();
+
+            // Draw Right Content
+            Listing_Standard listingSettings = new Listing_Standard();
+            listingSettings.Begin(rightContentRect);
+
+            switch (currentSection)
             {
-                List<FloatMenuOption> options = new()
-                {
-                    new("ULS_LiftControlMode_Remote".Translate(),
-                        () => Settings.liftControlMode = LiftControlMode.Remote),
-                    new("ULS_LiftControlMode_Console".Translate(),
-                        () => Settings.liftControlMode = LiftControlMode.Console),
-                    new("ULS_LiftControlMode_Manual".Translate(),
-                        () => Settings.liftControlMode = LiftControlMode.Manual)
-                };
-                Find.WindowStack.Add(new FloatMenu(options));
+                case GeneralSection.Core:
+                    DrawCoreSection(listingSettings);
+                    break;
+                case GeneralSection.Visual:
+                    DrawVisualSection(listingSettings);
+                    break;
+                case GeneralSection.Performance:
+                    DrawPerformanceSection(listingSettings);
+                    break;
             }
 
-            listing.Gap(6f);
-            listing.Label("ULS_Settings_LiftControlMode_Desc".Translate());
-
-            listing.Gap(6f);
-            listing.CheckboxLabeled("ULS_Settings_EnableLiftPower".Translate(), ref Settings.enableLiftPower,
-                "ULS_Settings_EnableLiftPower_Desc".Translate());
-
-            listing.GapLine();
-
-
-            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowStoredGhost".Translate(),
-                ref Settings.showStoredGhostOverlay);
-            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowControllerCell".Translate(),
-                ref Settings.ShowControllerCell);
-            listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection".Translate(),
-                ref Settings.showAutoGroupDetectionProjection);
-
-            listing.GapLine();
-
-            if (groupMaxSizeBuffer.NullOrEmpty())
-            {
-                groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
-            }
-
-            Rect groupMaxSizeRow = listing.GetRect(Text.LineHeight);
-            Rect groupMaxSizeLabelRect = new Rect(groupMaxSizeRow.x, groupMaxSizeRow.y, groupMaxSizeRow.width - 100f,
-                groupMaxSizeRow.height);
-            Rect groupMaxSizeFieldRect =
-                new Rect(groupMaxSizeRow.xMax - 100f, groupMaxSizeRow.y, 100f, groupMaxSizeRow.height);
-            Widgets.Label(groupMaxSizeLabelRect, "ULS_Settings_GroupMaxSize".Translate());
-            Widgets.TextFieldNumeric(groupMaxSizeFieldRect, ref Settings.groupMaxSize, ref groupMaxSizeBuffer, 1, 5000);
-
-            listing.Gap();
-
-
-            Rect liftHpRow = listing.GetRect(Text.LineHeight);
-            float hpSetBefore = Settings.liftDurationHpSet;
-            string hpSetLabel = "ULS_Settings_LiftDurationHpSet".Translate(hpSetBefore.ToString("0.00"));
-            float hpSetAfter =
-                Widgets.HorizontalSlider(liftHpRow, hpSetBefore, 0f, 5f, false, hpSetLabel, "0", "5", 0.01f);
-            if (Math.Abs(hpSetAfter - hpSetBefore) > 0.0001f)
-            {
-                Settings.liftDurationHpSet = hpSetAfter;
-            }
-
-
-            Rect liftMassRow = listing.GetRect(Text.LineHeight);
-            float massSetBefore = Settings.liftDurationMassSet;
-            string massSetLabel = "ULS_Settings_LiftDurationMassSet".Translate(massSetBefore.ToString("0.00"));
-            float massSetAfter = Widgets.HorizontalSlider(liftMassRow, massSetBefore, 0f, 5f, false, massSetLabel, "0",
-                "5", 0.01f);
-            if (Math.Abs(massSetAfter - massSetBefore) > 0.0001f)
-            {
-                Settings.liftDurationMassSet = massSetAfter;
-            }
-
-            listing.GapLine();
-            if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
+            listingSettings.GapLine();
+            if (listingSettings.ButtonText("ULS_Settings_ResetToDefault".Translate()))
             {
                 Settings.ResetToDefault();
                 Settings.Write();
                 groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
             }
 
+            listingSettings.End();
+
+            // End the main listing started outside (if any, though here we replaced the whole block)
             listing.End();
             return;
         }
@@ -568,5 +539,110 @@ public class UniversalLiftStructureMod : Mod
         }
 
         return false;
+    }
+
+    private void DrawSectionButton(Listing_Standard listing, GeneralSection section, string label)
+    {
+        Rect rect = listing.GetRect(30f);
+        if (currentSection == section)
+        {
+            Widgets.DrawHighlightSelected(rect);
+        }
+        else if (Mouse.IsOver(rect))
+        {
+            Widgets.DrawHighlight(rect);
+        }
+
+        if (Widgets.ButtonInvisible(rect))
+        {
+            currentSection = section;
+        }
+
+        Text.Anchor = TextAnchor.MiddleCenter;
+        Widgets.Label(rect, label);
+        Text.Anchor = TextAnchor.UpperLeft;
+
+        listing.Gap(2f);
+    }
+
+    private void DrawCoreSection(Listing_Standard listing)
+    {
+        Rect liftModeRow = listing.GetRect(Text.LineHeight);
+        Rect liftModeLabelRect = new(liftModeRow.x, liftModeRow.y, liftModeRow.width - 160f, liftModeRow.height);
+        Rect liftModeButtonRect = new(liftModeRow.xMax - 160f, liftModeRow.y, 160f, liftModeRow.height);
+        Widgets.Label(liftModeLabelRect, "ULS_Settings_LiftControlMode".Translate());
+
+        string liftModeLabel = GetLiftControlModeLabel(Settings.liftControlMode);
+        if (Widgets.ButtonText(liftModeButtonRect, liftModeLabel))
+        {
+            List<FloatMenuOption> options = new()
+            {
+                new("ULS_LiftControlMode_Remote".Translate(),
+                    () => Settings.liftControlMode = LiftControlMode.Remote),
+                new("ULS_LiftControlMode_Console".Translate(),
+                    () => Settings.liftControlMode = LiftControlMode.Console),
+                new("ULS_LiftControlMode_Manual".Translate(),
+                    () => Settings.liftControlMode = LiftControlMode.Manual)
+            };
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        listing.Gap(6f);
+        listing.Label("ULS_Settings_LiftControlMode_Desc".Translate());
+
+        listing.Gap(6f);
+        listing.CheckboxLabeled("ULS_Settings_EnableLiftPower".Translate(), ref Settings.enableLiftPower,
+            "ULS_Settings_EnableLiftPower_Desc".Translate());
+
+        listing.GapLine();
+
+        if (groupMaxSizeBuffer.NullOrEmpty())
+        {
+            groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
+        }
+
+        Rect groupMaxSizeRow = listing.GetRect(Text.LineHeight);
+        Rect groupMaxSizeLabelRect = new Rect(groupMaxSizeRow.x, groupMaxSizeRow.y, groupMaxSizeRow.width - 100f,
+            groupMaxSizeRow.height);
+        Rect groupMaxSizeFieldRect =
+            new Rect(groupMaxSizeRow.xMax - 100f, groupMaxSizeRow.y, 100f, groupMaxSizeRow.height);
+        Widgets.Label(groupMaxSizeLabelRect, "ULS_Settings_GroupMaxSize".Translate());
+        Widgets.TextFieldNumeric(groupMaxSizeFieldRect, ref Settings.groupMaxSize, ref groupMaxSizeBuffer, 1, 5000);
+    }
+
+    private void DrawVisualSection(Listing_Standard listing)
+    {
+        listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowStoredGhost".Translate(),
+            ref Settings.showStoredGhostOverlay);
+        listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowControllerCell".Translate(),
+            ref Settings.ShowControllerCell);
+        listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection".Translate(),
+            ref Settings.showAutoGroupDetectionProjection);
+    }
+
+    private void DrawPerformanceSection(Listing_Standard listing)
+    {
+        listing.Gap();
+        Rect liftHpRow = listing.GetRect(Text.LineHeight);
+        float hpSetBefore = Settings.liftDurationHpSet;
+        string hpSetLabel = "ULS_Settings_LiftDurationHpSet".Translate(hpSetBefore.ToString("0.00"));
+        float hpSetAfter =
+            Widgets.HorizontalSlider(liftHpRow, hpSetBefore, 0f, 5f, false, hpSetLabel, "0", "5", 0.01f);
+        if (Math.Abs(hpSetAfter - hpSetBefore) > 0.0001f)
+        {
+            Settings.liftDurationHpSet = hpSetAfter;
+        }
+
+        listing.Gap(6f);
+
+        Rect liftMassRow = listing.GetRect(Text.LineHeight);
+        float massSetBefore = Settings.liftDurationMassSet;
+        string massSetLabel = "ULS_Settings_LiftDurationMassSet".Translate(massSetBefore.ToString("0.00"));
+        float massSetAfter = Widgets.HorizontalSlider(liftMassRow, massSetBefore, 0f, 5f, false, massSetLabel, "0",
+            "5", 0.01f);
+        if (Math.Abs(massSetAfter - massSetBefore) > 0.0001f)
+        {
+            Settings.liftDurationMassSet = massSetAfter;
+        }
     }
 }
