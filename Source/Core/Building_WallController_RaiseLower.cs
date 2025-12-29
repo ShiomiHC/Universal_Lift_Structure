@@ -43,16 +43,11 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
-        uniqueRootCells.Clear();
-        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
-        seenRoots.Clear();
-        List<Building_WallController> raisableControllers = SimplePool<List<Building_WallController>>.Get();
-        raisableControllers.Clear();
-        HashSet<Building_WallController> processedControllers = SimplePool<HashSet<Building_WallController>>.Get();
-        processedControllers.Clear();
+        using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
+        using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
+        using var _3 = new PooledList<Building_WallController>(out var raisableControllers);
+        using var _4 = new PooledHashSet<Building_WallController>(out var processedControllers);
 
-        try
         {
             foreach (var cell in cells)
             {
@@ -139,17 +134,6 @@ public partial class Building_WallController
 
             return true;
         }
-        finally
-        {
-            uniqueRootCells.Clear();
-            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
-            seenRoots.Clear();
-            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
-            raisableControllers.Clear();
-            SimplePool<List<Building_WallController>>.Return(raisableControllers);
-            processedControllers.Clear();
-            SimplePool<HashSet<Building_WallController>>.Return(processedControllers);
-        }
     }
 
 
@@ -192,14 +176,10 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
-        uniqueRootCells.Clear();
-        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
-        seenRoots.Clear();
-        List<Building_WallController> raisableControllers = SimplePool<List<Building_WallController>>.Get();
-        raisableControllers.Clear();
+        using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
+        using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
+        using var _3 = new PooledList<Building_WallController>(out var raisableControllers);
 
-        try
         {
             foreach (var cell in cells)
             {
@@ -310,15 +290,6 @@ public partial class Building_WallController
             {
                 MessageNeutral("ULS_GroupRaisedPartial", this, raisableControllers.Count, failedCount);
             }
-        }
-        finally
-        {
-            uniqueRootCells.Clear();
-            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
-            seenRoots.Clear();
-            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
-            raisableControllers.Clear();
-            SimplePool<List<Building_WallController>>.Return(raisableControllers);
         }
     }
 
@@ -442,17 +413,13 @@ public partial class Building_WallController
         }
 
 
-        List<IntVec3> uniqueRootCells = SimplePool<List<IntVec3>>.Get();
-        uniqueRootCells.Clear();
-        HashSet<IntVec3> seenRoots = SimplePool<HashSet<IntVec3>>.Get();
-        seenRoots.Clear();
-        HashSet<Building> processedMultiCellBuildings = SimplePool<HashSet<Building>>.Get();
-        processedMultiCellBuildings.Clear();
-        List<(Building_WallController controller, IntVec3 position, Building edifice)> oneCellLowerTargets =
-            SimplePool<List<(Building_WallController controller, IntVec3 position, Building edifice)>>.Get();
-        oneCellLowerTargets.Clear();
+        using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
+        using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
+        using var _3 = new PooledHashSet<Building>(out var processedMultiCellBuildings);
+        using var _4 =
+            new PooledList<(Building_WallController controller, IntVec3 position, Building edifice)>(
+                out var oneCellLowerTargets);
 
-        try
         {
             foreach (var cell in cells)
             {
@@ -603,18 +570,6 @@ public partial class Building_WallController
             {
                 MessageNeutral("ULS_GroupLoweredPartial", this, loweredCount, skippedCount);
             }
-        }
-        finally
-        {
-            uniqueRootCells.Clear();
-            SimplePool<List<IntVec3>>.Return(uniqueRootCells);
-            seenRoots.Clear();
-            SimplePool<HashSet<IntVec3>>.Return(seenRoots);
-            processedMultiCellBuildings.Clear();
-            SimplePool<HashSet<Building>>.Return(processedMultiCellBuildings);
-            oneCellLowerTargets.Clear();
-            SimplePool<List<(Building_WallController controller, IntVec3 position, Building edifice)>>.Return(
-                oneCellLowerTargets);
         }
     }
 

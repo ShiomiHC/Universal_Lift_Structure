@@ -49,41 +49,32 @@ public class CompLiftConsole : ThingComp
             return;
         }
 
-        // 使用 SimplePool 减少内存分配
-        List<ULS_LiftRequest> requestsToExecute = SimplePool<List<ULS_LiftRequest>>.Get();
-        requestsToExecute.Clear();
+        // 使用 PooledList 减少内存分配
+        using var _ = new PooledList<ULS_LiftRequest>(out var requestsToExecute);
 
-        try
+        // 从全局队列取出所有请求
+        mapComp.DequeueAllRequests(requestsToExecute);
+
+        // 执行所有请求
+        foreach (var request in requestsToExecute)
         {
-            // 从全局队列取出所有请求
-            mapComp.DequeueAllRequests(requestsToExecute);
-
-            // 执行所有请求
-            foreach (var request in requestsToExecute)
+            if (request.controller == null || request.controller.Destroyed || !request.controller.Spawned)
             {
-                if (request.controller == null || request.controller.Destroyed || !request.controller.Spawned)
-                {
-                    continue;
-                }
-
-                if (request.type == ULS_LiftRequestType.RaiseGroup)
-                {
-                    request.controller.GizmoRaiseGroup();
-                }
-                else
-                {
-                    request.controller.GizmoLowerGroup(request.startCell);
-                }
-
-                // 执行完毕后，清除控制器的期望状态（视为请求已完成）
-                // 这也会触发 UpdateLiftDesignation，移除视觉标记
-                request.controller.CancelLiftAction();
+                continue;
             }
-        }
-        finally
-        {
-            requestsToExecute.Clear();
-            SimplePool<List<ULS_LiftRequest>>.Return(requestsToExecute);
+
+            if (request.type == ULS_LiftRequestType.RaiseGroup)
+            {
+                request.controller.GizmoRaiseGroup();
+            }
+            else
+            {
+                request.controller.GizmoLowerGroup(request.startCell);
+            }
+
+            // 执行完毕后，清除控制器的期望状态（视为请求已完成）
+            // 这也会触发 UpdateLiftDesignation，移除视觉标记
+            request.controller.CancelLiftAction();
         }
     }
 }

@@ -193,18 +193,14 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
                 continue;
             }
 
-            switch (filterType)
+            var targetList = filterType switch
             {
-                case ULS_AutoGroupType.Friendly:
-                    TmpFriendlyCells.AddRange(cache.scanCells);
-                    break;
-                case ULS_AutoGroupType.Hostile:
-                    TmpHostileCells.AddRange(cache.scanCells);
-                    break;
-                case ULS_AutoGroupType.Neutral:
-                    TmpNeutralCells.AddRange(cache.scanCells);
-                    break;
-            }
+                ULS_AutoGroupType.Friendly => TmpFriendlyCells,
+                ULS_AutoGroupType.Hostile => TmpHostileCells,
+                ULS_AutoGroupType.Neutral => TmpNeutralCells,
+                _ => null
+            };
+            targetList?.AddRange(cache.scanCells);
         }
 
 

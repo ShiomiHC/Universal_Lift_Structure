@@ -71,6 +71,7 @@
         <Compile Include="Source\Settings\LiftControlMode.cs" />
         <Compile Include="Source\Settings\UniversalLiftStructureMod.cs" />
         <Compile Include="Source\Settings\UniversalLiftStructureSettings.cs" />
+        <Compile Include="Source\Utilities\PooledList.cs" />
         <Compile Include="Source\Utilities\ULS_AutoGroupUtility.cs" />
         <Compile Include="Source\Utilities\ULS_Utility.cs" />
         <Compile Include="Source\WorkGiver\WorkGiver_FlickWallController.cs" />
