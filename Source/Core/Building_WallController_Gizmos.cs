@@ -307,14 +307,7 @@ public partial class Building_WallController
 
     public void GizmoLowerFromBuilding(Building building, IntVec3 controllerCell)
     {
-        if (building.OccupiedRect().Area <= 1)
-        {
-            TryLowerGroup(controllerCell, showMessage: true);
-        }
-        else
-        {
-            TryLowerMultiCellBuilding(building);
-        }
+        TryLowerGroup(controllerCell, showMessage: true);
     }
 
     private void OnGizmoAction_SetGroupId(List<Building_WallController> selectedControllers)

@@ -173,7 +173,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             ULS_AutoGroupType filterType = autoGroupComp.GetOrInitGroupFilterType(groupId, props.autoGroupType);
 
 
-            int membershipHash = ComputeMembershipHash(groupCells);
+            int membershipHash = ULS_Utility.ComputeMembershipHash(groupCells);
             if (!ScanCacheByGroupId.TryGetValue(groupId, out ScanCache cache) || cache == null)
             {
                 cache = new ScanCache();
@@ -220,23 +220,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         }
     }
 
-    private static int ComputeMembershipHash(List<IntVec3> cells)
-    {
-        unchecked
-        {
-            int h = 17;
-            if (cells != null)
-            {
-                foreach (var c in cells)
-                {
-                    h = h * 31 + c.x;
-                    h = h * 31 + c.z;
-                }
-            }
-
-            return h;
-        }
-    }
 
     private static List<IntVec3> BuildScanCells(Map map, List<IntVec3> groupCells, int maxRadius)
     {

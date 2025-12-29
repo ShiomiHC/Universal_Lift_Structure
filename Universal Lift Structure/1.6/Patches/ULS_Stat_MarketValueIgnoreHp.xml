@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Patch>
-    <!-- 收纳的建筑价值叠自身-->
+    <!-- 收纳的建筑价值-->
 
     <!-- 已有parts追加StatPart -->
     <Operation Class="Verse.PatchOperationConditional">

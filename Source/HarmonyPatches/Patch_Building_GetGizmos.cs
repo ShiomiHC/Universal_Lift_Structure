@@ -122,56 +122,56 @@ public static class Patch_Building_GetGizmos
             }
             else
             {
-                bool missingController = false;
-                bool anyStored = false;
-                bool anyInGroup = false;
-                foreach (IntVec3 cell in rect)
+                ULS_MultiCellGroupMapComponent groupComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
+                if (groupComp != null && groupComp.HasGroup(rootCell))
                 {
-                    if (!ULS_Utility.TryGetControllerAt(map, cell, out Building_WallController c))
-                    {
-                        missingController = true;
-                        break;
-                    }
-
-
-                    if (c.InLiftProcessForUI)
-                    {
-                        lowerCommand.Disable("ULS_LiftInProcess".Translate());
-
-                        break;
-                    }
-
-                    if (c.HasStored)
-                    {
-                        anyStored = true;
-                        break;
-                    }
-
-                    if (c.MultiCellGroupRootCell.IsValid)
-                    {
-                        anyInGroup = true;
-                        break;
-                    }
-                }
-
-                if (missingController)
-                {
-                    lowerCommand.Disable("ULS_MultiCellNeedControllerEveryCell".Translate());
-                }
-                else if (anyStored)
-                {
-                    lowerCommand.Disable("ULS_MultiCellControllerHasStored".Translate());
-                }
-                else if (anyInGroup)
-                {
-                    lowerCommand.Disable("ULS_MultiCellControllerInGroup".Translate());
+                    lowerCommand.Disable("ULS_MultiCellGroupAlreadyExists".Translate());
                 }
                 else
                 {
-                    ULS_MultiCellGroupMapComponent groupComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
-                    if (groupComp != null && groupComp.HasGroup(rootCell))
+                    bool missingController = false;
+                    bool anyStored = false;
+                    bool anyInGroup = false;
+                    foreach (IntVec3 cell in rect)
                     {
-                        lowerCommand.Disable("ULS_MultiCellGroupAlreadyExists".Translate());
+                        if (!ULS_Utility.TryGetControllerAt(map, cell, out Building_WallController c))
+                        {
+                            missingController = true;
+                            break;
+                        }
+
+
+                        if (c.InLiftProcessForUI)
+                        {
+                            lowerCommand.Disable("ULS_LiftInProcess".Translate());
+
+                            break;
+                        }
+
+                        if (c.HasStored)
+                        {
+                            anyStored = true;
+                            break;
+                        }
+
+                        if (c.MultiCellGroupRootCell.IsValid)
+                        {
+                            anyInGroup = true;
+                            break;
+                        }
+                    }
+
+                    if (missingController)
+                    {
+                        lowerCommand.Disable("ULS_MultiCellNeedControllerEveryCell".Translate());
+                    }
+                    else if (anyStored)
+                    {
+                        lowerCommand.Disable("ULS_MultiCellControllerHasStored".Translate());
+                    }
+                    else if (anyInGroup)
+                    {
+                        lowerCommand.Disable("ULS_MultiCellControllerInGroup".Translate());
                     }
                 }
             }

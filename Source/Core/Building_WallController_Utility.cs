@@ -4,21 +4,27 @@ public partial class Building_WallController
 {
     private static void MessageReject(string key, LookTargets lookTargets, params NamedArgument[] args)
     {
-        Messages.Message(
-            key.Translate(args),
-            lookTargets,
-            MessageTypeDefOf.RejectInput,
-            historical: false);
+        if (MessagesRepeatAvoider.MessageShowAllowed(key, 1f))
+        {
+            Messages.Message(
+                key.Translate(args),
+                lookTargets,
+                MessageTypeDefOf.RejectInput,
+                historical: false);
+        }
     }
 
 
     private static void MessageNeutral(string key, LookTargets lookTargets, params NamedArgument[] args)
     {
-        Messages.Message(
-            key.Translate(args),
-            lookTargets,
-            MessageTypeDefOf.NeutralEvent,
-            historical: false);
+        if (MessagesRepeatAvoider.MessageShowAllowed(key, 1f))
+        {
+            Messages.Message(
+                key.Translate(args),
+                lookTargets,
+                MessageTypeDefOf.NeutralEvent,
+                historical: false);
+        }
     }
 
 

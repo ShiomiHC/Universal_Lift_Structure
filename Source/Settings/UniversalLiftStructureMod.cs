@@ -8,7 +8,8 @@ public class UniversalLiftStructureMod : Mod
     private enum SettingsTab
     {
         General,
-        Filter
+        Filter,
+        Other
     }
 
     private enum GeneralSection
@@ -57,7 +58,9 @@ public class UniversalLiftStructureMod : Mod
             new("ULS_Tab_General".Translate(), () => currentTab = SettingsTab.General,
                 () => currentTab == SettingsTab.General),
             new("ULS_Tab_Filter".Translate(), () => currentTab = SettingsTab.Filter,
-                () => currentTab == SettingsTab.Filter)
+                () => currentTab == SettingsTab.Filter),
+            new("ULS_Tab_Other".Translate(), () => currentTab = SettingsTab.Other,
+                () => currentTab == SettingsTab.Other)
         };
         TabDrawer.DrawTabs(tabBaseRect, tabs);
 
@@ -102,14 +105,6 @@ public class UniversalLiftStructureMod : Mod
                     break;
             }
 
-            listingSettings.GapLine();
-            if (listingSettings.ButtonText("ULS_Settings_ResetToDefault".Translate()))
-            {
-                Settings.ResetToDefault();
-                Settings.Write();
-                groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
-            }
-
             listingSettings.End();
 
             // End the main listing started outside (if any, though here we replaced the whole block)
@@ -118,157 +113,120 @@ public class UniversalLiftStructureMod : Mod
         }
 
 
-        listing.Label("ULS_Settings_DefNameBlacklist".Translate());
-
-        listing.GapLine();
-        listing.Label("ULS_Settings_BuiltInRules".Translate());
-
-
-        bool allowNaturalRock = !Settings.excludeNaturalRock;
-        listing.CheckboxLabeled("ULS_Settings_AllowNaturalRock".Translate(), ref allowNaturalRock);
-        Settings.excludeNaturalRock = !allowNaturalRock;
-
-        listing.GapLine();
-
-
-        Rect searchRow = listing.GetRect(Text.LineHeight);
-        Rect searchLabelRect = new(searchRow.x, searchRow.y, 60f, searchRow.height);
-        const float modButtonWidth = 160f;
-        Rect modButtonRect = new(searchRow.xMax - modButtonWidth, searchRow.y, modButtonWidth, searchRow.height);
-        Rect searchFieldRect = new(searchLabelRect.xMax + 6f, searchRow.y,
-            modButtonRect.xMin - (searchLabelRect.xMax + 6f) - 6f - 26f, searchRow.height);
-        Rect searchClearRect = new(modButtonRect.xMin - 24f, searchRow.y, 24f, 24f);
-
-        Widgets.Label(searchLabelRect, "ULS_Settings_Search".Translate());
-        blacklistSearch = Widgets.TextField(searchFieldRect, blacklistSearch);
-        if (Widgets.ButtonImage(searchClearRect, TexButton.CloseXSmall))
+        if (currentTab == SettingsTab.Filter)
         {
-            blacklistSearch = string.Empty;
-        }
+            listing.Label("ULS_Settings_DefNameBlacklist".Translate());
 
-        string search = blacklistSearch?.Trim();
-        string searchLower = search.NullOrEmpty() ? null : search?.ToLowerInvariant();
-
-        string modPrefix = "ULS_Settings_ModFilter".Translate();
-        string allLabel = "ULS_Settings_ModFilter_All".Translate();
-        string modLabel = selectedModName.NullOrEmpty()
-            ? $"{modPrefix}：{allLabel}"
-            : $"{modPrefix}：{selectedModName}";
-        if (Widgets.ButtonText(modButtonRect, modLabel))
-        {
-            OpenModFilterMenu();
-        }
-
-        listing.Gap(6f);
+            listing.GapLine();
+            listing.Label("ULS_Settings_BuiltInRules".Translate());
 
 
-        ValidateSelectedMod();
+            bool allowNaturalRock = !Settings.excludeNaturalRock;
+            listing.CheckboxLabeled("ULS_Settings_AllowNaturalRock".Translate(), ref allowNaturalRock);
+            Settings.excludeNaturalRock = !allowNaturalRock;
 
-        List<ThingClassGroup> groups = BuildThingClassGroups(searchLower, selectedModPackageId);
-
-        float listHeight = Mathf.Min(360f, tabBaseRect.height - listing.CurHeight - 70f);
-        Rect outerRect = listing.GetRect(listHeight);
-        float viewHeight = GetThingClassTreeViewHeight(groups, searchLower);
-        Rect viewRect = new(0f, 0f, outerRect.width - 16f, viewHeight);
-        Widgets.BeginScrollView(outerRect, ref blacklistTreeScrollPosition, viewRect);
-
-        float y = 0f;
-        const float rowGap = 2f;
-        float rowHeight = Text.LineHeight + rowGap;
-
-        foreach (var group in groups)
-        {
-            bool searchActive = !searchLower.NullOrEmpty();
-            bool expanded = searchActive || expandedThingClassKeys.Contains(group.key);
+            listing.GapLine();
 
 
-            Rect groupRow = new(0f, y, viewRect.width, Text.LineHeight);
-            Rect expandRect = new(groupRow.x, groupRow.y, 18f, 18f);
-            Rect checkboxRect = new(expandRect.xMax + 2f, groupRow.y, 24f, 24f);
-            Rect labelRect = new(checkboxRect.xMax + 6f, groupRow.y, groupRow.width - (checkboxRect.xMax + 6f),
-                groupRow.height);
+            Rect searchRow = listing.GetRect(Text.LineHeight);
+            Rect searchLabelRect = new(searchRow.x, searchRow.y, 60f, searchRow.height);
+            const float modButtonWidth = 160f;
+            Rect modButtonRect = new(searchRow.xMax - modButtonWidth, searchRow.y, modButtonWidth, searchRow.height);
+            Rect searchFieldRect = new(searchLabelRect.xMax + 6f, searchRow.y,
+                modButtonRect.xMin - (searchLabelRect.xMax + 6f) - 6f - 26f, searchRow.height);
+            Rect searchClearRect = new(modButtonRect.xMin - 24f, searchRow.y, 24f, 24f);
 
-            if (!searchActive && Widgets.ButtonImage(expandRect, expanded ? TexButton.Collapse : TexButton.Reveal))
+            Widgets.Label(searchLabelRect, "ULS_Settings_Search".Translate());
+            blacklistSearch = Widgets.TextField(searchFieldRect, blacklistSearch);
+            if (Widgets.ButtonImage(searchClearRect, TexButton.CloseXSmall))
             {
-                if (expanded)
-                {
-                    expandedThingClassKeys.Remove(group.key);
-                }
-                else
-                {
-                    expandedThingClassKeys.Add(group.key);
-                }
-
-                expanded = !expanded;
+                blacklistSearch = string.Empty;
             }
 
-            var checkedCount = 0;
-            foreach (var t in group.allDefs)
+            string search = blacklistSearch?.Trim();
+            string searchLower = search.NullOrEmpty() ? null : search?.ToLowerInvariant();
+
+            string modPrefix = "ULS_Settings_ModFilter".Translate();
+            string allLabel = "ULS_Settings_ModFilter_All".Translate();
+            string modLabel = selectedModName.NullOrEmpty()
+                ? $"{modPrefix}：{allLabel}"
+                : $"{modPrefix}：{selectedModName}";
+            if (Widgets.ButtonText(modButtonRect, modLabel))
             {
-                if (!Settings.IsDefNameBlacklisted(t.defName))
+                OpenModFilterMenu();
+            }
+
+            listing.Gap(6f);
+
+
+            ValidateSelectedMod();
+
+            List<ThingClassGroup> groups = BuildThingClassGroups(searchLower, selectedModPackageId);
+
+            float listHeight = Mathf.Min(360f, tabBaseRect.height - listing.CurHeight - 70f);
+            Rect outerRect = listing.GetRect(listHeight);
+            float viewHeight = GetThingClassTreeViewHeight(groups, searchLower);
+            Rect viewRect = new(0f, 0f, outerRect.width - 16f, viewHeight);
+            Widgets.BeginScrollView(outerRect, ref blacklistTreeScrollPosition, viewRect);
+
+            float y = 0f;
+            const float rowGap = 2f;
+            float rowHeight = Text.LineHeight + rowGap;
+
+            foreach (var group in groups)
+            {
+                bool searchActive = !searchLower.NullOrEmpty();
+                bool expanded = searchActive || expandedThingClassKeys.Contains(group.key);
+
+
+                Rect groupRow = new(0f, y, viewRect.width, Text.LineHeight);
+                Rect expandRect = new(groupRow.x, groupRow.y, 18f, 18f);
+                Rect checkboxRect = new(expandRect.xMax + 2f, groupRow.y, 24f, 24f);
+                Rect labelRect = new(checkboxRect.xMax + 6f, groupRow.y, groupRow.width - (checkboxRect.xMax + 6f),
+                    groupRow.height);
+
+                if (!searchActive && Widgets.ButtonImage(expandRect, expanded ? TexButton.Collapse : TexButton.Reveal))
                 {
-                    checkedCount++;
+                    if (expanded)
+                    {
+                        expandedThingClassKeys.Remove(group.key);
+                    }
+                    else
+                    {
+                        expandedThingClassKeys.Add(group.key);
+                    }
+
+                    expanded = !expanded;
                 }
-            }
 
-            var state = checkedCount == 0
-                ? MultiCheckboxState.Off
-                : (checkedCount == group.allDefs.Count ? MultiCheckboxState.On : MultiCheckboxState.Partial);
-
-            Texture2D stateTex = state switch
-            {
-                MultiCheckboxState.On => Widgets.CheckboxOnTex,
-                MultiCheckboxState.Off => Widgets.CheckboxOffTex,
-                _ => Widgets.CheckboxPartialTex
-            };
-
-            bool groupToggleClicked = Widgets.ButtonImage(checkboxRect, stateTex);
-            if (groupToggleClicked)
-            {
-                IEnumerable<string> defNames = group.allDefs.Select(d => d.defName);
-
-                var changed = state == MultiCheckboxState.On
-                    ? Settings.AddDefNamesToBlacklist(defNames)
-                    : Settings.RemoveDefNamesFromBlacklist(defNames);
-
-                if (changed)
+                var checkedCount = 0;
+                foreach (var t in group.allDefs)
                 {
-                    Settings.defNameBlacklist.Sort(StringComparer.Ordinal);
-                    Settings.Write();
+                    if (!Settings.IsDefNameBlacklisted(t.defName))
+                    {
+                        checkedCount++;
+                    }
                 }
-            }
 
-            string groupLabel = $"{group.displayName}  ({checkedCount}/{group.allDefs.Count})";
-            Widgets.Label(labelRect, groupLabel);
-            TooltipHandler.TipRegion(labelRect, group.key);
+                var state = checkedCount == 0
+                    ? MultiCheckboxState.Off
+                    : (checkedCount == group.allDefs.Count ? MultiCheckboxState.On : MultiCheckboxState.Partial);
 
-            y += rowHeight;
-
-            if (!expanded)
-            {
-                continue;
-            }
-
-
-            List<ThingDef> defsToShow = searchActive ? group.shownDefs : group.allDefs;
-            foreach (var def in defsToShow)
-            {
-                Rect defRow = new(28f, y, viewRect.width - 28f, Text.LineHeight);
-
-                bool checkedState = !Settings.IsDefNameBlacklisted(def.defName);
-
-                string modName = def.modContentPack?.Name;
-                string defLabel = modName.NullOrEmpty()
-                    ? $"{def.LabelCap} ({def.defName})"
-                    : $"{def.LabelCap} ({def.defName}) [{modName}]";
-
-                bool before = checkedState;
-                Widgets.CheckboxLabeled(defRow, defLabel, ref checkedState);
-                if (checkedState != before)
+                Texture2D stateTex = state switch
                 {
-                    var changed = checkedState
-                        ? Settings.RemoveDefNameFromBlacklist(def.defName)
-                        : Settings.AddDefNameToBlacklist(def.defName);
+                    MultiCheckboxState.On => Widgets.CheckboxOnTex,
+                    MultiCheckboxState.Off => Widgets.CheckboxOffTex,
+                    _ => Widgets.CheckboxPartialTex
+                };
+
+                bool groupToggleClicked = Widgets.ButtonImage(checkboxRect, stateTex);
+                if (groupToggleClicked)
+                {
+                    IEnumerable<string> defNames = group.allDefs.Select(d => d.defName);
+
+                    var changed = state == MultiCheckboxState.On
+                        ? Settings.AddDefNamesToBlacklist(defNames)
+                        : Settings.RemoveDefNamesFromBlacklist(defNames);
 
                     if (changed)
                     {
@@ -277,31 +235,69 @@ public class UniversalLiftStructureMod : Mod
                     }
                 }
 
+                string groupLabel = $"{group.displayName}  ({checkedCount}/{group.allDefs.Count})";
+                Widgets.Label(labelRect, groupLabel);
+                TooltipHandler.TipRegion(labelRect, group.key);
+
                 y += rowHeight;
+
+                if (!expanded)
+                {
+                    continue;
+                }
+
+
+                List<ThingDef> defsToShow = searchActive ? group.shownDefs : group.allDefs;
+                foreach (var def in defsToShow)
+                {
+                    Rect defRow = new(28f, y, viewRect.width - 28f, Text.LineHeight);
+
+                    bool checkedState = !Settings.IsDefNameBlacklisted(def.defName);
+
+                    string modName = def.modContentPack?.Name;
+                    string defLabel = modName.NullOrEmpty()
+                        ? $"{def.LabelCap} ({def.defName})"
+                        : $"{def.LabelCap} ({def.defName}) [{modName}]";
+
+                    bool before = checkedState;
+                    Widgets.CheckboxLabeled(defRow, defLabel, ref checkedState);
+                    if (checkedState != before)
+                    {
+                        var changed = checkedState
+                            ? Settings.RemoveDefNameFromBlacklist(def.defName)
+                            : Settings.AddDefNameToBlacklist(def.defName);
+
+                        if (changed)
+                        {
+                            Settings.defNameBlacklist.Sort(StringComparer.Ordinal);
+                            Settings.Write();
+                        }
+                    }
+
+                    y += rowHeight;
+                }
             }
+
+            Widgets.EndScrollView();
+
+            listing.End();
+            return;
         }
 
-        Widgets.EndScrollView();
-
-        listing.GapLine();
-        if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
+        if (currentTab is SettingsTab.Other)
         {
-            Settings.ResetToDefault();
-            Settings.Write();
-            groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
+            listing.Gap();
+            if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
+            {
+                Settings.ResetToDefault();
+                ClearAllPendingLiftStates();
+                Settings.Write();
+                groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
+            }
+
+            listing.End();
         }
-
-        listing.End();
     }
-
-    private static string GetLiftControlModeLabel(LiftControlMode mode) => mode switch
-    {
-        LiftControlMode.Remote => "ULS_LiftControlMode_Remote".Translate(),
-        LiftControlMode.Console => "ULS_LiftControlMode_Console".Translate(),
-        LiftControlMode.Manual => "ULS_LiftControlMode_Manual".Translate(),
-        _ => mode.ToString()
-    };
-
 
     private struct ThingClassGroup
     {
@@ -310,7 +306,6 @@ public class UniversalLiftStructureMod : Mod
         public List<ThingDef> allDefs;
         public List<ThingDef> shownDefs;
     }
-
 
     private List<ThingClassGroup> BuildThingClassGroups(string searchLower, string modPackageIdFilter)
     {
@@ -567,24 +562,36 @@ public class UniversalLiftStructureMod : Mod
 
     private void DrawCoreSection(Listing_Standard listing)
     {
-        Rect liftModeRow = listing.GetRect(Text.LineHeight);
-        Rect liftModeLabelRect = new(liftModeRow.x, liftModeRow.y, liftModeRow.width - 160f, liftModeRow.height);
-        Rect liftModeButtonRect = new(liftModeRow.xMax - 160f, liftModeRow.y, 160f, liftModeRow.height);
-        Widgets.Label(liftModeLabelRect, "ULS_Settings_LiftControlMode".Translate());
+        listing.Label("ULS_Settings_LiftControlMode".Translate());
 
-        string liftModeLabel = GetLiftControlModeLabel(Settings.liftControlMode);
-        if (Widgets.ButtonText(liftModeButtonRect, liftModeLabel))
+        if (listing.RadioButton("ULS_LiftControlMode_Remote".Translate(),
+                Settings.liftControlMode == LiftControlMode.Remote))
         {
-            List<FloatMenuOption> options = new()
+            if (Settings.liftControlMode != LiftControlMode.Remote)
             {
-                new("ULS_LiftControlMode_Remote".Translate(),
-                    () => Settings.liftControlMode = LiftControlMode.Remote),
-                new("ULS_LiftControlMode_Console".Translate(),
-                    () => Settings.liftControlMode = LiftControlMode.Console),
-                new("ULS_LiftControlMode_Manual".Translate(),
-                    () => Settings.liftControlMode = LiftControlMode.Manual)
-            };
-            Find.WindowStack.Add(new FloatMenu(options));
+                Settings.liftControlMode = LiftControlMode.Remote;
+                ClearAllPendingLiftStates();
+            }
+        }
+
+        if (listing.RadioButton("ULS_LiftControlMode_Console".Translate(),
+                Settings.liftControlMode == LiftControlMode.Console))
+        {
+            if (Settings.liftControlMode != LiftControlMode.Console)
+            {
+                Settings.liftControlMode = LiftControlMode.Console;
+                ClearAllPendingLiftStates();
+            }
+        }
+
+        if (listing.RadioButton("ULS_LiftControlMode_Manual".Translate(),
+                Settings.liftControlMode == LiftControlMode.Manual))
+        {
+            if (Settings.liftControlMode != LiftControlMode.Manual)
+            {
+                Settings.liftControlMode = LiftControlMode.Manual;
+                ClearAllPendingLiftStates();
+            }
         }
 
         listing.Gap(6f);
@@ -643,6 +650,37 @@ public class UniversalLiftStructureMod : Mod
         if (Math.Abs(massSetAfter - massSetBefore) > 0.0001f)
         {
             Settings.liftDurationMassSet = massSetAfter;
+        }
+    }
+
+    private void ClearAllPendingLiftStates()
+    {
+        if (Current.Game == null)
+        {
+            return;
+        }
+
+        List<Map> maps = Find.Maps;
+        if (maps == null)
+        {
+            return;
+        }
+
+        foreach (var map in maps)
+        {
+            // 1. 清空全局请求队列
+            var mapComp = map.GetComponent<ULS_LiftRequestMapComponent>();
+            mapComp?.ClearAllRequests();
+
+            // 2. 清除所有控制器的状态
+            List<Thing> things = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
+            foreach (var t in things)
+            {
+                if (t is Building_WallController controller && !controller.Destroyed)
+                {
+                    controller.CancelLiftAction();
+                }
+            }
         }
     }
 }

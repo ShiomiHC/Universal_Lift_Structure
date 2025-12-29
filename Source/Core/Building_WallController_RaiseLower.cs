@@ -279,14 +279,7 @@ public partial class Building_WallController
             }
 
 
-            if (failedCount <= 0)
-            {
-                if (showMessage)
-                {
-                    MessageNeutral("ULS_GroupRaised", this, raisableControllers.Count);
-                }
-            }
-            else if (showMessage)
+            if (failedCount > 1 && showMessage)
             {
                 MessageNeutral("ULS_GroupRaisedPartial", this, raisableControllers.Count, failedCount);
             }
@@ -415,7 +408,7 @@ public partial class Building_WallController
 
         using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
         using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
-        using var _3 = new PooledHashSet<Building>(out var processedMultiCellBuildings);
+        using var _3 = new PooledHashSet<Building>(out var multiCellBuildingsToLow);
         using var _4 =
             new PooledList<(Building_WallController controller, IntVec3 position, Building edifice)>(
                 out var oneCellLowerTargets);
@@ -459,33 +452,19 @@ public partial class Building_WallController
             }
 
 
-            int loweredCount = 0;
-            int skippedCount = 0;
-
-
             foreach (var t in uniqueRootCells)
             {
                 if (!ULS_Utility.TryGetControllerAt(map, t, out var controller))
                 {
-                    skippedCount++;
                     continue;
                 }
 
-                if (controller.InLiftProcess)
+                if (controller.InLiftProcess || controller.HasStored)
                 {
-                    skippedCount++;
                     continue;
                 }
 
-                if (controller.HasStored)
-                {
-                    skippedCount++;
-                    continue;
-                }
-
-                IntVec3 position = controller.Position;
-                Building edifice = map.edificeGrid[position];
-
+                Building edifice = map.edificeGrid[t];
 
                 if (edifice == null ||
                     edifice.Destroyed ||
@@ -493,32 +472,37 @@ public partial class Building_WallController
                     edifice is Frame ||
                     !edifice.def.destroyable)
                 {
-                    skippedCount++;
+                    continue;
                 }
-                else if (ULS_Utility.IsEdificeBlacklisted(edifice))
+
+                if (ULS_Utility.IsEdificeBlacklisted(edifice) || edifice.Faction != Faction.OfPlayer)
                 {
-                    skippedCount++;
+                    continue;
                 }
-                else if (edifice.Faction != Faction.OfPlayer)
+
+                if (edifice.def.Size == IntVec2.One)
                 {
-                    skippedCount++;
+                    oneCellLowerTargets.Add((controller, t, edifice));
                 }
-                else if (edifice.def.Size == IntVec2.One)
+                else
                 {
-                    oneCellLowerTargets.Add((controller, position, edifice));
+                    multiCellBuildingsToLow.Add(edifice);
                 }
-                else if (!processedMultiCellBuildings.Contains(edifice))
+            }
+
+
+            int loweredCount = 0;
+            int failedCount = 0;
+
+            foreach (Building b in multiCellBuildingsToLow)
+            {
+                if (TryLowerMultiCellBuildingInternal(b, showMessage: false))
                 {
-                    if (!TryLowerMultiCellBuildingInternal(edifice, showMessage: false))
-                    {
-                        skippedCount++;
-                        processedMultiCellBuildings.Add(edifice);
-                    }
-                    else
-                    {
-                        loweredCount++;
-                        processedMultiCellBuildings.Add(edifice);
-                    }
+                    loweredCount++;
+                }
+                else
+                {
+                    failedCount++;
                 }
             }
 
@@ -536,14 +520,13 @@ public partial class Building_WallController
             {
                 if (t.controller == null || t.edifice == null)
                 {
-                    skippedCount++;
                     continue;
                 }
 
                 int ticks = CalculateLiftTicks(t.edifice);
                 if (!t.controller.TryLowerNoMessage(map, t.position, t.edifice, cacheLinkMask: false))
                 {
-                    skippedCount++;
+                    failedCount++;
                     continue;
                 }
 
@@ -559,16 +542,9 @@ public partial class Building_WallController
                     MessageReject("ULS_GroupNoLowerable", this);
                 }
             }
-            else if (skippedCount <= 0)
+            else if (failedCount > 1 && showMessage)
             {
-                if (showMessage)
-                {
-                    MessageNeutral("ULS_GroupLowered", this, loweredCount);
-                }
-            }
-            else if (showMessage)
-            {
-                MessageNeutral("ULS_GroupLoweredPartial", this, loweredCount, skippedCount);
+                MessageNeutral("ULS_GroupLoweredPartial", this, loweredCount, failedCount);
             }
         }
     }

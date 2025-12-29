@@ -52,6 +52,12 @@ public class ULS_LiftRequestMapComponent : MapComponent
         globalPendingRequests.Clear();
     }
 
+    // 清空所有待处理请求（用于模式切换清理）
+    public void ClearAllRequests()
+    {
+        globalPendingRequests?.Clear();
+    }
+
     // 移除针对特定控制器的所有请求
     public void RemoveRequestsForController(Building_WallController controller)
     {

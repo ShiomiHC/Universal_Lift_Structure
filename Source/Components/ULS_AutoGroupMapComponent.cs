@@ -368,7 +368,7 @@ public class ULS_AutoGroupMapComponent : MapComponent
         ULS_AutoGroupType filterType = GetOrInitGroupFilterType(groupId, props.autoGroupType);
 
 
-        int membershipHash = ComputeMembershipHash(groupCells);
+        int membershipHash = ULS_Utility.ComputeMembershipHash(groupCells);
         if (runtime.scanCells == null || runtime.scanCells.Count == 0 || runtime.membershipHash != membershipHash)
         {
             runtime.membershipHash = membershipHash;
@@ -501,23 +501,6 @@ public class ULS_AutoGroupMapComponent : MapComponent
         }
     }
 
-    private static int ComputeMembershipHash(List<IntVec3> cells)
-    {
-        unchecked
-        {
-            int h = 17;
-            if (cells != null)
-            {
-                foreach (var c in cells)
-                {
-                    h = h * 31 + c.x;
-                    h = h * 31 + c.z;
-                }
-            }
-
-            return h;
-        }
-    }
 
     private void UpdateScanCells(AutoGroupRuntime runtime, List<IntVec3> groupCells, int maxRadius)
     {

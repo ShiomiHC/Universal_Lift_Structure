@@ -3,8 +3,8 @@
 <LanguageData>
     <!-- 结构控制器 -->
     <ULS_WallController.label>结构控制器</ULS_WallController.label>
-    <ULS_WallController.description>结构控制</ULS_WallController.description>
+    <ULS_WallController.description>允许建筑升降的控制装置</ULS_WallController.description>
     <!-- 自动结构控制器 -->
     <ULS_WallController_Auto.label>结构控制器（自动）</ULS_WallController_Auto.label>
-    <ULS_WallController_Auto.description>当匹配过滤器的单位接近时自动降下；离开后延迟升起。过滤器可按组切换。</ULS_WallController_Auto.description>
+    <ULS_WallController_Auto.description>允许以友方/中立/敌方过滤的自动升降控制装置</ULS_WallController_Auto.description>
 </LanguageData>

@@ -178,4 +178,24 @@ public static class ULS_Utility
 
         return console != null;
     }
+
+
+    // 计算一组单元格坐标的成员哈希值（用于缓存校验）
+    public static int ComputeMembershipHash(List<IntVec3> cells)
+    {
+        unchecked
+        {
+            int h = 17;
+            if (cells != null)
+            {
+                foreach (var c in cells)
+                {
+                    h = h * 31 + c.x;
+                    h = h * 31 + c.z;
+                }
+            }
+
+            return h;
+        }
+    }
 }
