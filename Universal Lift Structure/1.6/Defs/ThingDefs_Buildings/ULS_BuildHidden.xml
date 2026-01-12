@@ -1,44 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <!-- 文件意图：ULS 隐藏建筑类
-         - 不绘制（drawerType=None）
-         - 不可选中（selectable=false）
-         - 不掉落资源（leaveResourcesWhenKilled=false）
-         - 不 Tick（tickerType=Never）-->
-    <!--隐藏建筑基类-->
     <ThingDef Name="ULS_HiddenBuildingBase" ParentName="BuildingBase" Abstract="True">
-
-        <!-- 作为 Building 类别的 ThingDef 基础信息。 -->
-        <thingClass>Building</thingClass>
-        <category>Building</category>
-
-        <!-- 留空 -->
         <label />
         <description />
 
-        <!-- 不绘制、不可选中：用于“纯逻辑/占位”类结构，避免干扰玩家交互与 UI。 -->
+        <!--绘制类型-->
         <drawerType>None</drawerType>
+
+        <!--是否可选中-->
         <selectable>false</selectable>
 
-        <!-- 不掉落资源：这些结构不会以“被击毁建筑”的方式交互，避免产生无意义掉落。 -->
+        <!--是否掉落资源-->
         <leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
 
-        <!--禁用血量-->
+        <!--是否参与血量逻辑-->
         <useHitPoints>false</useHitPoints>
-        <!-- 不需要 Tick：由外部系统/代码驱动生命周期。 -->
-        <tickerType>Never</tickerType>
+
+        <!--tickerType：Tick 频率-->
+        <tickerType>Never</tickerType> <!--外部-->
     </ThingDef>
 
-
-    <!-- 临时阻挡物 -->
-
     <ThingDef ParentName="ULS_HiddenBuildingBase">
+        <!--
+        📌 defName：唯一标识符
+           - C# 中通过 ULS_ThingDefOf.ULS_LiftBlocker 引用
+        -->
         <defName>ULS_LiftBlocker</defName>
 
-        <!-- 作为 edifice 阻挡通行：注意 passability 位于 ThingDef 根层，而不是 <building> 节点内 -->
+        <!--通行性-->
         <passability>Impassable</passability>
 
         <building>
+            <!--阻挡建筑-->
             <isEdifice>true</isEdifice>
         </building>
     </ThingDef>

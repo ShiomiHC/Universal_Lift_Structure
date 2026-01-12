@@ -583,12 +583,6 @@ public partial class Building_WallController
     }
 
 
-    private void TryLowerMultiCellBuilding(Building building)
-    {
-        TryLowerMultiCellBuildingInternal(building, showMessage: true);
-    }
-
-
     private bool TryLowerMultiCellBuildingInternal(Building building, bool showMessage)
     {
         Map map = building.Map;

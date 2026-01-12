@@ -2,9 +2,11 @@
 
 public class UniversalLiftStructureMod : Mod
 {
+    // HarmonyID
     private const string HarmonyId = "shiomi.UniversalLiftStructure";
 
 
+    // 设置页的标签页类型
     private enum SettingsTab
     {
         General,
@@ -12,6 +14,7 @@ public class UniversalLiftStructureMod : Mod
         Other
     }
 
+    // 设置页 General 标签下的子分区
     private enum GeneralSection
     {
         Core,
@@ -21,6 +24,7 @@ public class UniversalLiftStructureMod : Mod
 
     public static UniversalLiftStructureSettings Settings;
 
+    // UI 状态字段（不需要序列化）
     private SettingsTab currentTab = SettingsTab.General;
     private GeneralSection currentSection = GeneralSection.Core;
 
@@ -34,7 +38,7 @@ public class UniversalLiftStructureMod : Mod
 
     private string groupMaxSizeBuffer = string.Empty;
 
-
+    // 自动
     public UniversalLiftStructureMod(ModContentPack content) : base(content)
     {
         Settings = GetSettings<UniversalLiftStructureSettings>();
@@ -43,16 +47,20 @@ public class UniversalLiftStructureMod : Mod
         harmony.PatchAll();
     }
 
+    // Mod 名称
     public override string SettingsCategory()
     {
         return "ULS_SettingsCategory".Translate();
     }
 
 
+    // 绘制设置窗口的内容
     public override void DoSettingsWindowContents(Rect inRect)
     {
+        // 标签页区域
         Rect tabBaseRect = new(inRect.x, inRect.y + TabDrawer.TabHeight, inRect.width,
             inRect.height - TabDrawer.TabHeight);
+        // TabRecord 列表
         List<TabRecord> tabs = new()
         {
             new("ULS_Tab_General".Translate(), () => currentTab = SettingsTab.General,
@@ -62,210 +70,226 @@ public class UniversalLiftStructureMod : Mod
             new("ULS_Tab_Other".Translate(), () => currentTab = SettingsTab.Other,
                 () => currentTab == SettingsTab.Other)
         };
+        // 绘制标签页头部
         TabDrawer.DrawTabs(tabBaseRect, tabs);
 
+        // ============================================================
+        // 【Listing_Standard 布局工具】
+        // ============================================================
+        // Listing_Standard 是 RimWorld UI 的核心布局工具
+        // 它会自动管理垂直布局和元素间距
+        //
+        // 【基本用法】
+        // 1. 创建实例：Listing_Standard listing = new();
+        // 2. 开始绘制：listing.Begin(区域);
+        // 3. 添加元素：listing.Label(), listing.CheckboxLabeled() 等
+        // 4. 结束绘制：listing.End();
+        //
+        // 【常用方法】
+        // - Label(text)：显示文本
+        // - CheckboxLabeled(text, ref value)：复选框
+        // - Gap(pixels)：添加间距
+        // - GapLine()：添加分隔线
+        // - GetRect(height)：获取指定高度的矩形区域
+        // - ButtonText(text)：按钮，返回是否被点击
+        // ============================================================
         Listing_Standard listing = new();
         listing.Begin(tabBaseRect);
 
-        if (currentTab is SettingsTab.General)
+        switch (currentTab)
         {
-            Rect contentRect = new Rect(tabBaseRect.x, tabBaseRect.y, tabBaseRect.width, tabBaseRect.height);
-
-            // Left Navigation Column (160px width)
-            float leftNavWidth = 160f;
-            float gap = 10f;
-            Rect leftNavRect = new Rect(contentRect.x, contentRect.y, leftNavWidth, contentRect.height);
-            Rect rightContentRect = new Rect(contentRect.x + leftNavWidth + gap, contentRect.y,
-                contentRect.width - leftNavWidth - gap, contentRect.height);
-
-            // Draw Left Navigation
-            Listing_Standard navListing = new Listing_Standard();
-            navListing.Begin(leftNavRect);
-
-            DrawSectionButton(navListing, GeneralSection.Core, "ULS_Section_Core".Translate());
-            DrawSectionButton(navListing, GeneralSection.Visual, "ULS_Section_Visual".Translate());
-            DrawSectionButton(navListing, GeneralSection.Performance, "ULS_Section_Performance".Translate());
-
-            navListing.End();
-
-            // Draw Right Content
-            Listing_Standard listingSettings = new Listing_Standard();
-            listingSettings.Begin(rightContentRect);
-
-            switch (currentSection)
+            case SettingsTab.General:
             {
-                case GeneralSection.Core:
-                    DrawCoreSection(listingSettings);
-                    break;
-                case GeneralSection.Visual:
-                    DrawVisualSection(listingSettings);
-                    break;
-                case GeneralSection.Performance:
-                    DrawPerformanceSection(listingSettings);
-                    break;
+                Rect contentRect = new Rect(tabBaseRect.x, tabBaseRect.y, tabBaseRect.width, tabBaseRect.height);
+
+                // Left Navigation Column (160px width)
+                float leftNavWidth = 160f;
+                float gap = 10f;
+                Rect leftNavRect = new Rect(contentRect.x, contentRect.y, leftNavWidth, contentRect.height);
+                Rect rightContentRect = new Rect(contentRect.x + leftNavWidth + gap, contentRect.y,
+                    contentRect.width - leftNavWidth - gap, contentRect.height);
+
+                // Draw Left Navigation
+                Listing_Standard navListing = new Listing_Standard();
+                navListing.Begin(leftNavRect);
+
+                DrawSectionButton(navListing, GeneralSection.Core, "ULS_Section_Core".Translate());
+                DrawSectionButton(navListing, GeneralSection.Visual, "ULS_Section_Visual".Translate());
+                DrawSectionButton(navListing, GeneralSection.Performance, "ULS_Section_Performance".Translate());
+
+                navListing.End();
+
+                // Draw Right Content
+                Listing_Standard listingSettings = new Listing_Standard();
+                listingSettings.Begin(rightContentRect);
+
+                switch (currentSection)
+                {
+                    case GeneralSection.Core:
+                        DrawCoreSection(listingSettings);
+                        break;
+                    case GeneralSection.Visual:
+                        DrawVisualSection(listingSettings);
+                        break;
+                    case GeneralSection.Performance:
+                        DrawPerformanceSection(listingSettings);
+                        break;
+                }
+
+                listingSettings.End();
+
+                // End the main listing started outside (if any, though here we replaced the whole block)
+                listing.End();
+                return;
             }
-
-            listingSettings.End();
-
-            // End the main listing started outside (if any, though here we replaced the whole block)
-            listing.End();
-            return;
-        }
-
-
-        if (currentTab == SettingsTab.Filter)
-        {
-            listing.Label("ULS_Settings_DefNameBlacklist".Translate());
-
-            listing.GapLine();
-            listing.Label("ULS_Settings_BuiltInRules".Translate());
-
-
-            bool allowNaturalRock = !Settings.excludeNaturalRock;
-            listing.CheckboxLabeled("ULS_Settings_AllowNaturalRock".Translate(), ref allowNaturalRock);
-            Settings.excludeNaturalRock = !allowNaturalRock;
-
-            listing.GapLine();
-
-
-            Rect searchRow = listing.GetRect(Text.LineHeight);
-            Rect searchLabelRect = new(searchRow.x, searchRow.y, 60f, searchRow.height);
-            const float modButtonWidth = 160f;
-            Rect modButtonRect = new(searchRow.xMax - modButtonWidth, searchRow.y, modButtonWidth, searchRow.height);
-            Rect searchFieldRect = new(searchLabelRect.xMax + 6f, searchRow.y,
-                modButtonRect.xMin - (searchLabelRect.xMax + 6f) - 6f - 26f, searchRow.height);
-            Rect searchClearRect = new(modButtonRect.xMin - 24f, searchRow.y, 24f, 24f);
-
-            Widgets.Label(searchLabelRect, "ULS_Settings_Search".Translate());
-            blacklistSearch = Widgets.TextField(searchFieldRect, blacklistSearch);
-            if (Widgets.ButtonImage(searchClearRect, TexButton.CloseXSmall))
+            case SettingsTab.Filter:
             {
-                blacklistSearch = string.Empty;
-            }
+                listing.Label("ULS_Settings_DefNameBlacklist".Translate());
 
-            string search = blacklistSearch?.Trim();
-            string searchLower = search.NullOrEmpty() ? null : search?.ToLowerInvariant();
-
-            string modPrefix = "ULS_Settings_ModFilter".Translate();
-            string allLabel = "ULS_Settings_ModFilter_All".Translate();
-            string modLabel = selectedModName.NullOrEmpty()
-                ? $"{modPrefix}：{allLabel}"
-                : $"{modPrefix}：{selectedModName}";
-            if (Widgets.ButtonText(modButtonRect, modLabel))
-            {
-                OpenModFilterMenu();
-            }
-
-            listing.Gap(6f);
+                listing.GapLine();
+                listing.Label("ULS_Settings_BuiltInRules".Translate());
 
 
-            ValidateSelectedMod();
+                bool allowNaturalRock = !Settings.excludeNaturalRock;
+                listing.CheckboxLabeled("ULS_Settings_AllowNaturalRock".Translate(), ref allowNaturalRock);
+                Settings.excludeNaturalRock = !allowNaturalRock;
 
-            List<ThingClassGroup> groups = BuildThingClassGroups(searchLower, selectedModPackageId);
+                listing.GapLine();
 
-            float listHeight = Mathf.Min(360f, tabBaseRect.height - listing.CurHeight - 70f);
-            Rect outerRect = listing.GetRect(listHeight);
-            float viewHeight = GetThingClassTreeViewHeight(groups, searchLower);
-            Rect viewRect = new(0f, 0f, outerRect.width - 16f, viewHeight);
-            Widgets.BeginScrollView(outerRect, ref blacklistTreeScrollPosition, viewRect);
+                // ============================================================
+                // 【手动布局示例】
+                // ============================================================
+                // 有时 Listing_Standard 的自动布局不够灵活
+                // 这时可以用 GetRect() 获取区域，然后手动分割
+                // ============================================================
+                Rect searchRow = listing.GetRect(Text.LineHeight);
+                Rect searchLabelRect = new(searchRow.x, searchRow.y, 60f, searchRow.height);
+                const float modButtonWidth = 160f;
+                Rect modButtonRect = new(searchRow.xMax - modButtonWidth, searchRow.y, modButtonWidth,
+                    searchRow.height);
+                Rect searchFieldRect = new(searchLabelRect.xMax + 6f, searchRow.y,
+                    modButtonRect.xMin - (searchLabelRect.xMax + 6f) - 6f - 26f, searchRow.height);
+                Rect searchClearRect = new(modButtonRect.xMin - 24f, searchRow.y, 24f, 24f);
 
-            float y = 0f;
-            const float rowGap = 2f;
-            float rowHeight = Text.LineHeight + rowGap;
-
-            foreach (var group in groups)
-            {
-                bool searchActive = !searchLower.NullOrEmpty();
-                bool expanded = searchActive || expandedThingClassKeys.Contains(group.key);
-
-
-                Rect groupRow = new(0f, y, viewRect.width, Text.LineHeight);
-                Rect expandRect = new(groupRow.x, groupRow.y, 18f, 18f);
-                Rect checkboxRect = new(expandRect.xMax + 2f, groupRow.y, 24f, 24f);
-                Rect labelRect = new(checkboxRect.xMax + 6f, groupRow.y, groupRow.width - (checkboxRect.xMax + 6f),
-                    groupRow.height);
-
-                if (!searchActive && Widgets.ButtonImage(expandRect, expanded ? TexButton.Collapse : TexButton.Reveal))
+                // ============================================================
+                // 【Widgets 控件库】
+                // ============================================================
+                // Widgets 是 RimWorld UI 的核心控件库，提供各种 UI 元素
+                //
+                // 【常用方法】
+                // - Widgets.Label(rect, text)：在指定区域显示文本
+                // - Widgets.TextField(rect, text)：文本输入框，返回新的文本值
+                // - Widgets.ButtonText(rect, text)：文本按钮，返回是否被点击
+                // - Widgets.ButtonImage(rect, texture)：图片按钮，返回是否被点击
+                // - Widgets.CheckboxLabeled(rect, text, ref value)：带标签的复选框
+                // - Widgets.DrawHighlight(rect)：绘制高亮背景
+                // ============================================================
+                Widgets.Label(searchLabelRect, "ULS_Settings_Search".Translate());
+                blacklistSearch = Widgets.TextField(searchFieldRect, blacklistSearch);
+                if (Widgets.ButtonImage(searchClearRect, TexButton.CloseXSmall))
                 {
-                    if (expanded)
-                    {
-                        expandedThingClassKeys.Remove(group.key);
-                    }
-                    else
-                    {
-                        expandedThingClassKeys.Add(group.key);
-                    }
-
-                    expanded = !expanded;
+                    blacklistSearch = string.Empty;
                 }
 
-                var checkedCount = 0;
-                foreach (var t in group.allDefs)
+                string search = blacklistSearch?.Trim();
+                string searchLower = search.NullOrEmpty() ? null : search?.ToLowerInvariant();
+
+                string modPrefix = "ULS_Settings_ModFilter".Translate();
+                string allLabel = "ULS_Settings_ModFilter_All".Translate();
+                string modLabel = selectedModName.NullOrEmpty()
+                    ? $"{modPrefix}：{allLabel}"
+                    : $"{modPrefix}：{selectedModName}";
+                if (Widgets.ButtonText(modButtonRect, modLabel))
                 {
-                    if (!Settings.IsDefNameBlacklisted(t.defName))
+                    OpenModFilterMenu();
+                }
+
+                listing.Gap(6f);
+
+
+                ValidateSelectedMod();
+
+                List<ThingClassGroup> groups = BuildThingClassGroups(searchLower, selectedModPackageId);
+
+                float listHeight = Mathf.Min(360f, tabBaseRect.height - listing.CurHeight - 70f);
+                Rect outerRect = listing.GetRect(listHeight);
+                float viewHeight = GetThingClassTreeViewHeight(groups, searchLower);
+                Rect viewRect = new(0f, 0f, outerRect.width - 16f, viewHeight);
+                // ============================================================
+                // 【ScrollView 滚动视图】
+                // ============================================================
+                // 当内容超过可视区域时，使用滚动视图
+                //
+                // 【用法】
+                // 1. BeginScrollView(外部区域, ref 滚动位置, 内部视图区域)
+                // 2. 在内部绘制内容
+                // 3. EndScrollView()
+                //
+                // 【注意】
+                // - blacklistTreeScrollPosition 是 Vector2，存储滚动位置
+                // - viewRect 定义了完整的内容尺寸
+                // ============================================================
+                Widgets.BeginScrollView(outerRect, ref blacklistTreeScrollPosition, viewRect);
+
+                float y = 0f;
+                const float rowGap = 2f;
+                float rowHeight = Text.LineHeight + rowGap;
+
+                foreach (var group in groups)
+                {
+                    bool searchActive = !searchLower.NullOrEmpty();
+                    bool expanded = searchActive || expandedThingClassKeys.Contains(group.key);
+
+
+                    Rect groupRow = new(0f, y, viewRect.width, Text.LineHeight);
+                    Rect expandRect = new(groupRow.x, groupRow.y, 18f, 18f);
+                    Rect checkboxRect = new(expandRect.xMax + 2f, groupRow.y, 24f, 24f);
+                    Rect labelRect = new(checkboxRect.xMax + 6f, groupRow.y, groupRow.width - (checkboxRect.xMax + 6f),
+                        groupRow.height);
+
+                    if (!searchActive &&
+                        Widgets.ButtonImage(expandRect, expanded ? TexButton.Collapse : TexButton.Reveal))
                     {
-                        checkedCount++;
+                        if (expanded)
+                        {
+                            expandedThingClassKeys.Remove(group.key);
+                        }
+                        else
+                        {
+                            expandedThingClassKeys.Add(group.key);
+                        }
+
+                        expanded = !expanded;
                     }
-                }
 
-                var state = checkedCount == 0
-                    ? MultiCheckboxState.Off
-                    : (checkedCount == group.allDefs.Count ? MultiCheckboxState.On : MultiCheckboxState.Partial);
-
-                Texture2D stateTex = state switch
-                {
-                    MultiCheckboxState.On => Widgets.CheckboxOnTex,
-                    MultiCheckboxState.Off => Widgets.CheckboxOffTex,
-                    _ => Widgets.CheckboxPartialTex
-                };
-
-                bool groupToggleClicked = Widgets.ButtonImage(checkboxRect, stateTex);
-                if (groupToggleClicked)
-                {
-                    IEnumerable<string> defNames = group.allDefs.Select(d => d.defName);
-
-                    var changed = state == MultiCheckboxState.On
-                        ? Settings.AddDefNamesToBlacklist(defNames)
-                        : Settings.RemoveDefNamesFromBlacklist(defNames);
-
-                    if (changed)
+                    var checkedCount = 0;
+                    foreach (var t in group.allDefs)
                     {
-                        Settings.defNameBlacklist.Sort(StringComparer.Ordinal);
-                        Settings.Write();
+                        if (!Settings.IsDefNameBlacklisted(t.defName))
+                        {
+                            checkedCount++;
+                        }
                     }
-                }
 
-                string groupLabel = $"{group.displayName}  ({checkedCount}/{group.allDefs.Count})";
-                Widgets.Label(labelRect, groupLabel);
-                TooltipHandler.TipRegion(labelRect, group.key);
+                    var state = checkedCount == 0
+                        ? MultiCheckboxState.Off
+                        : (checkedCount == group.allDefs.Count ? MultiCheckboxState.On : MultiCheckboxState.Partial);
 
-                y += rowHeight;
-
-                if (!expanded)
-                {
-                    continue;
-                }
-
-
-                List<ThingDef> defsToShow = searchActive ? group.shownDefs : group.allDefs;
-                foreach (var def in defsToShow)
-                {
-                    Rect defRow = new(28f, y, viewRect.width - 28f, Text.LineHeight);
-
-                    bool checkedState = !Settings.IsDefNameBlacklisted(def.defName);
-
-                    string modName = def.modContentPack?.Name;
-                    string defLabel = modName.NullOrEmpty()
-                        ? $"{def.LabelCap} ({def.defName})"
-                        : $"{def.LabelCap} ({def.defName}) [{modName}]";
-
-                    bool before = checkedState;
-                    Widgets.CheckboxLabeled(defRow, defLabel, ref checkedState);
-                    if (checkedState != before)
+                    Texture2D stateTex = state switch
                     {
-                        var changed = checkedState
-                            ? Settings.RemoveDefNameFromBlacklist(def.defName)
-                            : Settings.AddDefNameToBlacklist(def.defName);
+                        MultiCheckboxState.On => Widgets.CheckboxOnTex,
+                        MultiCheckboxState.Off => Widgets.CheckboxOffTex,
+                        _ => Widgets.CheckboxPartialTex
+                    };
+
+                    bool groupToggleClicked = Widgets.ButtonImage(checkboxRect, stateTex);
+                    if (groupToggleClicked)
+                    {
+                        IEnumerable<string> defNames = group.allDefs.Select(d => d.defName);
+
+                        var changed = state == MultiCheckboxState.On
+                            ? Settings.AddDefNamesToBlacklist(defNames)
+                            : Settings.RemoveDefNamesFromBlacklist(defNames);
 
                         if (changed)
                         {
@@ -274,28 +298,70 @@ public class UniversalLiftStructureMod : Mod
                         }
                     }
 
+                    string groupLabel = $"{group.displayName}  ({checkedCount}/{group.allDefs.Count})";
+                    Widgets.Label(labelRect, groupLabel);
+                    TooltipHandler.TipRegion(labelRect, group.key);
+
                     y += rowHeight;
+
+                    if (!expanded)
+                    {
+                        continue;
+                    }
+
+
+                    List<ThingDef> defsToShow = searchActive ? group.shownDefs : group.allDefs;
+                    foreach (var def in defsToShow)
+                    {
+                        Rect defRow = new(28f, y, viewRect.width - 28f, Text.LineHeight);
+
+                        bool checkedState = !Settings.IsDefNameBlacklisted(def.defName);
+
+                        string modName = def.modContentPack?.Name;
+                        string defLabel = modName.NullOrEmpty()
+                            ? $"{def.LabelCap} ({def.defName})"
+                            : $"{def.LabelCap} ({def.defName}) [{modName}]";
+
+                        bool before = checkedState;
+                        Widgets.CheckboxLabeled(defRow, defLabel, ref checkedState);
+                        if (checkedState != before)
+                        {
+                            var changed = checkedState
+                                ? Settings.RemoveDefNameFromBlacklist(def.defName)
+                                : Settings.AddDefNameToBlacklist(def.defName);
+
+                            if (changed)
+                            {
+                                Settings.defNameBlacklist.Sort(StringComparer.Ordinal);
+                                Settings.Write();
+                            }
+                        }
+
+                        y += rowHeight;
+                    }
                 }
+
+                Widgets.EndScrollView();
+
+                listing.End();
+                return;
             }
-
-            Widgets.EndScrollView();
-
-            listing.End();
-            return;
-        }
-
-        if (currentTab is SettingsTab.Other)
-        {
-            listing.Gap();
-            if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
+            case SettingsTab.Other:
             {
-                Settings.ResetToDefault();
-                ClearAllPendingLiftStates();
-                Settings.Write();
-                groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
-            }
+                listing.Gap();
+                if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
+                {
+                    Settings.ResetToDefault();
+                    ClearAllPendingLiftStates();
+                    Settings.Write();
+                    groupMaxSizeBuffer = Settings.groupMaxSize.ToString();
+                }
 
-            listing.End();
+                listing.End();
+                return;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 

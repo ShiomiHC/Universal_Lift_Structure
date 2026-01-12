@@ -33,7 +33,8 @@ public static class Patch_Building_GetGizmos
         Command_Action lowerCommand = new()
         {
             defaultLabel = "ULS_LowerGroup".Translate(),
-            icon = TexCommand.ForbidOff,
+            defaultDesc = "ULS_LowerGroupDesc".Translate(),
+            icon = ULS_GizmoTextures.LowerGroup,
             action = () =>
             {
                 if (mode is LiftControlMode.Remote)
@@ -106,6 +107,12 @@ public static class Patch_Building_GetGizmos
                             lowerCommand.Disable("ULS_LiftInProcess".Translate());
                             break;
                         }
+
+                        if (settings is { enableLiftPower: true } && !c.IsReadyForLiftPower())
+                        {
+                            lowerCommand.Disable("ULS_PowerOff".Translate());
+                            break;
+                        }
                     }
                 }
             }
@@ -148,6 +155,12 @@ public static class Patch_Building_GetGizmos
                             break;
                         }
 
+                        if (settings is { enableLiftPower: true } && !c.IsReadyForLiftPower())
+                        {
+                            lowerCommand.Disable("ULS_PowerOff".Translate());
+                            break;
+                        }
+
                         if (c.HasStored)
                         {
                             anyStored = true;
@@ -187,6 +200,7 @@ public static class Patch_Building_GetGizmos
             Command_Action cancelCommand = new Command_Action
             {
                 defaultLabel = "ULS_CancelLift".Translate(),
+                defaultDesc = "ULS_CancelLiftDesc".Translate(),
                 icon = TexCommand.ClearPrioritizedWork,
                 action = () =>
                 {

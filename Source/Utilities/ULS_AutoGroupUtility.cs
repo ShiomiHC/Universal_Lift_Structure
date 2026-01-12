@@ -110,8 +110,6 @@ public static class ULS_AutoGroupUtility
                 rejectKey = "ULS_AutoGroup_MixAutoAndManual";
                 return false;
             }
-
-            return true;
         }
 
 

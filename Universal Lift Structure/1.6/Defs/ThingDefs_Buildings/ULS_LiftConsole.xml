@@ -1,51 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <!-- 文件意图：升降控制台（Console 模式下的操作目标）。
-         说明：不添加研究前置/建造条件（开发测试占位）；实际升降由本 Mod 的请求队列 + 原版 flick 派工触发。 -->
-
+    <!-- 升降控制台 -->
     <ThingDef ParentName="BuildingBase">
         <defName>ULS_LiftConsole</defName>
-        <thingClass>Building</thingClass>
-        <category>Building</category>
-        <!-- 名称/描述留空，使用 DefInjected 本地化 -->
         <label />
         <description />
-
         <graphicData>
-            <!-- 临时占位贴图：复用原版 CommsConsole 贴图路径（若未来替换资源，可改为自有贴图）。 -->
             <texPath>Things/Building/Misc/CommsConsole</texPath>
+
+            <!-- Graphic_Single：单张贴图
+               - Graphic_Multi：多方向贴图
+               - Graphic_Random：随机贴图-->
             <graphicClass>Graphic_Single</graphicClass>
             <drawSize>(1,1)</drawSize>
         </graphicData>
         <uiIconPath>Things/Building/Misc/CommsConsole</uiIconPath>
-
         <size>(1,1)</size>
-
         <statBases>
-            <!-- 〇：开发测试占位数值 -->
             <WorkToBuild>800</WorkToBuild>
             <MaxHitPoints>200</MaxHitPoints>
             <Flammability>0.3</Flammability>
             <MarketValue>120</MarketValue>
         </statBases>
 
+        <!--成本-->
         <costList>
+            <!--<材料>数量-->
             <Steel>60</Steel>
             <ComponentIndustrial>2</ComponentIndustrial>
         </costList>
 
-        <designationCategory>Structure</designationCategory>
+        <!--建造菜单分类 -->
+        <designationCategory>Misc</designationCategory>
         <terrainAffordanceNeeded>Light</terrainAffordanceNeeded>
-
         <comps>
-            <!-- 电力：常规待机 20W。Flick 请求改由控制器的代理触发，避免本体被 flick 断电。 -->
+            <!-- CompProperties_Power：电力组件 -->
             <li Class="CompProperties_Power">
+                <!-- CompPowerTrader：消耗电力
+                   - CompPowerPlant：产生电力-->
                 <compClass>CompPowerTrader</compClass>
-                <basePowerConsumption>20</basePowerConsumption>
+
+                <!-- 基础电力消耗 -->
+                <basePowerConsumption>50</basePowerConsumption>
             </li>
-            <!-- 电源开关：允许玩家指派开关电源 -->
+
+            <!-- 默认允许指定关闭电源 -->
             <li Class="CompProperties_Flickable" />
-            <!-- flick 触发器：Pulse 版本隐藏开关 Gizmo。 -->
+
+            <!--自定义组件-->
             <li Class="Universal_Lift_Structure.CompProperties_LiftConsole" />
         </comps>
     </ThingDef>

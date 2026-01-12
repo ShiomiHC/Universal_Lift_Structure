@@ -138,6 +138,7 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
             }
 
             controller.MultiCellGroupRootCell = IntVec3.Invalid;
+            controller.ClearLiftProcessAndRemoveBlocker();
         }
     }
 }

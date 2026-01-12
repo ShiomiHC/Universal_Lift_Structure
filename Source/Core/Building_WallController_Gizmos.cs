@@ -35,7 +35,8 @@ public partial class Building_WallController
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_GroupSetIdWithValue".Translate(controllerGroupId),
-                    icon = TexCommand.ForbidOff,
+                    defaultDesc = "ULS_GroupSetIdDesc".Translate(),
+                    icon = ULS_GizmoTextures.SetGroupId,
                     action = delegate { OnGizmoAction_SetGroupId(selectedControllers); }
                 };
             }
@@ -46,7 +47,8 @@ public partial class Building_WallController
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_GroupMergeToPrimary".Translate(),
-                    icon = TexCommand.ForbidOff,
+                    defaultDesc = "ULS_GroupMergeToPrimaryDesc".Translate(),
+                    icon = ULS_GizmoTextures.MergeGroups,
                     action = delegate { OnGizmoAction_MergeGroups(selectedControllers); }
                 };
             }
@@ -57,7 +59,8 @@ public partial class Building_WallController
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_GroupSplitToNew".Translate(),
-                    icon = TexCommand.ForbidOff,
+                    defaultDesc = "ULS_GroupSplitToNewDesc".Translate(),
+                    icon = ULS_GizmoTextures.SplitGroup,
                     action = delegate { OnGizmoAction_SplitToNewGroup(selectedControllers); }
                 };
             }
@@ -129,7 +132,8 @@ public partial class Building_WallController
                         yield return new Command_Action
                         {
                             defaultLabel = "ULS_AutoGroup_FilterWithValue".Translate(labelText),
-                            icon = TexCommand.ForbidOff,
+                            defaultDesc = "ULS_AutoGroup_FilterDesc".Translate(),
+                            icon = ULS_GizmoTextures.SetAutoGroupFilter,
                             action = delegate { OnGizmoAction_SetAutoGroupFilter(groupIds); }
                         };
                     }
@@ -146,7 +150,8 @@ public partial class Building_WallController
         Command_Action raiseCommand = new Command_Action
         {
             defaultLabel = "ULS_RaiseGroup".Translate(),
-            icon = TexCommand.ForbidOn,
+            defaultDesc = "ULS_RaiseGroupDesc".Translate(),
+            icon = ULS_GizmoTextures.RaiseGroup,
             action = GizmoRaiseGroupCommandAction
         };
 
@@ -255,6 +260,7 @@ public partial class Building_WallController
             Command_Action cancelCommand = new Command_Action
             {
                 defaultLabel = "ULS_CancelLift".Translate(),
+                defaultDesc = "ULS_CancelLiftDesc".Translate(),
                 icon = TexCommand.ClearPrioritizedWork,
                 action = delegate
                 {

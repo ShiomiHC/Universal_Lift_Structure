@@ -52,8 +52,10 @@
         <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />
         <Compile Include="Source\Core\Building_WallController_Utility.cs" />
         <Compile Include="Source\Core\ULS_GhostRenderer.cs" />
+        <Compile Include="Source\Core\ULS_GizmoTextures.cs" />
         <Compile Include="Source\DefOf\ULS_DesignationDefOf.cs" />
         <Compile Include="Source\DefOf\ULS_JobDefOf.cs" />
+        <Compile Include="Source\DefOf\ULS_ThingDefOf.cs" />
         <Compile Include="Source\GlobalUsings.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_Building_GetGizmos.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_DrawManager_DynamicThings.cs" />
@@ -64,8 +66,8 @@
         <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
         <Compile Include="Source\Misc\ULS_StatPart_StoredMarketValue.cs" />
         <Compile Include="Source\Misc\ULS_Dialog_SetControllerGroupId.cs" />
-        <Compile Include="Source\Misc\ULS_ThingDefOf.cs" />
         <Compile Include="Source\Rendering\ULS_LiftClipRenderer.cs" />
+        <Compile Include="Source\Rendering\ULS_Materials.cs" />
         <Compile Include="Source\Rendering\ULS_ShaderTypeDefOf.cs" />
         <Compile Include="Source\Rendering\ULS_Textures.cs" />
         <Compile Include="Source\Settings\LiftControlMode.cs" />

@@ -87,19 +87,12 @@ public partial class Building_WallController
     }
 
 
-    private bool IsReadyForLiftPower()
+    public bool IsReadyForLiftPower()
     {
-        if (!PowerFeatureEnabled)
-        {
-            return true;
-        }
-
-        if (HasPowerComp)
-        {
-            return PowerOn;
-        }
-
-        return false;
+        // 电力功能是额外电力需求!
+        // 检查电力组件
+        if (!HasPowerComp) return false;
+        return PowerOn;
     }
 
 

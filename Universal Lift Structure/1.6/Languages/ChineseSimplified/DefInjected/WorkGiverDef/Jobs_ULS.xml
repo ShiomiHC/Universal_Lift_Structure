@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
     <ULS_FlickLiftStructure.label>升降结构</ULS_FlickLiftStructure.label>
+    <ULS_FlickLiftStructure.verb>升降</ULS_FlickLiftStructure.verb>
     <ULS_FlickLiftStructure.gerund>正在 升降结构</ULS_FlickLiftStructure.gerund>
 </LanguageData>

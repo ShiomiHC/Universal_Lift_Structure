@@ -168,7 +168,7 @@ public partial class Building_WallController
     }
 
 
-    private void ClearLiftProcessAndRemoveBlocker()
+    internal void ClearLiftProcessAndRemoveBlocker()
     {
         DestroyLiftBlockerIfAny();
 

@@ -5,9 +5,7 @@ public static class ULS_LiftClipRenderer
     private const int VisibleSteps = 64;
 
 
-    private const string LiftShaftAtlasTexPath = "Things/Building/Linked/ULS_LiftShaft_Atlas";
     private const float LiftShaftBackgroundAltitudeOffset = 0.01f;
-    private static Material liftShaftBaseMat;
 
 
     private static bool ShouldSkipClipForLinkMask(int linkMask)
@@ -85,12 +83,7 @@ public static class ULS_LiftClipRenderer
         Map map,
         Func<IntVec3, LinkDirections?> tryGetCachedLinkDirections)
     {
-        if (liftShaftBaseMat == null)
-        {
-            liftShaftBaseMat = MaterialPool.MatFrom(LiftShaftAtlasTexPath, ShaderDatabase.Cutout);
-        }
-
-        if (liftShaftBaseMat == null)
+        if (ULS_Materials.LiftShaftBase == null)
         {
             return;
         }
@@ -100,7 +93,7 @@ public static class ULS_LiftClipRenderer
         foreach (IntVec3 cell in rect)
         {
             LinkDirections linkSet = GetLiftShaftLinkDirections(cell, map, rootCell, tryGetCachedLinkDirections);
-            Material material = MaterialAtlasPool.SubMaterialFromAtlas(liftShaftBaseMat, linkSet);
+            Material material = MaterialAtlasPool.SubMaterialFromAtlas(ULS_Materials.LiftShaftBase, linkSet);
 
             Vector3 center = cell.ToVector3Shifted();
             center.y = altitude;

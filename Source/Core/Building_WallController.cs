@@ -81,11 +81,19 @@ public partial class Building_WallController : Building, IThingHolder
 
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
         LiftControlMode controlMode = settings?.liftControlMode ?? LiftControlMode.Remote;
+        Designation des = Map.designationManager.DesignationOn(this, ULS_DesignationDefOf.ULS_FlickLiftStructure);
 
         // Remote 模式不使用期望状态机制
         if (controlMode == LiftControlMode.Remote)
         {
             wantedLiftAction = ULS_LiftActionRequest.None;
+
+            // 清除可能残留的 Designation（从其他模式切换到 Remote 时）
+            if (des != null)
+            {
+                des.Delete();
+            }
+
             return;
         }
 
@@ -150,7 +158,6 @@ public partial class Building_WallController : Building, IThingHolder
             needsDesignation = (mapComp != null && mapComp.HasRequestForController(this));
         }
 
-        Designation des = Map.designationManager.DesignationOn(this, ULS_DesignationDefOf.ULS_FlickLiftStructure);
         if (needsDesignation && des == null)
         {
             Map.designationManager.AddDesignation(new Designation(this, ULS_DesignationDefOf.ULS_FlickLiftStructure));

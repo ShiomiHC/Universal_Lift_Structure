@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
-
+    <!-- 标记 -->
     <DesignationDef>
         <defName>ULS_FlickLiftStructure</defName>
-        <!-- 操控升降结构 -->
         <texturePath>UI/ULS_Flick</texturePath>
+
+        <!-- 标记的目标类型 -->
         <targetType>Thing</targetType>
-        <!-- 禁用原版右键取消：使用自定义取消 Gizmo 以确保正确清除期望状态和控制台队列 -->
+
+        <!--不允许默认右键取消-->
         <designateCancelable>false</designateCancelable>
     </DesignationDef>
 

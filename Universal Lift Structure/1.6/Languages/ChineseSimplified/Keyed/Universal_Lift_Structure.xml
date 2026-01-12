@@ -5,14 +5,21 @@
 
     <!-- [通用操作] -->
     <ULS_LowerGroup>降下</ULS_LowerGroup>
+    <ULS_LowerGroupDesc>降下当前结构</ULS_LowerGroupDesc>
     <ULS_RaiseGroup>升起</ULS_RaiseGroup>
+    <ULS_RaiseGroupDesc>升起降下的结构</ULS_RaiseGroupDesc>
     <ULS_CancelLift>取消升降</ULS_CancelLift>
+    <ULS_CancelLiftDesc>取消当前的升降操作请求</ULS_CancelLiftDesc>
 
     <!-- [组管理] -->
     <ULS_GroupMergeToPrimary>链接到选定组</ULS_GroupMergeToPrimary>
+    <ULS_GroupMergeToPrimaryDesc>将选中的控制器合并到同一组</ULS_GroupMergeToPrimaryDesc>
     <ULS_GroupSplitToNew>分离为新组</ULS_GroupSplitToNew>
+    <ULS_GroupSplitToNewDesc>将选中的控制器从当前组分离为新组</ULS_GroupSplitToNewDesc>
+    <ULS_GroupSetIdDesc>设置控制器的组ID</ULS_GroupSetIdDesc>
 
     <!-- [自动控制器] -->
+    <ULS_AutoGroup_FilterDesc>设置自动控制器(组)的目标筛选</ULS_AutoGroup_FilterDesc>
     <ULS_AutoGroup_SetFilter_Friendly>设为：友方</ULS_AutoGroup_SetFilter_Friendly>
     <ULS_AutoGroup_SetFilter_Hostile>设为：敌方</ULS_AutoGroup_SetFilter_Hostile>
     <ULS_AutoGroup_SetFilter_Neutral>设为：中立</ULS_AutoGroup_SetFilter_Neutral>
@@ -45,7 +52,7 @@
     <ULS_GroupBlacklistedAt>坐标 {0} 的结构未在白名单中</ULS_GroupBlacklistedAt>
     <ULS_GroupNoLowerable>组内没有可被降下的结构</ULS_GroupNoLowerable>
 
-    <ULS_GroupNoRaiseable>组内所有控制器均被阻挡</ULS_GroupNoRaiseable>
+    <ULS_GroupNoRaiseable>组内所有待升起结构均被阻挡</ULS_GroupNoRaiseable>
 
 
     <ULS_AutoGroup_MixAutoAndManual>自动控制器组与手动控制器组不能混为同一组</ULS_AutoGroup_MixAutoAndManual>
@@ -58,11 +65,11 @@
 
 
     <!-- [电力与控制台] -->
-    <ULS_PowerOff>未连接电网</ULS_PowerOff>
+    <ULS_PowerOff>组内存在未供电的结构控制器</ULS_PowerOff>
     <ULS_GroupPowerInsufficient>组内存在未供电的结构控制器</ULS_GroupPowerInsufficient>
-    <ULS_PowerLost>升降过程中断电，已回退</ULS_PowerLost>
+    <ULS_PowerLost>升降过程中断: 断电</ULS_PowerLost>
     <ULS_LiftConsoleMissing>未找到可用的升降控制台</ULS_LiftConsoleMissing>
-    <ULS_LiftConsolePowerOff>升降控制台已断电</ULS_LiftConsolePowerOff>
+    <ULS_LiftConsolePowerOff>升降控制台未连接到电网</ULS_LiftConsolePowerOff>
 
 
     <!-- ==================== 界面 (UI) ==================== -->
@@ -87,7 +94,7 @@
     <ULS_Settings_GroupMaxSize>组规模上限</ULS_Settings_GroupMaxSize>
 
     <ULS_Settings_EnableLiftPower>启用升降额外耗电逻辑</ULS_Settings_EnableLiftPower>
-    <ULS_Settings_EnableLiftPower_Desc>启用后升降过程：每个参与d 控制器额外耗电1000W； \n缺电时无法开始升降，升降途中断电将失败</ULS_Settings_EnableLiftPower_Desc>
+    <ULS_Settings_EnableLiftPower_Desc>启用后：升降过程中，每个参与的控制器额外耗电1000W； \n缺电时无法开始升降，升降途中断电将失败</ULS_Settings_EnableLiftPower_Desc>
 
     <ULS_Settings_LiftDurationHpSet>升降耗时受 耐久 影响倍率: {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>升降耗时受 质量 影响倍率: {0}</ULS_Settings_LiftDurationMassSet>

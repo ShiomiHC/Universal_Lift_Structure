@@ -90,17 +90,12 @@ public partial class Building_WallController
             return false;
         }
 
-        if (defInstance.defName == "ULS_WallController")
+        if (defInstance == ULS_ThingDefOf.ULS_WallController)
         {
             return true;
         }
 
-        if (defInstance.entityDefToBuild is { defName: "ULS_WallController" })
-        {
-            return true;
-        }
-
-        return false;
+        return defInstance.entityDefToBuild == ULS_ThingDefOf.ULS_WallController;
     }
 
 

@@ -1,19 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Defs>
     <!-- 文件意图：控制器建筑的 Def 定义。 -->
-
-    <!-- 抽象基类意图：统一指定 thingClass=Universal_Lift_Structure.Building_WallController，并设置为
-    isEdifice=false 以允许与结构共格；同时允许覆盖墙放置（canPlaceOverWall / isPlaceOverableWall）。 -->
     <ThingDef ParentName="BuildingBase" Name="ULS_WallControllerBase" Abstract="True">
         <!-- 逻辑类 -->
         <thingClass>Universal_Lift_Structure.Building_WallController</thingClass>
-        <!-- 建筑分类 -->
-        <category>Building</category>
-
-        <!--
-          重要：升降中间态需要 Tick 推进。
-          控制器本体默认可能为 Never，从而导致升/降过程永远不结束。
-        -->
+        <!-- 必须实时准备升降动画 -->
         <tickerType>Normal</tickerType>
         <!-- 需求地形 -->
         <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
@@ -23,19 +15,12 @@
         <rotatable>false</rotatable>
         <!-- 贴图 -->
         <graphicData>
-            <texPath>Things/Building/Linked/ULS_WallController_Atlas</texPath>
             <graphicClass>Graphic_Single</graphicClass>
             <!-- 连接 -->
             <linkType>Basic</linkType>
-            <!-- 连接标志-->
-            <linkFlags>
-                <li>Custom4</li>
-            </linkFlags>
             <drawSize>(1,1)</drawSize>
         </graphicData>
-        <!-- UI 图标 -->
         <useSameGraphicForGhost>false</useSameGraphicForGhost>
-        <uiIconPath>Things/Building/Linked/ULS_WallController_Icon</uiIconPath>
         <!-- 建筑节点设置 -->
         <building>
             <blueprintGraphicData>
@@ -50,9 +35,9 @@
             <isPlaceOverableWall>true</isPlaceOverableWall>
         </building>
 
-        <!-- 名称留空，使用本地化 -->
+        <!-- 名称-->
         <label />
-        <!-- 描述留空，使用本地化 -->
+        <!-- 描述-->
         <description />
         <!-- UI 图标 -->
         <uiIconPath>Things/Building/Linked/ULS_WallController_Icon</uiIconPath>
@@ -67,12 +52,6 @@
             <MarketValue>50</MarketValue>
         </statBases>
 
-        <!-- 造价 -->
-        <costList>
-            <Steel>30</Steel>
-            <ComponentIndustrial>1</ComponentIndustrial>
-        </costList>
-
         <!-- 建筑菜单类别：结构 -->
         <designationCategory>Structure</designationCategory>
         <!-- 填充样式：2D -->
@@ -82,15 +61,23 @@
         <placeWorkers>
             <li>Universal_Lift_Structure.ULS_PlaceRule_WallController</li>
         </placeWorkers>
-        <!-- 绘制方式：仅地图网格 -->
+        <!-- 绘制方式：静态地图-->
         <drawerType>MapMeshOnly</drawerType>
     </ThingDef>
 
-    <!-- 实体 Def 意图：控制器实体 Def：占位贴图与 UI 图标、通行/不填充体积以共格、建造类别与造价/耐久等基础数值。
-         注意：<label/>、<description/> 留空，显示文本由 Languages/ChineseSimplified/DefInjected 提供。
-         〇：部分数值（如造价/耐久/WorkToBuild）当前为开发测试占位，后续可调优。 -->
+    <!-- 控制器 -->
     <ThingDef ParentName="ULS_WallControllerBase">
         <defName>ULS_WallController</defName>
+        <!-- 贴图 -->
+        <graphicData>
+            <texPath>Things/Building/Linked/ULS_WallController_Atlas</texPath>
+            <!-- 连接标志-->
+            <linkFlags>
+                <li>Custom4</li>
+            </linkFlags>
+        </graphicData>
+        <!-- UI 图标 -->
+        <uiIconPath>Things/Building/Linked/ULS_WallController_Icon</uiIconPath>
         <comps>
             <!-- 电力：待机 1W -->
             <li Class="CompProperties_Power">
@@ -100,49 +87,47 @@
             <!-- 电源开关：允许玩家指派开关电源 -->
             <li Class="CompProperties_Flickable" />
         </comps>
+        <!-- 造价 -->
+        <costList>
+            <Steel>30</Steel>
+            <ComponentIndustrial>1</ComponentIndustrial>
+        </costList>
     </ThingDef>
 
-    <!-- 自动控制器 Def 意图：结构控制器（自动）。
-         行为：当（过滤器匹配的）Pawn 接近该组任意控制器时自动“降下/收纳(开)”；离开后延迟自动“升起/放出(关)”。
-         过滤器：由控制器 Gizmo 按组切换（敌方/友方/中立）；本 Def 中的 autoGroupType 仅作为“新组默认值”。
-         注意：自动组与手动组禁止混组。 -->
+    <!-- 自动控制器-->
     <ThingDef ParentName="ULS_WallControllerBase">
         <defName>ULS_WallController_Auto</defName>
+        <graphicData>
+            <texPath>Things/Building/Linked/ULS_WallController_Auto_Atlas</texPath>
+            <linkFlags>
+                <li>Custom8</li>
+            </linkFlags>
+        </graphicData>
+        <uiIconPath>Things/Building/Linked/ULS_WallController_Auto_Icon</uiIconPath>
         <comps>
-            <!-- 电力：待机 5W，升降耗电由代码控制（开启功能时按每控制器+100W）。 -->
             <li Class="CompProperties_Power">
                 <compClass>CompPowerTrader</compClass>
                 <basePowerConsumption>5</basePowerConsumption>
             </li>
-            <!-- 电源开关：允许玩家指派开关电源 -->
             <li Class="CompProperties_Flickable" />
 
-            <!-- 自动组标记：MapComponent 将按组扫描并执行自动开闭。 -->
+            <!-- 自动组标记-->
             <li Class="Universal_Lift_Structure.CompProperties_ULS_AutoGroupMarker">
-                <!-- 默认过滤器：友方/我方（Faction!=null 且非敌对）。玩家可在 Gizmo 中按组改为 敌方/中立。 -->
+                <!-- 默认过滤器：友方 -->
                 <autoGroupType>Friendly</autoGroupType>
-                <!-- 扫描半径：方形 5x5（包含自身） -->
+                <!-- 扫描半径 -->
                 <maxRadius>2</maxRadius>
-                <!-- 扫描间隔：60 tick（1x≈1次/秒） -->
+                <!-- 扫描间隔 -->
                 <checkIntervalTicks>60</checkIntervalTicks>
-                <!-- 升起延迟：目标离开后延迟一段时间再升起，避免路过抖动 -->
-                <closeDelayTicks>120</closeDelayTicks>
-                <!-- 开闭冷却：避免失败场景反复触发 -->
-                <toggleCooldownTicks>60</toggleCooldownTicks>
+                <!-- 升起延迟 -->
+                <closeDelayTicks>30</closeDelayTicks>
+                <!-- 开闭冷却 -->
+                <toggleCooldownTicks>180</toggleCooldownTicks>
             </li>
         </comps>
+        <costList>
+            <Steel>30</Steel>
+            <ComponentIndustrial>5</ComponentIndustrial>
+        </costList>
     </ThingDef>
-    <!-- 状态定义 收纳物价值叠加 -->
-    <StatDef>
-        <defName>ULS_StoredThingMarketValueIgnoreHp</defName>
-        <label>财富值</label>
-        <alwaysHide>true</alwaysHide>
-        <workerClass>StatWorker</workerClass>
-        <category>Building</category>
-        <displayPriorityInCategory>10</displayPriorityInCategory>
-        <parts>
-            <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue" />
-        </parts>
-    </StatDef>
-
 </Defs>

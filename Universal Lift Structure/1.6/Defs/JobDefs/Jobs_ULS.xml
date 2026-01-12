@@ -1,24 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
-
     <JobDef>
         <defName>ULS_FlickLiftStructure</defName>
+        <!-- 工作步骤 -->
         <driverClass>Universal_Lift_Structure.JobDriver_FlickLiftStructure</driverClass>
-        <reportString /> <!-- 正在扳动目标。 -->
+        <reportString /> <!-- pawn报告 -->
+
+        <!-- 允许顺路执行 -->
         <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
     </JobDef>
-
     <WorkGiverDef>
         <defName>ULS_FlickLiftStructure</defName>
-        <label /> <!-- 扳动升降结构 -->
+        <label />
+
+        <!--判断某个 Thing 是否有待执行的工作（HasJobOnThing）
+             if有，创建对应的 Job 实例（JobOnThing）-->
         <giverClass>Universal_Lift_Structure.WorkGiver_FlickLiftStructure</giverClass>
+
+        <!--工作类型分类-->
         <workType>BasicWorker</workType>
-        <priorityInType>100</priorityInType>
-        <verb>flick</verb>
-        <gerund /> <!-- 正在扳动 -->
+
+        <!--优先级-->
+        <priorityInType>300</priorityInType>
+
+        <!--动词描述-->
+        <verb/>
+
+        <!--正在进行时描述-->
+        <gerund />
+
+        <!-- 需求pawn能力- Manipulation = 操作能力（手部功能正常）-->
         <requiredCapacities>
             <li>Manipulation</li>
         </requiredCapacities>
+
+        <!--持续执行-->
         <prioritizeSustains>true</prioritizeSustains>
     </WorkGiverDef>
 
