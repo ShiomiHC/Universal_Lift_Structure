@@ -1,0 +1,16 @@
+<Defs>
+    <!-- 状态定义 收纳物价值叠加 -->
+    <StatDef>
+        <defName>ULS_StoredMarketValue</defName>
+        <label>财富值</label>
+        <!-- 隐藏 -->
+        <alwaysHide>true</alwaysHide>
+        <workerClass>StatWorker</workerClass>
+        <category>Building</category>
+        <displayPriorityInCategory>10</displayPriorityInCategory>
+        <!-- 内容 -->
+        <parts>
+            <li Class="Universal_Lift_Structure.ULS_StatPart_StoredMarketValue" />
+        </parts>
+    </StatDef>
+</Defs>
