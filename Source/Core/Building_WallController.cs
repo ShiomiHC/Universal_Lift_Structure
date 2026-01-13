@@ -31,6 +31,10 @@ public partial class Building_WallController : Building, IThingHolder
     // 期望的升降动作（用于 Gizmo 取消功能）
     private ULS_LiftActionRequest wantedLiftAction = ULS_LiftActionRequest.None;
 
+    // Cache MapComponents
+    private ULS_LiftRequestMapComponent cachedLiftRequestComp;
+    private ULS_ControllerGroupMapComponent cachedGroupComp;
+
     public bool LiftActionPending => liftActionPending;
     public ULS_LiftActionRequest WantedLiftAction => wantedLiftAction;
 
@@ -128,7 +132,7 @@ public partial class Building_WallController : Building, IThingHolder
         // Console 模式：同步到全局队列
         else if (controlMode == LiftControlMode.Console)
         {
-            var mapComp = Map.GetComponent<ULS_LiftRequestMapComponent>();
+            var mapComp = cachedLiftRequestComp;
             if (mapComp != null)
             {
                 if (needsDesignation)
@@ -154,7 +158,7 @@ public partial class Building_WallController : Building, IThingHolder
         // 在 Console 模式下，Designation 基于全局队列中是否有针对此控制器的请求
         if (controlMode == LiftControlMode.Console)
         {
-            var mapComp = Map.GetComponent<ULS_LiftRequestMapComponent>();
+            var mapComp = cachedLiftRequestComp;
             needsDesignation = (mapComp != null && mapComp.HasRequestForController(this));
         }
 
@@ -256,12 +260,17 @@ public partial class Building_WallController : Building, IThingHolder
     {
         base.SpawnSetup(map, respawningAfterLoad);
 
+        if (map != null)
+        {
+            cachedLiftRequestComp = map.GetComponent<ULS_LiftRequestMapComponent>();
+            cachedGroupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        }
 
         RefreshPowerCacheAndOutput();
 
         if (map != null)
         {
-            ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+            ULS_ControllerGroupMapComponent groupComp = cachedGroupComp;
             if (groupComp != null)
             {
                 if (respawningAfterLoad)
@@ -494,14 +503,14 @@ public partial class Building_WallController : Building, IThingHolder
         // 从全局升降队列移除针对本控制器的请求
         if (map != null)
         {
-            var liftReqComp = map.GetComponent<ULS_LiftRequestMapComponent>();
+            var liftReqComp = cachedLiftRequestComp;
             liftReqComp?.RemoveRequestsForController(this);
         }
 
         // 从控制器组移除
         if (map != null)
         {
-            map.GetComponent<ULS_ControllerGroupMapComponent>()?.RemoveControllerCell(position);
+            cachedGroupComp?.RemoveControllerCell(position);
 
             // 如果是自动组控制器，通知自动组系统
             if (ULS_AutoGroupUtility.IsAutoController(this))

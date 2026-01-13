@@ -29,38 +29,38 @@ public partial class Building_WallController
     }
 
 
-    private HashSet<Building_WallController> GetMultiCellMemberControllersOrSelf(Map map)
+    private void GetMultiCellMemberControllersOrSelf(Map map, HashSet<Building_WallController> outResult)
     {
-        HashSet<Building_WallController> result = new HashSet<Building_WallController> { this };
+        outResult.Clear();
+        outResult.Add(this);
 
         if (map == null)
         {
-            return result;
+            return;
         }
 
         if (!multiCellGroupRootCell.IsValid)
         {
-            return result;
+            return;
         }
 
         ULS_MultiCellGroupMapComponent multiCellComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
+
         if (multiCellComp == null ||
             !multiCellComp.TryGetGroup(multiCellGroupRootCell, out var record) ||
             record == null ||
             record.memberControllerCells == null)
         {
-            return result;
+            return;
         }
 
         foreach (var cell in record.memberControllerCells)
         {
             if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
             {
-                result.Add(controller);
+                outResult.Add(controller);
             }
         }
-
-        return result;
     }
 
 

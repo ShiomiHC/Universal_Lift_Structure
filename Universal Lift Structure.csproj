@@ -44,6 +44,7 @@
         <Compile Include="Source\Components\ULS_LiftRequestMapComponent.cs" />
         <Compile Include="Source\Components\ULS_MultiCellGroupMapComponent.cs" />
         <Compile Include="Source\Components\ULS_MultiCellGroupRecord.cs" />
+        <Compile Include="Source\Core\Building_LiftBlocker.cs" />
         <Compile Include="Source\Core\Building_WallController.cs" />
         <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
         <Compile Include="Source\Core\Building_WallController_Group.cs" />

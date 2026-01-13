@@ -123,28 +123,17 @@ public partial class Building_WallController
         }
 
         Vector3 basePos = Position.ToVector3Shifted();
+        float altitude = AltitudeLayer.MoteLow.AltitudeFor();
 
-        if (!burst)
+        // 统一参数设置
+        int count = burst ? LiftBurstCount : 1;
+        float radius = burst ? LiftBurstRadius : LiftFleckRadius;
+        float scale = burst ? LiftBurstScale : LiftFleckScale;
+
+        for (int i = 0; i < count; i++)
         {
-            float radius = LiftFleckRadius;
-            float scale = LiftFleckScale;
-            FleckMaker.ThrowDustPuff(
-                (basePos + Gen.RandomHorizontalVector(radius)).WithY(AltitudeLayer.MoteLow.AltitudeFor()),
-                map,
-                scale);
-        }
-        else
-        {
-            int count = LiftBurstCount;
-            float radius = LiftBurstRadius;
-            float size = LiftBurstScale;
-            for (int i = 0; i < count; i++)
-            {
-                FleckMaker.ThrowDustPuff(
-                    (basePos + Gen.RandomHorizontalVector(radius)).WithY(AltitudeLayer.MoteLow.AltitudeFor()),
-                    map,
-                    size);
-            }
+            Vector3 drawPos = (basePos + Gen.RandomHorizontalVector(radius)).WithY(altitude);
+            FleckMaker.ThrowDustPuff(drawPos, map, scale);
         }
     }
 
@@ -217,7 +206,8 @@ public partial class Building_WallController
         int ticksTotal = CalculateLiftTicks(storedThing);
 
 
-        HashSet<Building_WallController> memberControllers = GetMultiCellMemberControllersOrSelf(map);
+        using var _ = new PooledHashSet<Building_WallController>(out var memberControllers);
+        GetMultiCellMemberControllersOrSelf(map, memberControllers);
 
 
         foreach (Building_WallController member in memberControllers)
@@ -245,16 +235,13 @@ public partial class Building_WallController
         if (map != null && liftBlockerCell.IsValid && liftBlockerCell.InBounds(map))
         {
             Building existing = map.edificeGrid[liftBlockerCell];
-            if (existing != null)
+            if (existing != null && existing.def == ULS_ThingDefOf.ULS_LiftBlocker)
             {
-                _ = existing.def;
-                _ = ULS_ThingDefOf.ULS_LiftBlocker;
+                return;
             }
-            else
-            {
-                GenSpawn.Spawn(ThingMaker.MakeThing(ULS_ThingDefOf.ULS_LiftBlocker), liftBlockerCell, map,
-                    WipeMode.VanishOrMoveAside);
-            }
+
+            GenSpawn.Spawn(ThingMaker.MakeThing(ULS_ThingDefOf.ULS_LiftBlocker), liftBlockerCell, map,
+                WipeMode.VanishOrMoveAside);
         }
     }
 
@@ -265,7 +252,7 @@ public partial class Building_WallController
         if (map != null && liftBlockerCell.IsValid && liftBlockerCell.InBounds(map))
         {
             Building blocker = map.edificeGrid[liftBlockerCell];
-            if (blocker != null && blocker.def == ULS_ThingDefOf.ULS_LiftBlocker)
+            if (blocker != null && blocker.def == ULS_ThingDefOf.ULS_LiftBlocker && !blocker.Destroyed)
             {
                 blocker.Destroy();
             }
@@ -324,13 +311,7 @@ public partial class Building_WallController
         bool shouldFinalize = liftFinalizeOnComplete;
 
 
-        DestroyLiftBlockerIfAny();
-        liftProcessState = LiftProcessState.None;
-        liftTicksRemaining = 0;
-        liftTicksTotal = 0;
-        liftBlockerCell = IntVec3.Invalid;
-        liftFinalizeOnComplete = false;
-        ApplyActivePowerInternal(active: false);
+        ClearLiftProcessAndRemoveBlocker();
 
 
         if (completedState == LiftProcessState.Raising && shouldFinalize)
@@ -355,6 +336,10 @@ public partial class Building_WallController
             if (!IsBlockedForRaise(map, spawnCell, storedThing))
             {
                 TryRaiseNoMessage(map);
+            }
+            else
+            {
+                Log.Warning("[ULS] 预期外行为: 结构控制器升起结构时在其上建造了结构");
             }
         }
     }

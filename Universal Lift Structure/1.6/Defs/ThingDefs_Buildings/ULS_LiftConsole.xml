@@ -6,15 +6,16 @@
         <label />
         <description />
         <graphicData>
-            <texPath>Things/Building/Misc/CommsConsole</texPath>
+            <texPath>Things/Building/Misc/ULS_Console</texPath>
 
             <!-- Graphic_Single：单张贴图
                - Graphic_Multi：多方向贴图
                - Graphic_Random：随机贴图-->
             <graphicClass>Graphic_Single</graphicClass>
-            <drawSize>(1,1)</drawSize>
+            <drawSize>(1,1.5)</drawSize>
+            <drawOffset>(0,0,0.25)</drawOffset>
         </graphicData>
-        <uiIconPath>Things/Building/Misc/CommsConsole</uiIconPath>
+        <uiIconPath>Things/Building/Misc/ULS_Console</uiIconPath>
         <size>(1,1)</size>
         <statBases>
             <WorkToBuild>800</WorkToBuild>

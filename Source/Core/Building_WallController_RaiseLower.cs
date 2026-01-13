@@ -109,8 +109,8 @@ public partial class Building_WallController
                     continue;
                 }
 
-                HashSet<Building_WallController> memberControllers =
-                    controller.GetMultiCellMemberControllersOrSelf(map);
+                using var _5 = new PooledHashSet<Building_WallController>(out var memberControllers);
+                controller.GetMultiCellMemberControllersOrSelf(map, memberControllers);
 
                 if (!controller.TryStartRaisingProcess(map))
                 {

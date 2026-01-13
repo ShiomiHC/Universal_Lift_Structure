@@ -16,7 +16,8 @@
         <!--是否参与血量逻辑-->
         <useHitPoints>false</useHitPoints>
 
-        <!--tickerType：Tick 频率-->
+        <!--tickerType：Tick
+        频率-->
         <tickerType>Never</tickerType> <!--外部-->
     </ThingDef>
 
@@ -26,6 +27,8 @@
            - C# 中通过 ULS_ThingDefOf.ULS_LiftBlocker 引用
         -->
         <defName>ULS_LiftBlocker</defName>
+
+        <thingClass>Universal_Lift_Structure.Building_LiftBlocker</thingClass>
 
         <!--通行性-->
         <passability>Impassable</passability>
