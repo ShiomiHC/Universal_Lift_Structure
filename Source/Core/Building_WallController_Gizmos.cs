@@ -2,8 +2,17 @@ namespace Universal_Lift_Structure;
 
 public partial class Building_WallController
 {
+    // ============================================================
+    // 【获取交互按钮 (Gizmos)】
+    // ============================================================
+    // 获取该控制器的交互按钮 (Gizmos)
+    //
+    // 【返回值】
+    // - Gizmo 列表
+    // ============================================================
     public override IEnumerable<Gizmo> GetGizmos()
     {
+        // 获取基类 Gizmos
         foreach (Gizmo gizmo in base.GetGizmos())
         {
             yield return gizmo;
@@ -19,6 +28,7 @@ public partial class Building_WallController
 
         if (selectedControllers.Count <= 0 || selectedControllers[0] == this)
         {
+            // 检查是否有归属非玩家的控制器
             bool anyNotPlayerOwned = false;
             foreach (var t in selectedControllers)
             {
@@ -32,6 +42,7 @@ public partial class Building_WallController
 
             if (!anyNotPlayerOwned)
             {
+                // [设置分组ID] 按钮
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_GroupSetIdWithValue".Translate(controllerGroupId),
@@ -42,6 +53,7 @@ public partial class Building_WallController
             }
 
 
+            // [合并编组] 按钮 (选中2个以上时显示)
             if (selectedControllers.Count >= 2 && !anyNotPlayerOwned)
             {
                 yield return new Command_Action
@@ -54,6 +66,7 @@ public partial class Building_WallController
             }
 
 
+            // [拆分编组] 按钮 (不包含多格建筑时显示)
             if (!anyNotPlayerOwned && !AnySelectedControllerInMultiCellHiddenGroup(selectedControllers))
             {
                 yield return new Command_Action
@@ -66,17 +79,20 @@ public partial class Building_WallController
             }
 
 
+            // [自动编组过滤] 按钮
             if (!anyNotPlayerOwned && Map != null && GetComp<ULS_AutoGroupMarker>() != null)
             {
                 ULS_AutoGroupMapComponent autoGroupComp = Map.GetComponent<ULS_AutoGroupMapComponent>();
                 if (autoGroupComp != null)
                 {
+                    // 扩展选中的控制器，包含多格组
                     List<Building_WallController> expandedList =
                         ExpandSelectedControllersToMultiCellHiddenGroupMembers(Map, selectedControllers);
                     HashSet<int> groupIds = new HashSet<int>();
                     bool allAreAutoGroup = true;
 
 
+                    // 检查所有选中的控制器是否都支持自动编组
                     foreach (var controller in expandedList)
                     {
                         if (controller != null && controller.Map == Map && controller.Spawned)
@@ -103,6 +119,7 @@ public partial class Building_WallController
                         ULS_AutoGroupType currentType = ULS_AutoGroupType.Friendly;
 
 
+                        // 检查选中组的过滤类型是否一致
                         foreach (int gid in groupIds)
                         {
                             ULS_AutoGroupType groupType =
@@ -147,6 +164,7 @@ public partial class Building_WallController
         }
 
 
+        // [升起编组] 按钮 (核心功能)
         Command_Action raiseCommand = new Command_Action
         {
             defaultLabel = "ULS_RaiseGroup".Translate(),
@@ -160,6 +178,7 @@ public partial class Building_WallController
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
 
         int groupMaxSize = GetGroupMaxSize();
+        // 检查升起按钮的可用性状态
         if (currentMap == null)
         {
             raiseCommand.Disable("ULS_NoStored".Translate());
@@ -171,6 +190,7 @@ public partial class Building_WallController
             ULS_ControllerGroupMapComponent groupComp = currentMap.GetComponent<ULS_ControllerGroupMapComponent>();
             int groupId = controllerGroupId;
 
+            // 检查组是否存在或有效
             if (groupComp == null || groupId < 1 ||
                 !groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) || groupCells == null ||
                 groupCells.Count == 0)
@@ -178,6 +198,7 @@ public partial class Building_WallController
                 raiseCommand.Disable("ULS_NoStored".Translate());
                 disabled = true;
             }
+            // 检查组大小限制
             else if (groupCells.Count > groupMaxSize)
             {
                 raiseCommand.Disable("ULS_GroupTooLarge".Translate(groupMaxSize));
@@ -185,6 +206,7 @@ public partial class Building_WallController
             }
             else
             {
+                // 检查是否有存储的物体
                 bool hasStored = false;
                 foreach (var t in groupCells)
                 {
@@ -203,6 +225,7 @@ public partial class Building_WallController
                 }
                 else
                 {
+                    // 检查是否有控制器忙碌
                     foreach (var t in groupCells)
                     {
                         if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller) &&
@@ -215,6 +238,7 @@ public partial class Building_WallController
                     }
 
 
+                    // 检查电力状况
                     if (!disabled && settings is { enableLiftPower: true })
                     {
                         foreach (var t in groupCells)
@@ -232,6 +256,7 @@ public partial class Building_WallController
             }
         }
 
+        // 控制台模式检查
         if (!disabled && (settings?.liftControlMode ?? LiftControlMode.Remote) == LiftControlMode.Console)
         {
             if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(currentMap, Position, out ThingWithComps _))

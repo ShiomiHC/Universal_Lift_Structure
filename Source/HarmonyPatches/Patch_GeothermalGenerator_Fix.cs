@@ -1,14 +1,19 @@
 namespace Universal_Lift_Structure;
 
-/// <summary>
-/// 修复地热发电机在收纳状态下的组件报错与排热逻辑。
-/// </summary>
+// ============================================================
+// 【Harmony 补丁：地热发电机兼容修复】
+// ============================================================
+// 作用：修复地热发电机在被收纳状态下的组件报错与错误排热逻辑。
+// 虽然地热发电机通常可移动性较差，但如果被强制收纳（或 Mod 允许搬运），其 CompTick 会因为 Map 为空而报错。
+// ============================================================
 [HarmonyPatch]
 public static class Patch_GeothermalGenerator_Fix
 {
-    /// <summary>
-    /// 拦截 CompPowerPlantSteam.CompTick，防止在收纳状态下因 Map 为空导致的报错。
-    /// </summary>
+    // ============================================================
+    // 【前置拦截：CompPowerPlantSteam.CompTick】
+    // ============================================================
+    // 防止在收纳状态下（Map 为 null）执行 Tick 逻辑导致 NRE。
+    // ============================================================
     [HarmonyPatch(typeof(CompPowerPlantSteam), nameof(CompPowerPlantSteam.CompTick))]
     [HarmonyPrefix]
     public static bool CompPowerPlantSteam_CompTick_Prefix(CompPowerPlantSteam __instance)
@@ -18,12 +23,16 @@ public static class Patch_GeothermalGenerator_Fix
         {
             return false;
         }
+
         return true;
     }
 
-    /// <summary>
-    /// 拦截 CompHeatPusher.ShouldPushHeatNow，防止在收纳状态下由于容器已生成而继续排热。
-    /// </summary>
+
+    // ============================================================
+    // 【前置拦截：CompHeatPusher.ShouldPushHeatNow】
+    // ============================================================
+    // 防止在收纳状态下由于容器已生成而继续排热（因为 CompHeatPusher 可能只检查 parent != null）。
+    // ============================================================
     [HarmonyPatch(typeof(CompHeatPusher), "get_ShouldPushHeatNow")]
     [HarmonyPrefix]
     public static bool CompHeatPusher_ShouldPushHeatNow_Prefix(CompHeatPusher __instance, ref bool __result)
@@ -34,6 +43,7 @@ public static class Patch_GeothermalGenerator_Fix
             __result = false;
             return false;
         }
+
         return true;
     }
 }

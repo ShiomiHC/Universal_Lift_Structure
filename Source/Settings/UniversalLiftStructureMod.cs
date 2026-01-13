@@ -1,66 +1,141 @@
 ﻿namespace Universal_Lift_Structure;
 
+// ============================================================
+// 【Mod 入口类】
+// ============================================================
+// 此类是 Mod 的入口点，负责初始化、配置管理和设置界面
+//
+// 【继承关系】
+// - 继承自 Mod：RimWorld 的 Mod 基类
+//
+// 【核心职责】
+// 1. Mod 初始化：在构造函数中应用 Harmony 补丁和加载设置
+// 2. 设置管理：提供静态访问点 Settings 供全局使用
+// 3. 设置界面：实现复杂的多标签页设置窗口
+//
+// 【设置界面结构】
+// - General（常规）标签：包含三个子分区（核心/视觉/性能）
+// - Filter（过滤器）标签：黑名单管理，支持按 Mod 筛选和搜索
+// - Other（其他）标签：重置按钮等杂项功能
+//
+// 【UI 系统说明】
+// - 使用 TabDrawer 绘制标签页头部
+// - 使用 Listing_Standard 进行垂直布局
+// - 使用 Widgets 绘制各种 UI 控件
+// - 使用 ScrollView 处理长列表内容
+//
+// 【Harmony 集成】
+// - 在构造函数中自动扫描并应用所有 Harmony 补丁
+// - Harmony ID: shiomi.UniversalLiftStructure
+// ============================================================
 public class UniversalLiftStructureMod : Mod
 {
-    // HarmonyID
+    // Harmony 补丁的唯一标识符
+    // 用于区分不同 Mod 的补丁，避免冲突
     private const string HarmonyId = "shiomi.UniversalLiftStructure";
 
 
-    // 设置页的标签页类型
+    // ============================================================
+    // 【内部枚举定义】
+    // ============================================================
+
+    // 设置窗口的主标签页类型
     private enum SettingsTab
     {
-        General,
-        Filter,
-        Other
+        General, // 常规设置（包含核心/视觉/性能三个子分区）
+        Filter, // 过滤器设置（黑名单管理）
+        Other // 其他设置（重置等）
     }
 
-    // 设置页 General 标签下的子分区
+    // General 标签页的子分区类型
     private enum GeneralSection
     {
-        Core,
-        Visual,
-        Performance
+        Core, // 核心设置（控制模式、分组大小等）
+        Visual, // 视觉设置（覆盖层显示等）
+        Performance // 性能设置（升降时长系数等）
     }
 
+    // ============================================================
+    // 【静态字段】
+    // ============================================================
+
+    // 全局设置实例
+    // 整个 Mod 通过此静态字段访问配置
     public static UniversalLiftStructureSettings Settings;
 
-    // UI 状态字段（不需要序列化）
+    // ============================================================
+    // 【UI 状态字段】
+    // ============================================================
+    // 这些字段仅用于跟踪 UI 状态，不会被序列化保存
+
+    // 当前选中的标签页
     private SettingsTab currentTab = SettingsTab.General;
+
+    // General 标签页中当前选中的子分区
     private GeneralSection currentSection = GeneralSection.Core;
 
 
-    private string selectedModPackageId;
-    private string selectedModName;
+    // Filter 标签页：当前选中的 Mod 过滤器
+    private string selectedModPackageId; // Mod 的唯一 ID
+    private string selectedModName; // Mod 的显示名称
 
-    private string blacklistSearch = string.Empty;
-    private Vector2 blacklistTreeScrollPosition = Vector2.zero;
-    private readonly HashSet<string> expandedThingClassKeys = new(StringComparer.Ordinal);
+    // Filter 标签页：黑名单搜索和 UI 状态
+    private string blacklistSearch = string.Empty; // 搜索框内容
+    private Vector2 blacklistTreeScrollPosition = Vector2.zero; // 滚动位置
+    private readonly HashSet<string> expandedThingClassKeys = new(StringComparer.Ordinal); // 展开的分类
 
+    // General 标签页：分组大小输入缓冲
     private string groupMaxSizeBuffer = string.Empty;
 
-    // 自动
+    // ============================================================
+    // 【构造函数】
+    // ============================================================
+    // RimWorld 在加载 Mod 时自动调用此构造函数
+    // 【执行内容】
+    // 1. 加载设置：从 XML 文件读取用户配置
+    // 2. 应用补丁：扫描并应用所有 Harmony 补丁类
+    // ============================================================
     public UniversalLiftStructureMod(ModContentPack content) : base(content)
     {
+        // 加载或创建设置实例
+        // 如果是首次运行，会使用默认值
         Settings = GetSettings<UniversalLiftStructureSettings>();
 
+        // 创建 Harmony 实例并应用所有补丁
+        // PatchAll() 会自动扫描程序集中所有带 [HarmonyPatch] 特性的类
         Harmony harmony = new(HarmonyId);
         harmony.PatchAll();
     }
 
-    // Mod 名称
+    // ============================================================
+    // 【设置类别名称】
+    // ============================================================
+    // 在游戏的 Mod 设置列表中显示的名称
+    // ============================================================
     public override string SettingsCategory()
     {
+        // 返回本地化的 Mod 名称
         return "ULS_SettingsCategory".Translate();
     }
 
 
-    // 绘制设置窗口的内容
+    // ============================================================
+    // 【设置窗口绘制方法】
+    // ============================================================
+    // RimWorld 在打开 Mod 设置窗口时调用此方法
+    // 【参数】
+    // inRect：可用的绘制区域
+    // 【实现】
+    // 使用 switch 根据当前标签页绘制不同内容
+    // ============================================================
     public override void DoSettingsWindowContents(Rect inRect)
     {
-        // 标签页区域
+        // 计算标签页内容区域（排除标签页头部高度）
         Rect tabBaseRect = new(inRect.x, inRect.y + TabDrawer.TabHeight, inRect.width,
             inRect.height - TabDrawer.TabHeight);
-        // TabRecord 列表
+
+        // 创建标签页列表
+        // 每个 TabRecord 包含：显示文本、点击回调、是否选中的判断函数
         List<TabRecord> tabs = new()
         {
             new("ULS_Tab_General".Translate(), () => currentTab = SettingsTab.General,
@@ -70,6 +145,7 @@ public class UniversalLiftStructureMod : Mod
             new("ULS_Tab_Other".Translate(), () => currentTab = SettingsTab.Other,
                 () => currentTab == SettingsTab.Other)
         };
+
         // 绘制标签页头部
         TabDrawer.DrawTabs(tabBaseRect, tabs);
 

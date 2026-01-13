@@ -1,11 +1,44 @@
 ﻿namespace Universal_Lift_Structure;
 
+// ============================================================
+// 【Mod 设置数据类】
+// ============================================================
+// 此类负责存储和管理所有的 Mod 配置选项
+//
+// 【继承关系】
+// - 继承自 ModSettings：RimWorld 的设置基类，提供序列化支持
+//
+// 【核心职责】
+// 1. 数据持久化：通过 ExposeData() 序列化/反序列化设置到 XML 文件
+// 2. 黑名单管理：提供添加、删除、查询黑名单的 API
+// 3. 缓存优化：使用 HashSet 缓存黑名单以提高查询性能
+//
+// 【设置分类】
+// - 过滤器设置：excludeNaturalRock, defNameBlacklist
+// - 核心设置：groupMaxSize, liftControlMode, enableLiftPower
+// - 视觉设置：showStoredGhostOverlay, enableOverlayDisplay 等
+// - 性能设置：liftDurationHpSet, liftDurationMassSet
+//
+// 【序列化机制】
+// - 可序列化字段：public 字段（会被保存到 XML）
+// - 不可序列化字段：private 字段（仅作为运行时缓存）
+// - 序列化方法：ExposeData() - 处理保存和加载逻辑
+//
+// 【使用方式】
+// - 通过 UniversalLiftStructureMod.Settings 静态属性访问
+// - 例如：UniversalLiftStructureMod.Settings.groupMaxSize
+// ============================================================
+
 // 继承自 ModSettings，可持久化的设置类
 public class UniversalLiftStructureSettings : ModSettings
 {
-    // 需要保存的字段应该是 public
-    // 不需要保存的字段（如缓存）应该是 private
-    // 必须在 ExposeData() 中注册
+    // ============================================================
+    // 【字段说明】
+    // ============================================================
+    // public 字段：会被序列化保存到 XML 文件
+    // private 字段：仅作为运行时缓存，不会被保存
+    // 所有需要保存的字段必须在 ExposeData() 中注册
+    // ============================================================
 
     // --- 过滤器设置 ---
     public bool excludeNaturalRock = true; // 是否排除天然岩石（默认 true）
@@ -130,9 +163,8 @@ public class UniversalLiftStructureSettings : ModSettings
     // - 两者必须保持同步！
     // ============================================================
 
-    /// <summary>
+
     /// 检查某个 defName 是否在黑名单中
-    /// </summary>
     public bool IsDefNameBlacklisted(string defName)
     {
         // 空字符串视为在黑名单中（安全处理）

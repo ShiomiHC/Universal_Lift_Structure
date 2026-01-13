@@ -2,23 +2,31 @@
 
 namespace Universal_Lift_Structure;
 
+// 负责执行升降操作的 JobDriver (Pawn 的具体工作流程)
+// 包含走向目标 -> 等待(操作) -> 完成(触发事件) 的流程
 public class JobDriver_FlickLiftStructure : JobDriver
 {
+    // 尝试在工作开始前预留目标
     public override bool TryMakePreToilReservations(bool errorOnFailed)
     {
         return pawn.Reserve(TargetA, job, 1, -1, null, errorOnFailed);
     }
 
+    // 定义工作流程 (Toils)
     protected override IEnumerable<Toil> MakeNewToils()
     {
+        // 1. 基本检查：如果目标消失或被销毁，则任务失败
         this.FailOnDespawnedOrNull(TargetIndex.A);
+
+        // 2. 状态检查：如果目标不再满足操作条件，则任务失败
         this.FailOn(delegate
         {
             Thing thing = TargetA.Thing;
 
-            // 如果是控制器，必须有 Designation
+            // 分情况检查控制器和控制台
             if (thing is Building_WallController)
             {
+                // 如果是控制器，必须仍有 Designation (表示玩家或系统仍希望操作它)
                 if (Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure) ==
                     null)
                 {
@@ -35,7 +43,7 @@ public class JobDriver_FlickLiftStructure : JobDriver
             return false;
         });
 
-        // 断电中断检查：若启用了电力需求且目标断电，则中断工作
+        // 3. 断电中断检查：若启用了电力需求且目标断电，则中断工作
         this.FailOn(delegate
         {
             UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
@@ -54,12 +62,15 @@ public class JobDriver_FlickLiftStructure : JobDriver
             return false;
         });
 
+        // 4. 走向目标
         yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
 
-        yield return Toils_General.Wait(15) // 短暂等待模拟操作
+        // 5. 执行操作（短暂等待模拟拨动开关）
+        yield return Toils_General.Wait(15)
             .FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch)
             .WithProgressBarToilDelay(TargetIndex.A);
 
+        // 6. 完成操作
         Toil finalize = new Toil
         {
             initAction = delegate
@@ -67,6 +78,7 @@ public class JobDriver_FlickLiftStructure : JobDriver
                 Thing thing = TargetA.Thing;
                 Pawn actor = pawn;
 
+                // 触发具体的完成逻辑
                 if (thing is Building_WallController controller)
                 {
                     controller.Notify_FlickedBy(actor);
@@ -76,7 +88,9 @@ public class JobDriver_FlickLiftStructure : JobDriver
                     console.NotifyFlicked();
                 }
 
-                // 移除 designations (虽然 controllers/console 内部可能已经移除了，这里再次确保)
+                // 清理工作：移除 designations 
+                // 虽然 controllers/console 内部逻辑（如 CancelLiftAction）可能已经移除了，
+                // 但为了保险起见，这里再次尝试移除，防止残留
                 Designation des =
                     Map.designationManager.DesignationOn(thing, ULS_DesignationDefOf.ULS_FlickLiftStructure);
                 if (des != null)
