@@ -48,6 +48,7 @@
         <Compile Include="Source\Core\Building_WallController.cs" />
         <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
         <Compile Include="Source\Core\Building_WallController_Group.cs" />
+        <Compile Include="Source\Core\Building_WallController_GroupHelpers.cs" />
         <Compile Include="Source\Core\Building_WallController_LiftProcess.cs" />
         <Compile Include="Source\Core\Building_WallController_Power.cs" />
         <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />

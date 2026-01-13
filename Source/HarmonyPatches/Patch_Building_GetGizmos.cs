@@ -139,6 +139,7 @@ public static class Patch_Building_GetGizmos
                     bool missingController = false;
                     bool anyStored = false;
                     bool anyInGroup = false;
+                    ULS_ControllerGroupMapComponent ctrlGroupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
                     foreach (IntVec3 cell in rect)
                     {
                         if (!ULS_Utility.TryGetControllerAt(map, cell, out Building_WallController c))
@@ -147,6 +148,15 @@ public static class Patch_Building_GetGizmos
                             break;
                         }
 
+                        // 组超限检测
+                        int cellGroupId = c.ControllerGroupId;
+                        if (ctrlGroupComp != null && cellGroupId > 0 &&
+                            ctrlGroupComp.TryGetGroupControllerCells(cellGroupId, out List<IntVec3> cellGroupCells) &&
+                            cellGroupCells != null && cellGroupCells.Count > groupMaxSize)
+                        {
+                            lowerCommand.Disable("ULS_GroupTooLarge".Translate(groupMaxSize));
+                            break;
+                        }
 
                         if (c.InLiftProcessForUI)
                         {

@@ -146,79 +146,26 @@ public partial class Building_WallController
         }
 
         int groupMaxSize = GetGroupMaxSize();
-        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
         int groupId = controllerGroupId;
 
-
-        if (groupComp == null ||
-            groupId < 1 ||
-            !groupComp.TryGetGroupControllerCells(groupId, out var cells) ||
-            cells == null ||
-            cells.Count == 0)
+        if (!TryGetValidGroupCells(map, groupId, groupMaxSize, showMessage, "ULS_NoStored", out var cells))
         {
-            if (showMessage)
-            {
-                MessageReject("ULS_NoStored", this);
-            }
-
             return;
         }
-
-
-        if (cells.Count > groupMaxSize)
-        {
-            if (showMessage)
-            {
-                MessageReject("ULS_GroupTooLarge", this, groupMaxSize);
-            }
-
-            return;
-        }
-
 
         using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
         using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
         using var _3 = new PooledList<Building_WallController>(out var raisableControllers);
 
         {
-            foreach (var cell in cells)
-            {
-                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
-                {
-                    IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
-                        ? controller.MultiCellGroupRootCell
-                        : controller.Position;
-
-                    if (seenRoots.Add(rootCell))
-                    {
-                        uniqueRootCells.Add(rootCell);
-                    }
-                }
-                else if (seenRoots.Add(cell))
-                {
-                    uniqueRootCells.Add(cell);
-                }
-            }
-
+            BuildUniqueRootCells(map, cells, uniqueRootCells, seenRoots);
 
             int storedCount = 0;
             int failedCount = 0;
 
-            if (PowerFeatureEnabled)
+            if (!CheckGroupPowerReady(map, uniqueRootCells, showMessage))
             {
-                foreach (var t in uniqueRootCells)
-                {
-                    if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                        !controller.IsReadyForLiftPower())
-                    {
-                        if (showMessage)
-                        {
-                            MessageReject("ULS_GroupPowerInsufficient", controller);
-                        }
-
-                        return;
-                    }
-                }
+                return;
             }
 
 
@@ -376,35 +323,12 @@ public partial class Building_WallController
             return;
         }
 
-
-        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
         int groupId = startController.ControllerGroupId;
 
-        if (groupComp == null ||
-            groupId < 1 ||
-            !groupComp.TryGetGroupControllerCells(groupId, out var cells) ||
-            cells == null ||
-            cells.Count == 0)
+        if (!TryGetValidGroupCells(map, groupId, groupMaxSize, showMessage, "ULS_GroupNoController", out var cells))
         {
-            if (showMessage)
-            {
-                MessageReject("ULS_GroupNoController", this);
-            }
-
             return;
         }
-
-
-        if (cells.Count > groupMaxSize)
-        {
-            if (showMessage)
-            {
-                MessageReject("ULS_GroupTooLarge", this, groupMaxSize);
-            }
-
-            return;
-        }
-
 
         using var _1 = new PooledList<IntVec3>(out var uniqueRootCells);
         using var _2 = new PooledHashSet<IntVec3>(out var seenRoots);
@@ -414,41 +338,11 @@ public partial class Building_WallController
                 out var oneCellLowerTargets);
 
         {
-            foreach (var cell in cells)
+            BuildUniqueRootCells(map, cells, uniqueRootCells, seenRoots);
+
+            if (!CheckGroupPowerReady(map, uniqueRootCells, showMessage))
             {
-                if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
-                {
-                    IntVec3 rootCell = controller.MultiCellGroupRootCell.IsValid
-                        ? controller.MultiCellGroupRootCell
-                        : controller.Position;
-
-                    if (seenRoots.Add(rootCell))
-                    {
-                        uniqueRootCells.Add(rootCell);
-                    }
-                }
-                else if (seenRoots.Add(cell))
-                {
-                    uniqueRootCells.Add(cell);
-                }
-            }
-
-
-            if (PowerFeatureEnabled)
-            {
-                foreach (var t in uniqueRootCells)
-                {
-                    if (ULS_Utility.TryGetControllerAt(map, t, out var controller) &&
-                        !controller.IsReadyForLiftPower())
-                    {
-                        if (showMessage)
-                        {
-                            MessageReject("ULS_GroupPowerInsufficient", controller);
-                        }
-
-                        return;
-                    }
-                }
+                return;
             }
 
 
