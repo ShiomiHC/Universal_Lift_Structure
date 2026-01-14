@@ -140,24 +140,23 @@ public partial class Building_WallController
     // 【参数说明】
     // - map: 地图
     // - selectedControllers: 选中的控制器列表
-    //
-    // 【返回值】
-    // - 扩展后的控制器列表
+    // - outResult: 输出扩展后的控制器列表（会被清空后填充）
     // ============================================================
-    private static List<Building_WallController> ExpandSelectedControllersToMultiCellHiddenGroupMembers(
+    private static void ExpandSelectedControllersToMultiCellHiddenGroupMembers(
         Map map,
-        List<Building_WallController> selectedControllers)
+        List<Building_WallController> selectedControllers,
+        List<Building_WallController> outResult)
     {
-        List<Building_WallController> result = new List<Building_WallController>();
+        outResult.Clear();
 
         if (map == null || selectedControllers == null || selectedControllers.Count <= 0)
         {
-            return result;
+            return;
         }
 
         ULS_MultiCellGroupMapComponent multiCellComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
-        HashSet<IntVec3> uniqueCells = new HashSet<IntVec3>();
 
+        using var _ = new PooledHashSet<IntVec3>(out var uniqueCells);
 
         foreach (var controller in selectedControllers)
         {
@@ -199,10 +198,8 @@ public partial class Building_WallController
             // 尝试获取该位置的控制器并添加到结果中
             if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
             {
-                result.Add(controller);
+                outResult.Add(controller);
             }
         }
-
-        return result;
     }
 }

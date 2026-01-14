@@ -86,8 +86,8 @@ public partial class Building_WallController
                 if (autoGroupComp != null)
                 {
                     // 扩展选中的控制器，包含多格组
-                    List<Building_WallController> expandedList =
-                        ExpandSelectedControllersToMultiCellHiddenGroupMembers(Map, selectedControllers);
+                    List<Building_WallController> expandedList = new List<Building_WallController>();
+                    ExpandSelectedControllersToMultiCellHiddenGroupMembers(Map, selectedControllers, expandedList);
                     HashSet<int> groupIds = new HashSet<int>();
                     bool allAreAutoGroup = true;
 
@@ -341,9 +341,9 @@ public partial class Building_WallController
             Find.WindowStack.Add(new ULS_Dialog_SetControllerGroupId(controllerGroupId,
                 delegate(int newGroupId)
                 {
-                    List<Building_WallController> expandedList =
-                        ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
-                            selectedControllers);
+                    List<Building_WallController> expandedList = new List<Building_WallController>();
+                    ExpandSelectedControllersToMultiCellHiddenGroupMembers(mapLocal,
+                        selectedControllers, expandedList);
                     if (!ULS_AutoGroupUtility.CanAssignControllersToGroup(mapLocal, expandedList,
                             newGroupId, out string rejectKey))
                     {
@@ -384,8 +384,8 @@ public partial class Building_WallController
         }
 
         bool primaryIsAuto = ULS_AutoGroupUtility.IsAutoGroup(map, primaryGroupId);
-        List<Building_WallController> expandedList =
-            ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers);
+        List<Building_WallController> expandedList = new List<Building_WallController>();
+        ExpandSelectedControllersToMultiCellHiddenGroupMembers(map, selectedControllers, expandedList);
         HashSet<int> mergedGroupIds = new HashSet<int>();
 
 
