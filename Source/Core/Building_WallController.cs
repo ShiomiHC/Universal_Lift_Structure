@@ -639,6 +639,7 @@ public partial class Building_WallController : Building, IThingHolder
         {
             EnsureLiftBlocker();
             ApplyActivePowerInternal(active: true);
+            cachedGroupComp?.RegisterAnimatingController(this);
         }
     }
 
@@ -939,7 +940,6 @@ public partial class Building_WallController : Building, IThingHolder
 
         // 记录销毁前的状态（base.Destroy 后无法访问）
         Map map = Map;
-        IntVec3 position = Position;
 
         // 从全局升降队列移除针对本控制器的请求
         if (map != null)
@@ -951,7 +951,7 @@ public partial class Building_WallController : Building, IThingHolder
         // 从控制器分组系统移除
         if (map != null)
         {
-            cachedGroupComp?.RemoveControllerCell(position);
+            cachedGroupComp?.DeregisterController(this);
 
             // 如果是自动组控制器，通知自动组系统重新扫描
             if (ULS_AutoGroupUtility.IsAutoController(this))

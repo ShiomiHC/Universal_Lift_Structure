@@ -181,6 +181,7 @@ public partial class Building_WallController
         liftFinalizeOnComplete = finalizeOnComplete;
 
         ApplyActivePowerInternal(active: true);
+        cachedGroupComp?.RegisterAnimatingController(this);
         EnsureLiftBlocker();
         ThrowLiftDustFleck(burst: true);
     }
@@ -201,6 +202,7 @@ public partial class Building_WallController
         liftBlockerCell = IntVec3.Invalid;
         liftFinalizeOnComplete = false;
 
+        cachedGroupComp?.DeregisterAnimatingController(this);
         ApplyActivePowerInternal(active: false);
     }
 

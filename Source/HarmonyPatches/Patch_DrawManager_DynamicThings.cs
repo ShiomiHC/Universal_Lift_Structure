@@ -51,16 +51,31 @@ public static class Patch_DrawManager_DynamicThings
             return;
         }
 
-        List<Building> colonistBuildings = map.listerBuildings?.allBuildingsColonist;
-        if (colonistBuildings is null)
+        // 获取控制器组件以利用缓存列表进行优化
+        var groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp == null)
         {
             return;
         }
 
-        // 遍历所有玩家建筑，查找 WallController
-        foreach (var t in colonistBuildings)
+        UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
+        bool showGhost = settings is { enableOverlayDisplay: true, showStoredGhostOverlay: true };
+
+        // 优化策略:
+        // 1. 如果未开启虚影显示，仅遍历当前正在动画的控制器 (数量极少)
+        // 2. 否则遍历所有注册的控制器 (比遍历所有 map.listerBuildings 快)
+        IEnumerable<Building_WallController> controllersToIterate = showGhost
+            ? groupComp.GetAllControllers()
+            : groupComp.GetActiveAnimatingControllers();
+
+        if (controllersToIterate == null)
         {
-            if (t is not Building_WallController controller)
+            return;
+        }
+
+        foreach (var controller in controllersToIterate)
+        {
+            if (controller == null || !controller.Spawned)
             {
                 continue;
             }
@@ -110,8 +125,6 @@ public static class Patch_DrawManager_DynamicThings
             }
 
             // 非动画过程，检查是否需要显示静态虚影
-            UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
-            bool showGhost = settings is { enableOverlayDisplay: true, showStoredGhostOverlay: true };
             if (showGhost && controller.HasStored)
             {
                 ULS_GhostRenderer.DrawStoredBuildingGhost(drawCell, drawRot, storedBuilding.def, storedBuilding.Stuff);

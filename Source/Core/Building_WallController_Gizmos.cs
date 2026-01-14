@@ -206,15 +206,24 @@ public partial class Building_WallController
             }
             else
             {
-                // 检查是否有存储的物体
+                // 检查是否有存储的物体、忙碌状态及电力状况 (合并遍历以优化性能)
                 bool hasStored = false;
+                bool isBusy = false;
+                bool hasPowerIssue = false;
+
                 foreach (var t in groupCells)
                 {
-                    if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller) &&
-                        controller.HasStored)
+                    if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller))
                     {
-                        hasStored = true;
-                        break;
+                        if (controller.HasStored) hasStored = true;
+                        if (controller.InLiftProcess) isBusy = true;
+                        if (settings is { enableLiftPower: true } && !controller.IsReadyForLiftPower())
+                        {
+                            hasPowerIssue = true;
+                        }
+
+                        // 如果已确认有存储，且发现了任意阻碍条件，则可提前终止
+                        if (hasStored && (isBusy || hasPowerIssue)) break;
                     }
                 }
 
@@ -223,35 +232,15 @@ public partial class Building_WallController
                     raiseCommand.Disable("ULS_NoStored".Translate());
                     disabled = true;
                 }
-                else
+                else if (isBusy)
                 {
-                    // 检查是否有控制器忙碌
-                    foreach (var t in groupCells)
-                    {
-                        if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller) &&
-                            controller.InLiftProcess)
-                        {
-                            raiseCommand.Disable("ULS_LiftInProcess".Translate());
-                            disabled = true;
-                            break;
-                        }
-                    }
-
-
-                    // 检查电力状况
-                    if (!disabled && settings is { enableLiftPower: true })
-                    {
-                        foreach (var t in groupCells)
-                        {
-                            if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller) &&
-                                controller != null && !controller.IsReadyForLiftPower())
-                            {
-                                raiseCommand.Disable("ULS_PowerOff".Translate());
-                                disabled = true;
-                                break;
-                            }
-                        }
-                    }
+                    raiseCommand.Disable("ULS_LiftInProcess".Translate());
+                    disabled = true;
+                }
+                else if (hasPowerIssue)
+                {
+                    raiseCommand.Disable("ULS_PowerOff".Translate());
+                    disabled = true;
                 }
             }
         }

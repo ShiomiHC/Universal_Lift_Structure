@@ -10,30 +10,49 @@ public partial class Building_WallController
     // 【返回值】
     // - 选中的控制器列表（不为空）
     // ============================================================
+    // 缓存字段
+    private static List<Building_WallController> cachedSelectedControllers;
+    private static int cachedSelectionTick = -1;
+
     private static List<Building_WallController> GetSelectedControllers()
     {
-        List<Building_WallController> result = new List<Building_WallController>();
+        // 检查缓存是否有效
+        if (cachedSelectionTick == Find.TickManager.TicksGame && cachedSelectedControllers != null)
+        {
+            return cachedSelectedControllers;
+        }
+
+        if (cachedSelectedControllers == null)
+        {
+            cachedSelectedControllers = new List<Building_WallController>();
+        }
+        else
+        {
+            cachedSelectedControllers.Clear();
+        }
+
+        cachedSelectionTick = Find.TickManager.TicksGame;
 
         if (Find.Selector == null)
         {
-            return result;
+            return cachedSelectedControllers;
         }
 
         List<object> selectedObjects = Find.Selector.SelectedObjectsListForReading;
         if (selectedObjects == null)
         {
-            return result;
+            return cachedSelectedControllers;
         }
 
         for (int i = 0; i < selectedObjects.Count; i++)
         {
             if (selectedObjects[i] is Building_WallController controller)
             {
-                result.Add(controller);
+                cachedSelectedControllers.Add(controller);
             }
         }
 
-        return result;
+        return cachedSelectedControllers;
     }
 
 

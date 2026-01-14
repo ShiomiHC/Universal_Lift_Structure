@@ -54,6 +54,44 @@
 public class ULS_ControllerGroupMapComponent : MapComponent
 {
     // ============================================================
+    // 【活跃动画控制器追踪】
+    // ============================================================
+    // 追踪当前正在进行升降动画的控制器
+    // 用于优化 Patch_DrawManager_DynamicThings 的渲染性能
+    private readonly HashSet<Building_WallController> activeAnimatingControllers =
+        new HashSet<Building_WallController>();
+
+    // 追踪地图上所有的控制器
+    // 用于优化 Patch_DrawManager_DynamicThings 的 Ghost 渲染遍历
+    private readonly HashSet<Building_WallController> allControllers = new HashSet<Building_WallController>();
+
+    public void RegisterAnimatingController(Building_WallController controller)
+    {
+        if (controller != null)
+        {
+            activeAnimatingControllers.Add(controller);
+        }
+    }
+
+    public void DeregisterAnimatingController(Building_WallController controller)
+    {
+        if (controller != null)
+        {
+            activeAnimatingControllers.Remove(controller);
+        }
+    }
+
+    public HashSet<Building_WallController> GetActiveAnimatingControllers()
+    {
+        return activeAnimatingControllers;
+    }
+
+    public HashSet<Building_WallController> GetAllControllers()
+    {
+        return allControllers;
+    }
+
+    // ============================================================
     // 【字段说明】
     // ============================================================
 
@@ -110,6 +148,10 @@ public class ULS_ControllerGroupMapComponent : MapComponent
         {
             indexBuilt = false;
         }
+
+        // 确保清理缓存的引用
+        activeAnimatingControllers.Clear();
+        allControllers.Clear();
     }
 
     // ============================================================
@@ -242,6 +284,8 @@ public class ULS_ControllerGroupMapComponent : MapComponent
             return;
         }
 
+        allControllers.Add(controller);
+
         IntVec3 cell = controller.Position;
         if (!cell.IsValid)
         {
@@ -318,6 +362,14 @@ public class ULS_ControllerGroupMapComponent : MapComponent
                 controllerCellsByGroupId.Remove(groupId);
             }
         }
+    }
+
+    public void DeregisterController(Building_WallController controller)
+    {
+        if (controller == null) return;
+
+        allControllers.Remove(controller);
+        RemoveControllerCell(controller.Position);
     }
 
     // ============================================================
@@ -523,6 +575,7 @@ public class ULS_ControllerGroupMapComponent : MapComponent
         rebuildInProgress = true;
         controllerCellsByGroupId.Clear();
         groupIdByControllerCell.Clear();
+        allControllers.Clear();
 
         if (map is null)
         {
