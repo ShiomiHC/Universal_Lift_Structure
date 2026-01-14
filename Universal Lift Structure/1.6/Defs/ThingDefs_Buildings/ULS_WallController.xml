@@ -44,6 +44,11 @@
         <!-- 尺寸 -->
         <size>(1,1)</size>
 
+        <!--研发前置：电力-->
+        <researchPrerequisites>
+            <li>Electricity</li>
+        </researchPrerequisites>
+
         <!-- 工作量/耐久/燃烧/价值 -->
         <statBases>
             <WorkToBuild>400</WorkToBuild>

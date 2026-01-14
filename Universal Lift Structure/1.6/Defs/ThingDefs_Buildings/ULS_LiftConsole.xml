@@ -31,6 +31,11 @@
             <ComponentIndustrial>2</ComponentIndustrial>
         </costList>
 
+        <!--研发前置：电力-->
+        <researchPrerequisites>
+            <li>Electricity</li>
+        </researchPrerequisites>
+
         <!--建造菜单分类 -->
         <designationCategory>Misc</designationCategory>
         <terrainAffordanceNeeded>Light</terrainAffordanceNeeded>
@@ -42,7 +47,7 @@
                 <compClass>CompPowerTrader</compClass>
 
                 <!-- 基础电力消耗 -->
-                <basePowerConsumption>50</basePowerConsumption>
+                <basePowerConsumption>25</basePowerConsumption>
             </li>
 
             <!-- 默认允许指定关闭电源 -->
