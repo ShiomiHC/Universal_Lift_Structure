@@ -148,11 +148,8 @@ public class ULS_ControllerGroupMapComponent : MapComponent
         {
             indexBuilt = false;
         }
-
-        // 确保清理缓存的引用
-        activeAnimatingControllers.Clear();
-        allControllers.Clear();
     }
+
 
     // ============================================================
     // 【地图初始化完成】

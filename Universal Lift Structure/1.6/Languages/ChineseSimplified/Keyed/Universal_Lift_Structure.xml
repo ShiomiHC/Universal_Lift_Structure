@@ -35,18 +35,18 @@
     <ULS_NoEdifice>该格没有可降下的结构</ULS_NoEdifice>
 
     <ULS_LowerNotPlayerOwned>仅允许降下玩家所有的结构</ULS_LowerNotPlayerOwned>
-    <ULS_CannotPlace_ControllerExists>该格已存在结构控制器</ULS_CannotPlace_ControllerExists>
-    <ULS_CannotPlace_BlacklistedOverlay>该格存在黑名单结构（{0}），无法放置结构控制器</ULS_CannotPlace_BlacklistedOverlay>
+    <ULS_CannotPlace_ControllerExists>该格已存在升降控制器</ULS_CannotPlace_ControllerExists>
+    <ULS_CannotPlace_BlacklistedOverlay>该格结构存在非白名单结构（{0}），无法放置升降控制器</ULS_CannotPlace_BlacklistedOverlay>
 
     <!-- [多格结构验证] -->
-    <ULS_MultiCellNeedControllerEveryCell>多格结构要求其占格内填满结构控制器</ULS_MultiCellNeedControllerEveryCell>
+    <ULS_MultiCellNeedControllerEveryCell>多格结构要求其占格内填满升降控制器</ULS_MultiCellNeedControllerEveryCell>
     <ULS_MultiCellControllerHasStored>组内存在已降下结构的控制器，无法降下多格结构</ULS_MultiCellControllerHasStored>
     <ULS_MultiCellControllerInGroup>部分控制器已被其他多格结构组占用，无法降下多格结构</ULS_MultiCellControllerInGroup>
     <ULS_MultiCellGroupAlreadyExists>该多格结构已位于待升降列表</ULS_MultiCellGroupAlreadyExists>
 
     <!-- [组操作验证] -->
     <ULS_GroupTooLarge>组规模超过上限（上限：{0}）</ULS_GroupTooLarge>
-    <ULS_GroupNoController>未找到结构控制器</ULS_GroupNoController>
+    <ULS_GroupNoController>未找到升降控制器</ULS_GroupNoController>
 
 
     <ULS_GroupBlacklistedAt>坐标 {0} 的结构未在白名单中</ULS_GroupBlacklistedAt>
@@ -65,8 +65,8 @@
 
 
     <!-- [电力与控制台] -->
-    <ULS_PowerOff>组内存在未供电的结构控制器</ULS_PowerOff>
-    <ULS_GroupPowerInsufficient>组内存在未供电的结构控制器</ULS_GroupPowerInsufficient>
+    <ULS_PowerOff>组内存在未供电的升降控制器</ULS_PowerOff>
+    <ULS_GroupPowerInsufficient>组内存在未供电的升降控制器</ULS_GroupPowerInsufficient>
     <ULS_PowerLost>升降过程中断: 断电</ULS_PowerLost>
     <ULS_LiftConsoleMissing>未找到可用的升降控制台</ULS_LiftConsoleMissing>
     <ULS_LiftConsolePowerOff>升降控制台未连接到电网</ULS_LiftConsolePowerOff>
@@ -81,8 +81,8 @@
     <ULS_Tab_Other>其他</ULS_Tab_Other>
 
     <ULS_Section_Core>基础设置</ULS_Section_Core>
-    <ULS_Section_Visual>视觉辅助</ULS_Section_Visual>
-    <ULS_Section_Performance>性能参数</ULS_Section_Performance>
+    <ULS_Section_Visual>UI叠加层</ULS_Section_Visual>
+    <ULS_Section_Performance>升降耗时</ULS_Section_Performance>
 
     <!-- [设置：核心与功能] -->
     <ULS_Settings_LiftControlMode>升降控制模式</ULS_Settings_LiftControlMode>
@@ -94,10 +94,10 @@
     <ULS_Settings_GroupMaxSize>组规模上限</ULS_Settings_GroupMaxSize>
 
     <ULS_Settings_EnableLiftPower>启用升降额外耗电逻辑</ULS_Settings_EnableLiftPower>
-    <ULS_Settings_EnableLiftPower_Desc>启用后：升降过程中，每个参与的控制器额外耗电1000W； \n缺电时无法开始升降，升降途中断电将失败</ULS_Settings_EnableLiftPower_Desc>
+    <ULS_Settings_EnableLiftPower_Desc>启用时：升降过程中，每个参与的控制器额外耗电1000W； \n缺电时无法开始升降，升降途中断电将失败</ULS_Settings_EnableLiftPower_Desc>
 
-    <ULS_Settings_LiftDurationHpSet>升降耗时受 耐久 影响倍率: {0}</ULS_Settings_LiftDurationHpSet>
-    <ULS_Settings_LiftDurationMassSet>升降耗时受 质量 影响倍率: {0}</ULS_Settings_LiftDurationMassSet>
+    <ULS_Settings_LiftDurationHpSet>升降耗时倍率(基于耐久): {0}</ULS_Settings_LiftDurationHpSet>
+    <ULS_Settings_LiftDurationMassSet>升降耗时倍率(基于重量): {0}</ULS_Settings_LiftDurationMassSet>
 
     <!-- [设置：筛选与黑名单] -->
     <ULS_Settings_DefNameBlacklist>白名单</ULS_Settings_DefNameBlacklist>
@@ -122,7 +122,7 @@
 
     <!-- [面板/检查器显示] -->
     <ULS_AutoGroup_FilterWithValue>允许目标:{0}</ULS_AutoGroup_FilterWithValue>
-    <ULS_AutoGroup_Filter_Mixed>混合</ULS_AutoGroup_Filter_Mixed>
+    <ULS_AutoGroup_Filter_Mixed>混合的</ULS_AutoGroup_Filter_Mixed>
     <ULS_AutoGroup_Filter_Friendly>友方</ULS_AutoGroup_Filter_Friendly>
     <ULS_AutoGroup_Filter_Hostile>敌方</ULS_AutoGroup_Filter_Hostile>
     <ULS_AutoGroup_Filter_Neutral>中立</ULS_AutoGroup_Filter_Neutral>

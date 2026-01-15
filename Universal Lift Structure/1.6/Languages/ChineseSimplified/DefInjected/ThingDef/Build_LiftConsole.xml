@@ -2,6 +2,5 @@
 <!-- 升降控制台 -->
 <LanguageData>
     <ULS_LiftConsole.label>升降控制台</ULS_LiftConsole.label>
-    <ULS_LiftConsole.description>用于在“控制台模式”下对控制台进行升降操作。
-        殖民者将自动前往并执行操作。</ULS_LiftConsole.description>
+    <ULS_LiftConsole.description>在“控制台模式”下对等待升降的建筑进行升降操作。\n殖民者将自动前往并执行操作。</ULS_LiftConsole.description>
 </LanguageData>

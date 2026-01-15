@@ -127,11 +127,11 @@ public partial class Building_WallController
         float hpMultiplier = settings?.liftDurationHpSet ?? 1f;
         float massMultiplier = settings?.liftDurationMassSet ?? 1f;
 
-        float hpTicks = thing.MaxHitPoints * 0.2f * hpMultiplier;
-        float massTicks = thing.GetStatValue(StatDefOf.Mass) * 50f * massMultiplier;
+        float hpTicks = thing.MaxHitPoints * 0.1f * hpMultiplier;
+        float massTicks = thing.GetStatValue(StatDefOf.Mass) * massMultiplier;
         int calculatedTicks = Mathf.RoundToInt(hpTicks + massTicks);
 
-        return Mathf.Max(60, calculatedTicks);
+        return Mathf.Clamp(calculatedTicks, 60, 2000);
     }
 
 
@@ -311,8 +311,11 @@ public partial class Building_WallController
     {
         base.Tick();
 
-        // 检查空闲状态下的电力消耗
-        EnsureIdlePowerIfFeatureDisabled();
+        // 检查空闲状态下的电力消耗 (每秒检查一次设置变化)
+        if (this.IsHashIntervalTick(60))
+        {
+            EnsureIdlePowerIfFeatureDisabled();
+        }
 
         if (!InLiftProcess)
         {
@@ -386,7 +389,7 @@ public partial class Building_WallController
             }
             else
             {
-                Log.Warning("[ULS] 预期外行为: 结构控制器升起结构时在其上建造了结构");
+                Log.Warning("[ULS] 预期外行为: 升降控制器升起结构时在其上建造了结构");
             }
         }
     }
