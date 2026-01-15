@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 隠し建物類 -->
+<LanguageData>
+
+    <!-- ULS_LiftBlocker -->
+    <ULS_LiftBlocker.label>昇降中の構造</ULS_LiftBlocker.label>
+    <ULS_LiftBlocker.description>昇降中の構造</ULS_LiftBlocker.description>
+</LanguageData>

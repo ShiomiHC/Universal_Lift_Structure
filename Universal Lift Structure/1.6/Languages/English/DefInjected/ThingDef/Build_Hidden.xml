@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hidden Buildings -->
+<LanguageData>
+
+    <!-- ULS_LiftBlocker -->
+    <ULS_LiftBlocker.label>lifting structure</ULS_LiftBlocker.label>
+    <ULS_LiftBlocker.description>A structure being lifted</ULS_LiftBlocker.description>
+</LanguageData>

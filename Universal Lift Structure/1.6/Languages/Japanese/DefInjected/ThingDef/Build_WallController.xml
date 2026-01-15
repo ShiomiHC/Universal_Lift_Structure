@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 昇降コントローラー類 -->
+<LanguageData>
+    <!-- 昇降コントローラー -->
+    <ULS_WallController.label>昇降コントローラー</ULS_WallController.label>
+    <ULS_WallController.description>建物を昇降させることができる制御装置</ULS_WallController.description>
+    <!-- 自動昇降コントローラー -->
+    <ULS_WallController_Auto.label>昇降コントローラー(自動)</ULS_WallController_Auto.label>
+    <ULS_WallController_Auto.description>味方/中立/敵対のフィルタリングによる自動昇降制御装置</ULS_WallController_Auto.description>
+</LanguageData>

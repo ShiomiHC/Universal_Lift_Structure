@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+    <!-- ==================== ボタン (Gizmos) ==================== -->
+
+    <!-- [共通操作] -->
+    <ULS_LowerGroup>下降</ULS_LowerGroup>
+    <ULS_LowerGroupDesc>現在の構造を下降させる</ULS_LowerGroupDesc>
+    <ULS_RaiseGroup>上昇</ULS_RaiseGroup>
+    <ULS_RaiseGroupDesc>下降した構造を上昇させる</ULS_RaiseGroupDesc>
+    <ULS_CancelLift>昇降キャンセル</ULS_CancelLift>
+    <ULS_CancelLiftDesc>現在の昇降操作リクエストをキャンセルする</ULS_CancelLiftDesc>
+
+    <!-- [グループ管理] -->
+    <ULS_GroupMergeToPrimary>選択グループへリンク</ULS_GroupMergeToPrimary>
+    <ULS_GroupMergeToPrimaryDesc>選択したコントローラーを同じグループに統合する</ULS_GroupMergeToPrimaryDesc>
+    <ULS_GroupSplitToNew>新規グループに分離</ULS_GroupSplitToNew>
+    <ULS_GroupSplitToNewDesc>選択したコントローラーを現在のグループから新しいグループに分離する</ULS_GroupSplitToNewDesc>
+    <ULS_GroupSetIdDesc>コントローラーのグループIDを設定する</ULS_GroupSetIdDesc>
+
+    <!-- [自動コントローラー] -->
+    <ULS_AutoGroup_FilterDesc>自動コントローラー(グループ)のターゲットフィルタを設定する</ULS_AutoGroup_FilterDesc>
+    <ULS_AutoGroup_SetFilter_Friendly>設定：友好</ULS_AutoGroup_SetFilter_Friendly>
+    <ULS_AutoGroup_SetFilter_Hostile>設定：敵対</ULS_AutoGroup_SetFilter_Hostile>
+    <ULS_AutoGroup_SetFilter_Neutral>設定：中立</ULS_AutoGroup_SetFilter_Neutral>
+
+    <!-- [視覚/デバッグ] -->
+    <ULS_OverlayDisplayMasterToggleButton>補助表示レイヤーを表示</ULS_OverlayDisplayMasterToggleButton>
+
+
+    <!-- ==================== メッセージ (Messages) ==================== -->
+
+    <!-- [共通検証] -->
+    <ULS_NoStored>現在のコントローラーに下降した構造がありません</ULS_NoStored>
+    <ULS_NoEdifice>このセルには下降可能な構造がありません</ULS_NoEdifice>
+
+    <ULS_LowerNotPlayerOwned>プレイヤー所有の構造のみ下降できます</ULS_LowerNotPlayerOwned>
+    <ULS_CannotPlace_ControllerExists>このセルには既に昇降コントローラーが存在します</ULS_CannotPlace_ControllerExists>
+    <ULS_CannotPlace_BlacklistedOverlay>このセルの構造にホワイトリスト外の構造（{0}）があるため、昇降コントローラーを配置できません</ULS_CannotPlace_BlacklistedOverlay>
+
+    <!-- [マルチセル構造検証] -->
+    <ULS_MultiCellNeedControllerEveryCell>マルチセル構造は占有するすべてのセルに昇降コントローラーを配置する必要があります</ULS_MultiCellNeedControllerEveryCell>
+    <ULS_MultiCellControllerHasStored>グループ内に既に構造を下降させているコントローラーがあるため、マルチセル構造を下降できません</ULS_MultiCellControllerHasStored>
+    <ULS_MultiCellControllerInGroup>一部のコントローラーが他のマルチセル構造グループに占有されているため、マルチセル構造を下降できません</ULS_MultiCellControllerInGroup>
+    <ULS_MultiCellGroupAlreadyExists>このマルチセル構造は既に昇降待機リストにあります</ULS_MultiCellGroupAlreadyExists>
+
+    <!-- [グループ操作検証] -->
+    <ULS_GroupTooLarge>グループサイズが上限を超えています（上限：{0}）</ULS_GroupTooLarge>
+    <ULS_GroupNoController>昇降コントローラーが見つかりません</ULS_GroupNoController>
+
+
+    <ULS_GroupBlacklistedAt>座標 {0} の構造がホワイトリストにありません</ULS_GroupBlacklistedAt>
+    <ULS_GroupNoLowerable>グループ内に下降可能な構造がありません</ULS_GroupNoLowerable>
+
+    <ULS_GroupNoRaiseable>グループ内のすべての上昇予定構造がブロックされています</ULS_GroupNoRaiseable>
+
+
+    <ULS_AutoGroup_MixAutoAndManual>自動コントローラーグループと手動コントローラーグループを同じグループに統合できません</ULS_AutoGroup_MixAutoAndManual>
+
+    <!-- [操作結果] -->
+    <ULS_GroupLowerFailed>グループの下降に失敗しました</ULS_GroupLowerFailed>
+    <ULS_GroupLoweredPartial>一部下降成功：{0}（失敗：{1}）</ULS_GroupLoweredPartial>
+    <ULS_LiftInProcess>昇降実行中</ULS_LiftInProcess>
+    <ULS_GroupRaisedPartial>一部上昇成功：{0}（失敗：{1}）</ULS_GroupRaisedPartial>
+
+
+    <!-- [電力とコンソール] -->
+    <ULS_PowerOff>グループ内に電力供給されていない昇降コントローラーがあります</ULS_PowerOff>
+    <ULS_GroupPowerInsufficient>グループ内に電力供給されていない昇降コントローラーがあります</ULS_GroupPowerInsufficient>
+    <ULS_PowerLost>昇降プロセス中断：停電</ULS_PowerLost>
+    <ULS_LiftConsoleMissing>利用可能な昇降コンソールが見つかりません</ULS_LiftConsoleMissing>
+    <ULS_LiftConsolePowerOff>昇降コンソールが電力網に接続されていません</ULS_LiftConsolePowerOff>
+
+
+    <!-- ==================== UI ==================== -->
+
+    <!-- [設定：メニュー/タブ] -->
+
+    <ULS_SettingsCategory>ユニバーサル昇降構造</ULS_SettingsCategory>
+    <ULS_Tab_General>一般</ULS_Tab_General>
+    <ULS_Tab_Filter>フィルタ</ULS_Tab_Filter>
+    <ULS_Tab_Other>その他</ULS_Tab_Other>
+
+    <ULS_Section_Core>基本設定</ULS_Section_Core>
+    <ULS_Section_Visual>UIオーバーレイ</ULS_Section_Visual>
+    <ULS_Section_Performance>昇降所要時間</ULS_Section_Performance>
+
+    <!-- [設定：コアと機能] -->
+    <ULS_Settings_LiftControlMode>昇降制御モード</ULS_Settings_LiftControlMode>
+    <ULS_Settings_LiftControlMode_Desc>昇降を操作する方式を選択\nリモート制御：即座に発動；\nコンソール：昇降コンソールで統一操作；\n手動：コントローラー本体を直接操作</ULS_Settings_LiftControlMode_Desc>
+    <ULS_LiftControlMode_Remote>リモート制御</ULS_LiftControlMode_Remote>
+    <ULS_LiftControlMode_Console>コンソール</ULS_LiftControlMode_Console>
+    <ULS_LiftControlMode_Manual>手動</ULS_LiftControlMode_Manual>
+
+    <ULS_Settings_GroupMaxSize>グループサイズ上限</ULS_Settings_GroupMaxSize>
+
+    <ULS_Settings_EnableLiftPower>昇降時の追加電力消費を有効化</ULS_Settings_EnableLiftPower>
+    <ULS_Settings_EnableLiftPower_Desc>有効時：昇降プロセス中、参加する各コントローラーが追加で1000Wを消費；\n電力不足時は昇降を開始できず、昇降中に停電すると失敗</ULS_Settings_EnableLiftPower_Desc>
+
+    <ULS_Settings_LiftDurationHpSet>昇降所要時間倍率(耐久度基準): {0}</ULS_Settings_LiftDurationHpSet>
+    <ULS_Settings_LiftDurationMassSet>昇降所要時間倍率(重量基準): {0}</ULS_Settings_LiftDurationMassSet>
+
+    <!-- [設定：フィルタとブラックリスト] -->
+    <ULS_Settings_DefNameBlacklist>ホワイトリスト</ULS_Settings_DefNameBlacklist>
+    <ULS_Settings_Search>検索</ULS_Settings_Search>
+    <ULS_Settings_ModFilter>MOD元</ULS_Settings_ModFilter>
+    <ULS_Settings_ModFilter_All>すべて</ULS_Settings_ModFilter_All>
+    <ULS_Settings_BuiltInRules>特殊ルール</ULS_Settings_BuiltInRules>
+    <ULS_Settings_AllowNaturalRock>天然の岩壁を許可</ULS_Settings_AllowNaturalRock>
+    <ULS_Settings_ResetToDefault>デフォルトにリセット</ULS_Settings_ResetToDefault>
+
+    <!-- [設定：視覚] -->
+    <ULS_Settings_OverlayDisplay>オーバーレイ表示</ULS_Settings_OverlayDisplay>
+    <ULS_Settings_OverlayDisplay_ShowStoredGhost>下降した構造の影を表示</ULS_Settings_OverlayDisplay_ShowStoredGhost>
+    <ULS_Settings_OverlayDisplay_ShowControllerCell>コントローラー存在セルのヒントを表示</ULS_Settings_OverlayDisplay_ShowControllerCell>
+    <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>自動コントローラーの探知範囲を表示</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+
+    <!-- [ダイアログ：グループ設定] -->
+    <ULS_GroupSetIdWithValue>グループ設定:{0}</ULS_GroupSetIdWithValue>
+    <ULS_GroupSetId_Desc>同じグループIDのコントローラーは同一グループとして上昇/下降を実行します</ULS_GroupSetId_Desc>
+    <ULS_GroupSetId_Field>グループID</ULS_GroupSetId_Field>
+    <ULS_GroupSetId_Accept>確認</ULS_GroupSetId_Accept>
+
+    <!-- [パネル/インスペクタ表示] -->
+    <ULS_AutoGroup_FilterWithValue>許可ターゲット:{0}</ULS_AutoGroup_FilterWithValue>
+    <ULS_AutoGroup_Filter_Mixed>混在</ULS_AutoGroup_Filter_Mixed>
+    <ULS_AutoGroup_Filter_Friendly>友好</ULS_AutoGroup_Filter_Friendly>
+    <ULS_AutoGroup_Filter_Hostile>敵対</ULS_AutoGroup_Filter_Hostile>
+    <ULS_AutoGroup_Filter_Neutral>中立</ULS_AutoGroup_Filter_Neutral>
+
+</LanguageData>

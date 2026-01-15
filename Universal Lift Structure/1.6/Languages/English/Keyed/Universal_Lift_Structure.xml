@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+    <!-- ==================== Buttons (Gizmos) ==================== -->
+
+    <!-- [General Operations] -->
+    <ULS_LowerGroup>Lower</ULS_LowerGroup>
+    <ULS_LowerGroupDesc>Lower the current structure</ULS_LowerGroupDesc>
+    <ULS_RaiseGroup>Raise</ULS_RaiseGroup>
+    <ULS_RaiseGroupDesc>Raise the lowered structure</ULS_RaiseGroupDesc>
+    <ULS_CancelLift>Cancel Lift</ULS_CancelLift>
+    <ULS_CancelLiftDesc>Cancel the current lift operation request</ULS_CancelLiftDesc>
+
+    <!-- [Group Management] -->
+    <ULS_GroupMergeToPrimary>Join to Selected Group</ULS_GroupMergeToPrimary>
+    <ULS_GroupMergeToPrimaryDesc>Merge selected controllers into the same group</ULS_GroupMergeToPrimaryDesc>
+    <ULS_GroupSplitToNew>Split to New Group</ULS_GroupSplitToNew>
+    <ULS_GroupSplitToNewDesc>Separate selected controllers from the current group into a new group</ULS_GroupSplitToNewDesc>
+    <ULS_GroupSetIdDesc>Set the group ID of the controller</ULS_GroupSetIdDesc>
+
+    <!-- [Auto Controller] -->
+    <ULS_AutoGroup_FilterDesc>Set target filter for auto controller (group)</ULS_AutoGroup_FilterDesc>
+    <ULS_AutoGroup_SetFilter_Friendly>Set to: Friendly</ULS_AutoGroup_SetFilter_Friendly>
+    <ULS_AutoGroup_SetFilter_Hostile>Set to: Hostile</ULS_AutoGroup_SetFilter_Hostile>
+    <ULS_AutoGroup_SetFilter_Neutral>Set to: Neutral</ULS_AutoGroup_SetFilter_Neutral>
+
+    <!-- [Visual/Debug] -->
+    <ULS_OverlayDisplayMasterToggleButton>Show Visual Overlays</ULS_OverlayDisplayMasterToggleButton>
+
+
+    <!-- ==================== Messages ==================== -->
+
+    <!-- [General Validation] -->
+    <ULS_NoStored>Controller has no lowered structure</ULS_NoStored>
+    <ULS_NoEdifice>This cell has no lowerable structure</ULS_NoEdifice>
+
+    <ULS_LowerNotPlayerOwned>Only player-owned structures can be lowered</ULS_LowerNotPlayerOwned>
+    <ULS_CannotPlace_ControllerExists>A structure controller already exists at this cell</ULS_CannotPlace_ControllerExists>
+    <ULS_CannotPlace_BlacklistedOverlay>This cell contains restricted structures ({0}), cannot place structure controller</ULS_CannotPlace_BlacklistedOverlay>
+
+    <!-- [Multi-Cell Structure Validation] -->
+    <ULS_MultiCellNeedControllerEveryCell>Multi-cell structures require controllers in every occupied cell</ULS_MultiCellNeedControllerEveryCell>
+    <ULS_MultiCellControllerHasStored>Some controllers in the group have stored structures, cannot lower multi-cell structure</ULS_MultiCellControllerHasStored>
+    <ULS_MultiCellControllerInGroup>Some controllers are already occupied by other multi-cell structure groups, cannot lower multi-cell structure</ULS_MultiCellControllerInGroup>
+    <ULS_MultiCellGroupAlreadyExists>This multi-cell structure is already in the lift queue</ULS_MultiCellGroupAlreadyExists>
+
+    <!-- [Group Operation Validation] -->
+    <ULS_GroupTooLarge>Group size exceeds limit (limit: {0})</ULS_GroupTooLarge>
+    <ULS_GroupNoController>No structure controller found</ULS_GroupNoController>
+
+
+    <ULS_GroupBlacklistedAt>Structure at {0} is not whitelisted</ULS_GroupBlacklistedAt>
+    <ULS_GroupNoLowerable>No lowerable structures in group</ULS_GroupNoLowerable>
+
+    <ULS_GroupNoRaiseable>All raiseable structures in group are blocked</ULS_GroupNoRaiseable>
+
+
+    <ULS_AutoGroup_MixAutoAndManual>Auto controller groups and manual controller groups cannot be in the same group</ULS_AutoGroup_MixAutoAndManual>
+
+    <!-- [Operation Results] -->
+    <ULS_GroupLowerFailed>Group lower failed</ULS_GroupLowerFailed>
+    <ULS_GroupLoweredPartial>Partially lowered: {0} (failed: {1})</ULS_GroupLoweredPartial>
+    <ULS_LiftInProcess>Lift in progress</ULS_LiftInProcess>
+    <ULS_GroupRaisedPartial>Partially raised: {0} (failed: {1})</ULS_GroupRaisedPartial>
+
+
+    <!-- [Power and Console] -->
+    <ULS_PowerOff>Some structure controllers in the group are unpowered</ULS_PowerOff>
+    <ULS_GroupPowerInsufficient>Some structure controllers in the group are unpowered</ULS_GroupPowerInsufficient>
+    <ULS_PowerLost>Lift process interrupted: power lost</ULS_PowerLost>
+    <ULS_LiftConsoleMissing>No available lift console found</ULS_LiftConsoleMissing>
+    <ULS_LiftConsolePowerOff>Lift console is not powered</ULS_LiftConsolePowerOff>
+
+
+    <!-- ==================== UI ==================== -->
+
+    <!-- [Settings: Menu/Tabs] -->
+    <ULS_SettingsCategory>Universal Lift Structure</ULS_SettingsCategory>
+    <ULS_Tab_General>General</ULS_Tab_General>
+    <ULS_Tab_Filter>Filter</ULS_Tab_Filter>
+    <ULS_Tab_Other>Other</ULS_Tab_Other>
+
+    <ULS_Section_Core>Core Settings</ULS_Section_Core>
+    <ULS_Section_Visual>UI Overlay</ULS_Section_Visual>
+    <ULS_Section_Performance>Lift Duration</ULS_Section_Performance>
+
+    <!-- [Settings: Core and Features] -->
+    <ULS_Settings_LiftControlMode>Lift Control Mode</ULS_Settings_LiftControlMode>
+    <ULS_Settings_LiftControlMode_Desc>Choose how to control lifting\nRemote: takes effect immediately;\nConsole: unified operation through lift console;\nManual: operate the controller directly</ULS_Settings_LiftControlMode_Desc>
+    <ULS_LiftControlMode_Remote>Remote</ULS_LiftControlMode_Remote>
+    <ULS_LiftControlMode_Console>Console</ULS_LiftControlMode_Console>
+    <ULS_LiftControlMode_Manual>Manual</ULS_LiftControlMode_Manual>
+
+    <ULS_Settings_GroupMaxSize>Group Size Limit</ULS_Settings_GroupMaxSize>
+
+    <ULS_Settings_EnableLiftPower>Enable Lift Power Logic</ULS_Settings_EnableLiftPower>
+    <ULS_Settings_EnableLiftPower_Desc>When enabled: During lift operations, each participating controller consumes an additional 1000W; \nLift cannot start without sufficient power, power loss during lift will cause failure</ULS_Settings_EnableLiftPower_Desc>
+
+    <ULS_Settings_LiftDurationHpSet>Lift Duration Multiplier (HP-based): {0}</ULS_Settings_LiftDurationHpSet>
+    <ULS_Settings_LiftDurationMassSet>Lift Duration Multiplier (Mass-based): {0}</ULS_Settings_LiftDurationMassSet>
+
+    <!-- [Settings: Filter and Blacklist] -->
+    <ULS_Settings_DefNameBlacklist>Whitelist</ULS_Settings_DefNameBlacklist>
+    <ULS_Settings_Search>Search</ULS_Settings_Search>
+    <ULS_Settings_ModFilter>From</ULS_Settings_ModFilter>
+    <ULS_Settings_ModFilter_All>All</ULS_Settings_ModFilter_All>
+    <ULS_Settings_BuiltInRules>Special Rules</ULS_Settings_BuiltInRules>
+    <ULS_Settings_AllowNaturalRock>Allow Natural Rock</ULS_Settings_AllowNaturalRock>
+    <ULS_Settings_ResetToDefault>Reset to Default</ULS_Settings_ResetToDefault>
+
+    <!-- [Settings: Visual] -->
+    <ULS_Settings_OverlayDisplay>Overlay Display</ULS_Settings_OverlayDisplay>
+    <ULS_Settings_OverlayDisplay_ShowStoredGhost>Show ghost of lowered structures</ULS_Settings_OverlayDisplay_ShowStoredGhost>
+    <ULS_Settings_OverlayDisplay_ShowControllerCell>Show controller cell indicator</ULS_Settings_OverlayDisplay_ShowControllerCell>
+    <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>Show auto controller detection area projection</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+
+    <!-- [Dialog: Group Settings] -->
+    <ULS_GroupSetIdWithValue>Group Settings: {0}</ULS_GroupSetIdWithValue>
+    <ULS_GroupSetId_Desc>Controllers with the same group ID will execute raise/lower as a group</ULS_GroupSetId_Desc>
+    <ULS_GroupSetId_Field>Group ID</ULS_GroupSetId_Field>
+    <ULS_GroupSetId_Accept>Confirm</ULS_GroupSetId_Accept>
+
+    <!-- [Panel/Inspector Display] -->
+    <ULS_AutoGroup_FilterWithValue>Allowed Targets: {0}</ULS_AutoGroup_FilterWithValue>
+    <ULS_AutoGroup_Filter_Mixed>Mixed</ULS_AutoGroup_Filter_Mixed>
+    <ULS_AutoGroup_Filter_Friendly>Friendly</ULS_AutoGroup_Filter_Friendly>
+    <ULS_AutoGroup_Filter_Hostile>Hostile</ULS_AutoGroup_Filter_Hostile>
+    <ULS_AutoGroup_Filter_Neutral>Neutral</ULS_AutoGroup_Filter_Neutral>
+
+</LanguageData>

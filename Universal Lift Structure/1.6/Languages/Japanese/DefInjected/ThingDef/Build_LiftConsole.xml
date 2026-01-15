@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 昇降コンソール -->
+<LanguageData>
+    <ULS_LiftConsole.label>昇降コンソール</ULS_LiftConsole.label>
+    <ULS_LiftConsole.description>「コンソールモード」で昇降待ちの建物を操作する。\n入植者が自動的に移動して操作を実行する。</ULS_LiftConsole.description>
+</LanguageData>

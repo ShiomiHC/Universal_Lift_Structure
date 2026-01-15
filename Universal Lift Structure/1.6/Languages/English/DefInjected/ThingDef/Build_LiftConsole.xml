@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lift Console -->
+<LanguageData>
+    <ULS_LiftConsole.label>lift console</ULS_LiftConsole.label>
+    <ULS_LiftConsole.description>Performs lift operations on structures waiting for lift in "Console
+        Mode".\nColonists will automatically go to and execute operations.</ULS_LiftConsole.description>
+</LanguageData>

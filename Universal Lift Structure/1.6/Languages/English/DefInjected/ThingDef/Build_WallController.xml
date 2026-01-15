@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Structure Controllers -->
+<LanguageData>
+    <!-- Structure Controller -->
+    <ULS_WallController.label>lift controller</ULS_WallController.label>
+    <ULS_WallController.description>A control device that allows structures to be raised and lowered</ULS_WallController.description>
+    <!-- Auto Structure Controller -->
+    <ULS_WallController_Auto.label>lift controller (auto)</ULS_WallController_Auto.label>
+    <ULS_WallController_Auto.description>An automatic lift control device with
+        friendly/neutral/hostile filtering</ULS_WallController_Auto.description>
+</LanguageData>
