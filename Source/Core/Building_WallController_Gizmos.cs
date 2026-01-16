@@ -50,6 +50,15 @@ public partial class Building_WallController
                     icon = ULS_GizmoTextures.SetGroupId,
                     action = delegate { OnGizmoAction_SetGroupId(selectedControllers); }
                 };
+
+                // [选择组内所有控制器] 按钮
+                yield return new Command_Action
+                {
+                    defaultLabel = "ULS_SelectGroupControllers".Translate(),
+                    defaultDesc = "ULS_SelectGroupControllersDesc".Translate(),
+                    icon = ULS_GizmoTextures.SelectLinked,
+                    action = delegate { OnGizmoAction_SelectGroupControllers(); }
+                };
             }
 
 
@@ -152,6 +161,41 @@ public partial class Building_WallController
                             defaultDesc = "ULS_AutoGroup_FilterDesc".Translate(),
                             icon = ULS_GizmoTextures.SetAutoGroupFilter,
                             action = delegate { OnGizmoAction_SetAutoGroupFilter(groupIds); }
+                        };
+
+                        // [反转模式切换] 按钮
+                        // 检查选中组的反转模式状态是否一致
+                        bool hasInvertedState = false;
+                        bool mixedInverted = false;
+                        bool currentInverted = false;
+
+                        foreach (int gid in groupIds)
+                        {
+                            bool inverted = autoGroupComp.GetGroupInvertedMode(gid);
+                            if (!hasInvertedState)
+                            {
+                                hasInvertedState = true;
+                                currentInverted = inverted;
+                            }
+                            else if (currentInverted != inverted)
+                            {
+                                mixedInverted = true;
+                                break;
+                            }
+                        }
+
+                        string invertedLabelText = mixedInverted
+                            ? "ULS_AutoGroup_Inverted_Mixed".Translate()
+                            : (currentInverted
+                                ? "ULS_AutoGroup_Inverted_On".Translate()
+                                : "ULS_AutoGroup_Inverted_Off".Translate());
+
+                        yield return new Command_Action
+                        {
+                            defaultLabel = "ULS_AutoGroup_InvertedWithValue".Translate(invertedLabelText),
+                            defaultDesc = "ULS_AutoGroup_InvertedDesc".Translate(),
+                            icon = ULS_GizmoTextures.ToggleInvertedMode,
+                            action = delegate { OnGizmoAction_ToggleInvertedMode(groupIds); }
                         };
                     }
                 }
@@ -457,6 +501,62 @@ public partial class Building_WallController
                     autoGroupComp.SetGroupFilterType(gid, type);
                 }
             }));
+        }
+    }
+
+    private void OnGizmoAction_SelectGroupControllers()
+    {
+        Map map = Map;
+        if (map == null) return;
+
+        ULS_ControllerGroupMapComponent groupComp =
+            map.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp == null || controllerGroupId < 1) return;
+
+        if (!groupComp.TryGetGroupControllerCells(controllerGroupId, out var cells) ||
+            cells == null || cells.Count == 0) return;
+
+        // 如果按住Shift键，则追加选择；否则替换选择
+        if (!UnityEngine.Event.current.shift)
+        {
+            Find.Selector.ClearSelection();
+        }
+
+        foreach (var cell in cells)
+        {
+            if (ULS_Utility.TryGetControllerAt(map, cell, out var controller))
+            {
+                Find.Selector.Select(controller, playSound: false, forceDesignatorDeselect: false);
+            }
+        }
+    }
+
+    private void OnGizmoAction_ToggleInvertedMode(HashSet<int> groupIds)
+    {
+        ULS_AutoGroupMapComponent autoGroupComp = Map?.GetComponent<ULS_AutoGroupMapComponent>();
+        if (autoGroupComp == null) return;
+
+        // 确定目标状态：如果任意分组处于非反转状态，则全部切换到反转状态
+        bool targetInverted = false;
+        foreach (int gid in groupIds)
+        {
+            if (!autoGroupComp.GetGroupInvertedMode(gid))
+            {
+                targetInverted = true;
+                break;
+            }
+        }
+
+        // 统一设置所有分组的反转模式状态
+        foreach (int gid in groupIds)
+        {
+            autoGroupComp.SetGroupInvertedMode(gid, targetInverted);
+        }
+
+        // 立即触发所有受影响分组的升降判定，确保模式切换立即生效
+        foreach (int gid in groupIds)
+        {
+            autoGroupComp.ForceProcessAutoGroup(gid);
         }
     }
 }

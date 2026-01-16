@@ -9,50 +9,38 @@ public partial class Building_WallController
     //
     // 【返回值】
     // - 选中的控制器列表（不为空）
+    //
+    // 【实现说明】
+    // - 每次调用时重建列表，确保始终返回最新的选中控制器
+    // - 复用静态列表对象以避免 GC 压力
+    // - 不使用 tick 缓存，避免暂停时缓存失效问题
     // ============================================================
-    // 缓存字段
-    private static List<Building_WallController> cachedSelectedControllers;
-    private static int cachedSelectionTick = -1;
+    private static readonly List<Building_WallController> selectedControllersList = new();
 
     private static List<Building_WallController> GetSelectedControllers()
     {
-        // 检查缓存是否有效
-        if (cachedSelectionTick == Find.TickManager.TicksGame && cachedSelectedControllers != null)
-        {
-            return cachedSelectedControllers;
-        }
-
-        if (cachedSelectedControllers == null)
-        {
-            cachedSelectedControllers = new List<Building_WallController>();
-        }
-        else
-        {
-            cachedSelectedControllers.Clear();
-        }
-
-        cachedSelectionTick = Find.TickManager.TicksGame;
+        selectedControllersList.Clear();
 
         if (Find.Selector == null)
         {
-            return cachedSelectedControllers;
+            return selectedControllersList;
         }
 
         List<object> selectedObjects = Find.Selector.SelectedObjectsListForReading;
         if (selectedObjects == null)
         {
-            return cachedSelectedControllers;
+            return selectedControllersList;
         }
 
         for (int i = 0; i < selectedObjects.Count; i++)
         {
             if (selectedObjects[i] is Building_WallController controller)
             {
-                cachedSelectedControllers.Add(controller);
+                selectedControllersList.Add(controller);
             }
         }
 
-        return cachedSelectedControllers;
+        return selectedControllersList;
     }
 
 

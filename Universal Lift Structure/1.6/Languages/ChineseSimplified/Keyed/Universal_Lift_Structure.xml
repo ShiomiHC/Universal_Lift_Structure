@@ -17,6 +17,8 @@
     <ULS_GroupSplitToNew>分离为新组</ULS_GroupSplitToNew>
     <ULS_GroupSplitToNewDesc>将选中的控制器从当前组分离为新组</ULS_GroupSplitToNewDesc>
     <ULS_GroupSetIdDesc>设置控制器的组ID</ULS_GroupSetIdDesc>
+    <ULS_SelectGroupControllers>选中同组所有控制器</ULS_SelectGroupControllers>
+    <ULS_SelectGroupControllersDesc>选中当前组内的所有结构控制器</ULS_SelectGroupControllersDesc>
 
     <!-- [自动控制器] -->
     <ULS_AutoGroup_FilterDesc>设置自动控制器(组)的目标筛选</ULS_AutoGroup_FilterDesc>
@@ -121,10 +123,17 @@
     <ULS_GroupSetId_Accept>确认</ULS_GroupSetId_Accept>
 
     <!-- [面板/检查器显示] -->
-    <ULS_AutoGroup_FilterWithValue>允许目标:{0}</ULS_AutoGroup_FilterWithValue>
+    <ULS_AutoGroup_FilterWithValue>检测目标:{0}</ULS_AutoGroup_FilterWithValue>
     <ULS_AutoGroup_Filter_Mixed>混合的</ULS_AutoGroup_Filter_Mixed>
     <ULS_AutoGroup_Filter_Friendly>友方</ULS_AutoGroup_Filter_Friendly>
     <ULS_AutoGroup_Filter_Hostile>敌方</ULS_AutoGroup_Filter_Hostile>
     <ULS_AutoGroup_Filter_Neutral>中立</ULS_AutoGroup_Filter_Neutral>
+
+    <!-- [自动控制器：反转模式] -->
+    <ULS_AutoGroup_InvertedWithValue>反转升降模式:{0}</ULS_AutoGroup_InvertedWithValue>
+    <ULS_AutoGroup_InvertedDesc>切换自动控制器的升降模式\n正常模式：检测到目标时降下\n反转模式：检测到目标时升起</ULS_AutoGroup_InvertedDesc>
+    <ULS_AutoGroup_Inverted_On>已启用</ULS_AutoGroup_Inverted_On>
+    <ULS_AutoGroup_Inverted_Off>未启用</ULS_AutoGroup_Inverted_Off>
+    <ULS_AutoGroup_Inverted_Mixed>混合的</ULS_AutoGroup_Inverted_Mixed>
 
 </LanguageData>

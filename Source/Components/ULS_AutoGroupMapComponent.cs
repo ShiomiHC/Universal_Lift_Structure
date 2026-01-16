@@ -131,6 +131,12 @@ public class ULS_AutoGroupMapComponent : MapComponent
     // 例如：Colonists、Enemies、AllHumans 等
     private Dictionary<int, ULS_AutoGroupType> filterTypeByGroupId = new();
 
+    // --- 反转模式配置（会被序列化） ---
+    // 存储每个分组是否启用反转模式
+    // 正常模式：检测到目标Pawn时降下（让路），无目标时升起（阻挡）
+    // 反转模式：检测到目标Pawn时升起（阻挡），无目标时降下（让路）
+    private Dictionary<int, bool> invertedModeByGroupId = new();
+
 
     // --- 活跃分组列表（运行时缓存） ---
     // 所有需要处理的自动分组 ID 列表
@@ -219,9 +225,16 @@ public class ULS_AutoGroupMapComponent : MapComponent
         Scribe_Collections.Look(ref filterTypeByGroupId, "filterTypeByGroupId", LookMode.Value, LookMode.Value,
             ref keys, ref values);
 
-        if (Scribe.mode is LoadSaveMode.PostLoadInit && filterTypeByGroupId is null)
+        // 序列化反转模式配置
+        List<int> invertedKeys = null;
+        List<bool> invertedValues = null;
+        Scribe_Collections.Look(ref invertedModeByGroupId, "invertedModeByGroupId", LookMode.Value, LookMode.Value,
+            ref invertedKeys, ref invertedValues);
+
+        if (Scribe.mode is LoadSaveMode.PostLoadInit)
         {
-            filterTypeByGroupId = new();
+            filterTypeByGroupId ??= new();
+            invertedModeByGroupId ??= new();
         }
     }
 
@@ -309,6 +322,66 @@ public class ULS_AutoGroupMapComponent : MapComponent
 
         filterTypeByGroupId ??= new();
         filterTypeByGroupId[groupId] = type;
+    }
+
+
+    // ============================================================
+    // 【获取反转模式】
+    // ============================================================
+    // 获取指定分组是否启用反转模式
+    //
+    // 【参数说明】
+    // - groupId: 分组ID
+    //
+    // 【返回值】
+    // - true: 反转模式已启用
+    // ============================================================
+    public bool GetGroupInvertedMode(int groupId)
+    {
+        if (groupId < 1 || invertedModeByGroupId is null)
+        {
+            return false;
+        }
+
+        return invertedModeByGroupId.TryGetValue(groupId, out bool inverted) && inverted;
+    }
+
+    // ============================================================
+    // 【设置反转模式】
+    // ============================================================
+    // 为指定分组设置反转模式
+    //
+    // 【参数说明】
+    // - groupId: 分组ID
+    // - inverted: 是否启用反转模式
+    // ============================================================
+    public void SetGroupInvertedMode(int groupId, bool inverted)
+    {
+        if (groupId < 1)
+        {
+            return;
+        }
+
+        invertedModeByGroupId ??= new();
+        invertedModeByGroupId[groupId] = inverted;
+    }
+
+    // ============================================================
+    // 【切换反转模式】
+    // ============================================================
+    // 切换指定分组的反转模式状态
+    //
+    // 【参数说明】
+    // - groupId: 分组ID
+    //
+    // 【返回值】
+    // - 切换后的状态（true=反转模式已启用）
+    // ============================================================
+    public bool ToggleGroupInvertedMode(int groupId)
+    {
+        bool current = GetGroupInvertedMode(groupId);
+        SetGroupInvertedMode(groupId, !current);
+        return !current;
     }
 
 
@@ -590,14 +663,39 @@ public class ULS_AutoGroupMapComponent : MapComponent
         return true;
     }
 
-    private void TryProcessAutoGroup(int groupId, int tick)
+
+    // ============================================================
+    // 【强制处理指定分组】
+    // ============================================================
+    // 立即触发指定分组的升降判定（用于反转模式切换后立即生效）
+    //
+    // 【调用场景】
+    // - 切换反转模式后立即触发
+    // - 手动触发某分组的检测
+    //
+    // 【参数说明】
+    // - groupId: 分组ID
+    // ============================================================
+    public void ForceProcessAutoGroup(int groupId)
+    {
+        if (groupId < 1 || map == null)
+        {
+            return;
+        }
+
+        int tick = Find.TickManager.TicksGame;
+        TryProcessAutoGroup(groupId, tick, forceProcess: true);
+    }
+
+    private void TryProcessAutoGroup(int groupId, int tick, bool forceProcess = false)
     {
         if (!runtimeByGroupId.TryGetValue(groupId, out AutoGroupRuntime runtime))
         {
             return;
         }
 
-        if (tick < runtime.nextCheckTick)
+        // 如果不是强制处理，检查是否到达下次检测时间
+        if (!forceProcess && tick < runtime.nextCheckTick)
         {
             return;
         }
@@ -727,10 +825,27 @@ public class ULS_AutoGroupMapComponent : MapComponent
         }
 
 
-        bool closeWanted = hasTarget;
-        if (!closeWanted && runtime.lastSeenTick != int.MinValue)
+        // 判断是否启用反转模式
+        // 正常模式：检测到目标Pawn时降下（让路）
+        // 反转模式：检测到目标Pawn时升起（阻挡）
+        bool inverted = GetGroupInvertedMode(groupId);
+        bool closeWanted = inverted ? !hasTarget : hasTarget;
+
+        // 延迟关闭逻辑（仅在正常模式下生效）
+        // 反转模式下，延迟逻辑适用于"保持升起"状态
+        if (runtime.lastSeenTick != int.MinValue)
         {
-            closeWanted = tick - runtime.lastSeenTick < props.closeDelayTicks;
+            bool withinDelay = tick - runtime.lastSeenTick < props.closeDelayTicks;
+            if (inverted)
+            {
+                // 反转模式：如果最近检测到目标，保持升起（不降下）
+                if (withinDelay) closeWanted = false;
+            }
+            else
+            {
+                // 正常模式：如果最近检测到目标，保持降下（让路）
+                if (withinDelay) closeWanted = true;
+            }
         }
 
         if (tick < runtime.nextToggleAllowedTick)

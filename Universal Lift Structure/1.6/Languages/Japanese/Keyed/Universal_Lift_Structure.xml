@@ -17,6 +17,8 @@
     <ULS_GroupSplitToNew>新規グループに分離</ULS_GroupSplitToNew>
     <ULS_GroupSplitToNewDesc>選択したコントローラーを現在のグループから新しいグループに分離する</ULS_GroupSplitToNewDesc>
     <ULS_GroupSetIdDesc>コントローラーのグループIDを設定する</ULS_GroupSetIdDesc>
+    <ULS_SelectGroupControllers>グループ内の全コントローラーを選択</ULS_SelectGroupControllers>
+    <ULS_SelectGroupControllersDesc>現在のグループ内のすべての構造コントローラーを選択します</ULS_SelectGroupControllersDesc>
 
     <!-- [自動コントローラー] -->
     <ULS_AutoGroup_FilterDesc>自動コントローラー(グループ)のターゲットフィルタを設定する</ULS_AutoGroup_FilterDesc>
@@ -127,5 +129,12 @@
     <ULS_AutoGroup_Filter_Friendly>友好</ULS_AutoGroup_Filter_Friendly>
     <ULS_AutoGroup_Filter_Hostile>敵対</ULS_AutoGroup_Filter_Hostile>
     <ULS_AutoGroup_Filter_Neutral>中立</ULS_AutoGroup_Filter_Neutral>
+
+    <!-- [自動コントローラー：反転モード] -->
+    <ULS_AutoGroup_InvertedWithValue>反転昇降モード:{0}</ULS_AutoGroup_InvertedWithValue>
+    <ULS_AutoGroup_InvertedDesc>自動コントローラーの昇降モードを切り替え\n通常モード：ターゲット検知時に下降\n反転モード：ターゲット検知時に上昇</ULS_AutoGroup_InvertedDesc>
+    <ULS_AutoGroup_Inverted_On>有効</ULS_AutoGroup_Inverted_On>
+    <ULS_AutoGroup_Inverted_Off>無効</ULS_AutoGroup_Inverted_Off>
+    <ULS_AutoGroup_Inverted_Mixed>混在</ULS_AutoGroup_Inverted_Mixed>
 
 </LanguageData>

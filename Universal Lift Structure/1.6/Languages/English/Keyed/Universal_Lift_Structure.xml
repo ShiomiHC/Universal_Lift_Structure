@@ -17,6 +17,8 @@
     <ULS_GroupSplitToNew>Split to New Group</ULS_GroupSplitToNew>
     <ULS_GroupSplitToNewDesc>Separate selected controllers from the current group into a new group</ULS_GroupSplitToNewDesc>
     <ULS_GroupSetIdDesc>Set the group ID of the controller</ULS_GroupSetIdDesc>
+    <ULS_SelectGroupControllers>Select All in Group</ULS_SelectGroupControllers>
+    <ULS_SelectGroupControllersDesc>Select all structure controllers in the current group</ULS_SelectGroupControllersDesc>
 
     <!-- [Auto Controller] -->
     <ULS_AutoGroup_FilterDesc>Set target filter for auto controller (group)</ULS_AutoGroup_FilterDesc>
@@ -126,5 +128,12 @@
     <ULS_AutoGroup_Filter_Friendly>Friendly</ULS_AutoGroup_Filter_Friendly>
     <ULS_AutoGroup_Filter_Hostile>Hostile</ULS_AutoGroup_Filter_Hostile>
     <ULS_AutoGroup_Filter_Neutral>Neutral</ULS_AutoGroup_Filter_Neutral>
+
+    <!-- [Auto Controller: Inverted Mode] -->
+    <ULS_AutoGroup_InvertedWithValue>Inverted lift Mode: {0}</ULS_AutoGroup_InvertedWithValue>
+    <ULS_AutoGroup_InvertedDesc>Toggle lift mode for auto controller\nNormal mode: Lower when target detected\nInverted mode: Raise when target detected</ULS_AutoGroup_InvertedDesc>
+    <ULS_AutoGroup_Inverted_On>Enabled</ULS_AutoGroup_Inverted_On>
+    <ULS_AutoGroup_Inverted_Off>Disabled</ULS_AutoGroup_Inverted_Off>
+    <ULS_AutoGroup_Inverted_Mixed>Mixed</ULS_AutoGroup_Inverted_Mixed>
 
 </LanguageData>
