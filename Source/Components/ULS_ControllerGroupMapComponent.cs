@@ -168,6 +168,41 @@ public class ULS_ControllerGroupMapComponent : MapComponent
     }
 
     // ============================================================
+    // 【每帧更新】
+    // ============================================================
+    // 仅更新正在进行升降动画的控制器
+    //
+    // 【性能优化】
+    // - 空闲控制器不消耗任何 CPU
+    // - 仅遍历 activeAnimatingControllers（通常数量极少）
+    // ============================================================
+    public override void MapComponentTick()
+    {
+        base.MapComponentTick();
+
+        // 无动画控制器时直接返回
+        if (activeAnimatingControllers.Count == 0)
+        {
+            return;
+        }
+
+        // 使用临时列表避免在遍历时修改集合
+        using var _ = new PooledList<Building_WallController>(out var toTick);
+        foreach (var controller in activeAnimatingControllers)
+        {
+            if (controller != null && controller.Spawned)
+            {
+                toTick.Add(controller);
+            }
+        }
+
+        foreach (var controller in toTick)
+        {
+            controller.TickLiftProcess();
+        }
+    }
+
+    // ============================================================
     // 【确保索引已构建】
     // ============================================================
     // 惰性初始化：如果索引未构建且不在重建中，则触发重建

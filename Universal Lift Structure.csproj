@@ -61,6 +61,7 @@
         <Compile Include="Source\DefOf\ULS_ThingDefOf.cs" />
         <Compile Include="Source\GlobalUsings.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_Building_GetGizmos.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_CompPowerTrader_PowerOn.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_DrawManager_DynamicThings.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_GeothermalGenerator_Fix.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />

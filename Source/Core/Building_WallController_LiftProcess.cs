@@ -204,6 +204,9 @@ public partial class Building_WallController
 
         cachedGroupComp?.DeregisterAnimatingController(this);
         ApplyActivePowerInternal(active: false);
+
+        // 状态改变后刷新 Gizmo 缓存
+        InvalidateGizmoCache();
     }
 
 
@@ -307,22 +310,18 @@ public partial class Building_WallController
     }
 
 
-    protected override void Tick()
+    // ============================================================
+    // 【升降过程 Tick】
+    // ============================================================
+    // 由 ULS_ControllerGroupMapComponent.MapComponentTick() 调用
+    // 仅在控制器处于升降动画过程中才会被调用
+    //
+    // 【性能优化】
+    // - 空闲控制器不会调用此方法（无 CPU 开销）
+    // - 仅遍历正在动画的控制器
+    // ============================================================
+    internal void TickLiftProcess()
     {
-        base.Tick();
-
-        // 检查空闲状态下的电力消耗 (每秒检查一次设置变化)
-        if (this.IsHashIntervalTick(60))
-        {
-            EnsureIdlePowerIfFeatureDisabled();
-        }
-
-        // 定期刷新 Gizmo 缓存
-        if (this.IsHashIntervalTick(60))
-        {
-            RefreshGizmoCache();
-        }
-
         if (!InLiftProcess)
         {
             return;

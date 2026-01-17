@@ -6,7 +6,11 @@
 // 作用：注入渲染逻辑，用于显示处于升降过程中的被收纳建筑。
 // 主要功能：
 // - 在控制器进行升降动画时，渲染随之升降的建筑模型。
-// - 如果设置开启了“虚影显示”，则在收纳完成状态下渲染建筑虚影。
+// - 如果设置开启了"虚影显示"，则在收纳完成状态下渲染建筑虚影。
+//
+// 【性能优化】
+// - 使用视口裁剪，仅渲染当前可见区域内的控制器
+// - 直接访问 internal 字段，避免反射开销
 // ============================================================
 [HarmonyPatch(typeof(DynamicDrawManager), nameof(DynamicDrawManager.DrawDynamicThings))]
 public static class Patch_DrawManager_DynamicThings
@@ -16,14 +20,6 @@ public static class Patch_DrawManager_DynamicThings
     // 反射获取 DynamicDrawManager 的 map 字段
     private static readonly AccessTools.FieldRef<DynamicDrawManager, Map> MapRef =
         AccessTools.FieldRefAccess<DynamicDrawManager, Map>("map");
-
-    // 反射获取 Building_WallController 的 storedRotation 字段
-    private static readonly AccessTools.FieldRef<Building_WallController, Rot4> StoredRotationRef =
-        AccessTools.FieldRefAccess<Building_WallController, Rot4>("storedRotation");
-
-    // 反射获取 Building_WallController 的 storedCell 字段
-    private static readonly AccessTools.FieldRef<Building_WallController, IntVec3> StoredCellRef =
-        AccessTools.FieldRefAccess<Building_WallController, IntVec3>("storedCell");
 
 
     // ============================================================
@@ -73,9 +69,19 @@ public static class Patch_DrawManager_DynamicThings
             return;
         }
 
+        // 视口裁剪：仅渲染当前摄像机视口内的控制器
+        // ExpandedBy(2) 确保边缘控制器不会闪烁
+        CellRect viewRect = Find.CameraDriver.CurrentViewRect.ExpandedBy(2);
+
         foreach (var controller in controllersToIterate)
         {
             if (controller == null || !controller.Spawned)
+            {
+                continue;
+            }
+
+            // 视口裁剪检查
+            if (!viewRect.Contains(controller.Position))
             {
                 continue;
             }
@@ -92,10 +98,10 @@ public static class Patch_DrawManager_DynamicThings
                 continue;
             }
 
-            // 获取存储时的位置和旋转信息
-            IntVec3 storedCell = StoredCellRef(controller);
+            // 直接访问 internal 字段，避免反射开销
+            IntVec3 storedCell = controller.storedCell;
             IntVec3 drawCell = storedCell.IsValid ? storedCell : controller.Position;
-            Rot4 drawRot = StoredRotationRef(controller);
+            Rot4 drawRot = controller.storedRotation;
 
             // 检查是否处于升降动画过程中
             if (controller.TryGetLiftProgress01(out float rawProgress01, out bool isRaising))
@@ -111,16 +117,9 @@ public static class Patch_DrawManager_DynamicThings
                     visible01 = Mathf.Lerp(1f, StoredVisible01, rawProgress01);
                 }
 
-
-                // 获取连接方向（用于正确绘制连接纹理）
-                LinkDirections? TryGetCachedLinkDirections(IntVec3 c) =>
-                    controller.TryGetStoredLinkDirections(c, out LinkDirections dirs)
-                        ? dirs
-                        : null;
-
                 // 调用剪裁渲染器绘制建筑
                 ULS_LiftClipRenderer.DrawLiftingStoredBuilding(storedBuilding, drawRot, drawCell, visible01, map,
-                    TryGetCachedLinkDirections);
+                    c => controller.TryGetStoredLinkDirections(c, out LinkDirections dirs) ? dirs : null);
                 continue;
             }
 

@@ -12,6 +12,9 @@ public partial class Building_WallController
     // ============================================================
     public override IEnumerable<Gizmo> GetGizmos()
     {
+        // 确保电力状态正确（边缘情况：Mod设置运行时变更）
+        EnsureIdlePowerIfFeatureDisabled();
+
         // 获取基类 Gizmos
         foreach (Gizmo gizmo in base.GetGizmos())
         {

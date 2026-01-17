@@ -5,8 +5,8 @@
     <ThingDef ParentName="BuildingBase" Name="ULS_WallControllerBase" Abstract="True">
         <!-- 逻辑类 -->
         <thingClass>Universal_Lift_Structure.Building_WallController</thingClass>
-        <!-- 必须实时准备升降动画 -->
-        <tickerType>Normal</tickerType>
+        <!-- 注：动画更新由 MapComponent 托管，空闲时无 Tick 开销 -->
+        <tickerType>Never</tickerType>
         <!-- 需求地形 -->
         <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
         <!-- 绘制：电缆层 -->

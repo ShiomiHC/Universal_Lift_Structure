@@ -71,11 +71,11 @@ public partial class Building_WallController : Building, IThingHolder
 
     // 存储建筑的原始朝向
     // 用途：升起时恢复建筑的正确朝向
-    private Rot4 storedRotation = Rot4.North;
+    internal Rot4 storedRotation = Rot4.North;
 
     // 存储建筑的原始位置
     // 用途：验证位置有效性，确保升起时位置可用
-    private IntVec3 storedCell = IntVec3.Invalid;
+    internal IntVec3 storedCell = IntVec3.Invalid;
 
     // 缓存的 LinkMask 数据：单元格列表
     // 用途：记录 Linked 图形建筑每个单元格的连接状态

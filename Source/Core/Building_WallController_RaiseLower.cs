@@ -330,6 +330,9 @@ public partial class Building_WallController
                 multiCellGroupRootCell = IntVec3.Invalid;
             }
         }
+
+        // 成功升起后刷新缓存
+        InvalidateGizmoCache();
     }
 
 
@@ -548,6 +551,8 @@ public partial class Building_WallController
             return false;
         }
 
+        // 成功降下后刷新缓存
+        InvalidateGizmoCache();
         return true;
     }
 

@@ -75,54 +75,62 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             return;
         }
 
-        List<Building> colonistBuildings = map.listerBuildings?.allBuildingsColonist;
-        if (colonistBuildings is null || colonistBuildings.Count <= 0)
+        // 提前获取 groupComp，两个功能都可能需要使用
+        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp is null)
         {
             return;
         }
 
         // --- 1. 绘制控制器填充高亮 ---
+        // 优化：使用 groupComp.GetAllControllers() 而非遍历 allBuildingsColonist
+        // 复杂度从 O(总建筑数) 降至 O(控制器数)
         if (showFill)
         {
-            TmpFillCells.Clear();
-            foreach (var t in colonistBuildings)
+            HashSet<Building_WallController> allControllers = groupComp.GetAllControllers();
+            if (allControllers is { Count: > 0 })
             {
-                if (t is not Building_WallController controller)
+                TmpFillCells.Clear();
+                foreach (var controller in allControllers)
                 {
-                    continue;
-                }
-
-                TmpFillCells.Add(controller.Position);
-            }
-
-            if (TmpFillCells.Count > 0)
-            {
-                const float altOffset = 0.001f;
-                // 使用淡白色填充
-                Color fillColor = new Color(0.98f, 0.97f, 0.96f, 0.35f);
-
-                // 使用 Instanced 绘制提高性能
-                Material fillMat = MaterialPool.MatFrom(BaseContent.WhiteTex, ShaderDatabase.Transparent, fillColor,
-                    renderQueue: 2900);
-                fillMat.enableInstancing = true;
-
-                TmpFillMatrices.Clear();
-                foreach (var cell in TmpFillCells)
-                {
-                    if (!cell.InBounds(map))
+                    if (controller == null || !controller.Spawned)
                     {
                         continue;
                     }
 
-                    TmpFillMatrices.Add(Matrix4x4.TRS(
-                        cell.ToVector3ShiftedWithAltitude(AltitudeLayer.MetaOverlays) + new Vector3(0f, altOffset, 0f),
-                        Quaternion.identity,
-                        Vector3.one));
+                    TmpFillCells.Add(controller.Position);
                 }
 
-                if (TmpFillMatrices.Count > 0)
+                if (TmpFillCells.Count > 0)
                 {
-                    Graphics.DrawMeshInstanced(MeshPool.plane10, 0, fillMat, TmpFillMatrices);
+                    const float altOffset = 0.001f;
+                    // 使用淡白色填充
+                    Color fillColor = new Color(0.98f, 0.97f, 0.96f, 0.35f);
+
+                    // 使用 Instanced 绘制提高性能
+                    Material fillMat = MaterialPool.MatFrom(BaseContent.WhiteTex, ShaderDatabase.Transparent, fillColor,
+                        renderQueue: 2900);
+                    fillMat.enableInstancing = true;
+
+                    TmpFillMatrices.Clear();
+                    foreach (var cell in TmpFillCells)
+                    {
+                        if (!cell.InBounds(map))
+                        {
+                            continue;
+                        }
+
+                        TmpFillMatrices.Add(Matrix4x4.TRS(
+                            cell.ToVector3ShiftedWithAltitude(AltitudeLayer.MetaOverlays) +
+                            new Vector3(0f, altOffset, 0f),
+                            Quaternion.identity,
+                            Vector3.one));
+                    }
+
+                    if (TmpFillMatrices.Count > 0)
+                    {
+                        Graphics.DrawMeshInstanced(MeshPool.plane10, 0, fillMat, TmpFillMatrices);
+                    }
                 }
             }
         }
@@ -133,12 +141,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             return;
         }
 
-
-        ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
-        if (groupComp is null)
-        {
-            return;
-        }
+        // groupComp 已在上方定义并验证过非空
 
         ULS_AutoGroupMapComponent autoGroupComp = map.GetComponent<ULS_AutoGroupMapComponent>();
         if (autoGroupComp is null)
