@@ -317,6 +317,12 @@ public partial class Building_WallController
             EnsureIdlePowerIfFeatureDisabled();
         }
 
+        // 定期刷新 Gizmo 缓存
+        if (this.IsHashIntervalTick(60))
+        {
+            RefreshGizmoCache();
+        }
+
         if (!InLiftProcess)
         {
             return;

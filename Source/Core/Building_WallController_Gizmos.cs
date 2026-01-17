@@ -217,101 +217,21 @@ public partial class Building_WallController
             action = GizmoRaiseGroupCommandAction
         };
 
-        bool disabled = false;
-        Map currentMap = Map;
-        UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
-
-        int groupMaxSize = GetGroupMaxSize();
-        // 检查升起按钮的可用性状态
-        if (currentMap == null)
+        // 使用缓存进行状态检查（优化：避免每帧重复计算）
+        if (!IsGizmoCacheValid)
         {
-            raiseCommand.Disable("ULS_NoStored".Translate());
-            disabled = true;
+            RefreshGizmoCache();
         }
 
-        else
+        if (cachedRaiseDisableReason != GizmoDisableReason.None)
         {
-            ULS_ControllerGroupMapComponent groupComp = currentMap.GetComponent<ULS_ControllerGroupMapComponent>();
-            int groupId = controllerGroupId;
-
-            // 检查组是否存在或有效
-            if (groupComp == null || groupId < 1 ||
-                !groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) || groupCells == null ||
-                groupCells.Count == 0)
-            {
-                raiseCommand.Disable("ULS_NoStored".Translate());
-                disabled = true;
-            }
-            // 检查组大小限制
-            else if (groupCells.Count > groupMaxSize)
-            {
-                raiseCommand.Disable("ULS_GroupTooLarge".Translate(groupMaxSize));
-                disabled = true;
-            }
-            else
-            {
-                // 检查是否有存储的物体、忙碌状态及电力状况 (合并遍历以优化性能)
-                bool hasStored = false;
-                bool isBusy = false;
-                bool hasPowerIssue = false;
-
-                foreach (var t in groupCells)
-                {
-                    if (ULS_Utility.TryGetControllerAt(currentMap, t, out Building_WallController controller))
-                    {
-                        if (controller.HasStored) hasStored = true;
-                        if (controller.InLiftProcess) isBusy = true;
-                        if (settings is { enableLiftPower: true } && !controller.IsReadyForLiftPower())
-                        {
-                            hasPowerIssue = true;
-                        }
-
-                        // 如果已确认有存储，且发现了任意阻碍条件，则可提前终止
-                        if (hasStored && (isBusy || hasPowerIssue)) break;
-                    }
-                }
-
-                if (!hasStored)
-                {
-                    raiseCommand.Disable("ULS_NoStored".Translate());
-                    disabled = true;
-                }
-                else if (isBusy)
-                {
-                    raiseCommand.Disable("ULS_LiftInProcess".Translate());
-                    disabled = true;
-                }
-                else if (hasPowerIssue)
-                {
-                    raiseCommand.Disable("ULS_PowerOff".Translate());
-                    disabled = true;
-                }
-            }
-        }
-
-        // 控制台模式检查
-        if (!disabled && (settings?.liftControlMode ?? LiftControlMode.Remote) == LiftControlMode.Console)
-        {
-            if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(currentMap, Position, out ThingWithComps _))
-            {
-                ThingDef consoleDef = DefDatabase<ThingDef>.GetNamedSilentFail("ULS_LiftConsole");
-                bool anyConsoleExists = consoleDef != null && currentMap.listerThings.ThingsOfDef(consoleDef)
-                    .Any(t => t.Faction == Faction.OfPlayer);
-
-                if (anyConsoleExists)
-                {
-                    raiseCommand.Disable("ULS_LiftConsolePowerOff".Translate());
-                }
-                else
-                {
-                    raiseCommand.Disable("ULS_LiftConsoleMissing".Translate());
-                }
-            }
+            raiseCommand.Disable(GetDisableReasonString(cachedRaiseDisableReason, cachedGroupMaxSizeArg));
         }
 
         yield return raiseCommand;
 
         // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
+        UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
         if (wantedLiftAction != ULS_LiftActionRequest.None &&
             settings is { liftControlMode: not LiftControlMode.Remote })
         {
@@ -353,12 +273,14 @@ public partial class Building_WallController
         if (controlMode == LiftControlMode.Remote)
         {
             TryRaiseGroup(showMessage: true);
+            RefreshGizmoCache(); // 立即刷新缓存，让 UI 响应更快
         }
         // Manual/Console 模式：设置期望状态
         else
         {
             wantedLiftAction = ULS_LiftActionRequest.Raise;
             UpdateLiftDesignation();
+            RefreshGizmoCache(); // 立即刷新缓存，让 UI 响应更快
         }
     }
 
@@ -366,12 +288,14 @@ public partial class Building_WallController
     public void GizmoLowerGroup(IntVec3 startCell)
     {
         TryLowerGroup(startCell, showMessage: true);
+        RefreshGizmoCache(); // 立即刷新缓存，让 UI 响应更快
     }
 
 
     public void GizmoLowerFromBuilding(Building building, IntVec3 controllerCell)
     {
         TryLowerGroup(controllerCell, showMessage: true);
+        RefreshGizmoCache(); // 立即刷新缓存，让 UI 响应更快
     }
 
     private void OnGizmoAction_SetGroupId(List<Building_WallController> selectedControllers)
@@ -407,6 +331,12 @@ public partial class Building_WallController
 
                         groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
                         mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+
+                        // 立即刷新所有相关控制器的缓存，让 UI 响应更快
+                        foreach (var ctrl in expandedList)
+                        {
+                            ctrl?.RefreshGizmoCache();
+                        }
                     }
                 }));
         }
@@ -453,6 +383,12 @@ public partial class Building_WallController
         }
 
         map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+
+        // 立即刷新所有相关控制器的缓存，让 UI 响应更快
+        foreach (var ctrl in expandedList)
+        {
+            ctrl?.RefreshGizmoCache();
+        }
     }
 
     private void OnGizmoAction_SplitToNewGroup(List<Building_WallController> selectedControllers)
@@ -476,6 +412,12 @@ public partial class Building_WallController
 
                 groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
                 map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
+
+                // 立即刷新所有被拆分控制器的缓存，让 UI 响应更快
+                foreach (var ctrl in selectedControllers)
+                {
+                    ctrl?.RefreshGizmoCache();
+                }
             }
         }
     }
@@ -517,7 +459,7 @@ public partial class Building_WallController
             cells == null || cells.Count == 0) return;
 
         // 如果按住Shift键，则追加选择；否则替换选择
-        if (!UnityEngine.Event.current.shift)
+        if (!Event.current.shift)
         {
             Find.Selector.ClearSelection();
         }

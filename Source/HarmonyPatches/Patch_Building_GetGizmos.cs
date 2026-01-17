@@ -77,12 +77,6 @@ public static class Patch_Building_GetGizmos
             return;
         }
 
-        int groupMaxSize = settings?.groupMaxSize ?? 20;
-        if (groupMaxSize < 1)
-        {
-            groupMaxSize = 20;
-        }
-
 
         // 控制台模式检查：需要范围内有通电的控制台
         if (mode == LiftControlMode.Console)
@@ -103,138 +97,21 @@ public static class Patch_Building_GetGizmos
             }
         }
 
-        // 分支处理：单格建筑 vs 多格建筑
+        // 分支处理：单格建筑 vs 多格建筑（优化：使用专门的验证方法）
         if (__instance.def.Size == IntVec2.One)
         {
-            // 单格逻辑：检查编组状态
-            ULS_ControllerGroupMapComponent groupComp = __instance.Map.GetComponent<ULS_ControllerGroupMapComponent>();
-            int groupId = controller.ControllerGroupId;
-            if (groupComp != null && groupId > 0 &&
-                groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) && groupCells != null)
+            // 单格逻辑：使用专门的降下验证方法
+            if (!controller.CanLowerSingleCellBuilding(out string singleCellDisableReason))
             {
-                // 检查组大小限制
-                if (groupCells.Count > groupMaxSize)
-                {
-                    lowerCommand.Disable("ULS_GroupTooLarge".Translate(groupMaxSize));
-                }
-                else
-                {
-                    // 遍历组内成员检查状态
-                    foreach (var t in groupCells)
-                    {
-                        if (!ULS_Utility.TryGetControllerAt(__instance.Map, t, out Building_WallController c) ||
-                            c == null)
-                        {
-                            continue;
-                        }
-
-                        // 检查是否正在运行中
-                        if (c.InLiftProcessForUI)
-                        {
-                            lowerCommand.Disable("ULS_LiftInProcess".Translate());
-                            break;
-                        }
-
-                        // 检查电力
-                        if (settings is { enableLiftPower: true } && !c.IsReadyForLiftPower())
-                        {
-                            lowerCommand.Disable("ULS_PowerOff".Translate());
-                            break;
-                        }
-                    }
-                }
+                lowerCommand.Disable(singleCellDisableReason);
             }
         }
         else
         {
-            // 多格逻辑：需要检查占用的所有格子
-            Map map = __instance.Map;
-            IntVec3 rootCell = __instance.Position;
-            CellRect rect = __instance.OccupiedRect();
-
-            // 根位置必须有控制器
-            if (!ULS_Utility.TryGetControllerAt(map, rootCell, out _))
+            // 多格逻辑：委托控制器验证（避免在 Patch 中遍历）
+            if (!controller.CanLowerMultiCellBuilding(__instance, out string multiCellDisableReason))
             {
-                lowerCommand.Disable("ULS_MultiCellNeedControllerEveryCell".Translate());
-            }
-            else
-            {
-                // 检查是否与多格组冲突
-                ULS_MultiCellGroupMapComponent groupComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
-                if (groupComp != null && groupComp.HasGroup(rootCell))
-                {
-                    lowerCommand.Disable("ULS_MultiCellGroupAlreadyExists".Translate());
-                }
-                else
-                {
-                    bool missingController = false;
-                    bool anyStored = false;
-                    bool anyInGroup = false;
-                    ULS_ControllerGroupMapComponent ctrlGroupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
-
-                    // 遍历多格建筑占用的每一个格子
-                    foreach (IntVec3 cell in rect)
-                    {
-                        if (!ULS_Utility.TryGetControllerAt(map, cell, out Building_WallController c))
-                        {
-                            missingController = true;
-                            break;
-                        }
-
-                        // 组超限检测（针对每个格子所在的控制器组）
-                        int cellGroupId = c.ControllerGroupId;
-                        if (ctrlGroupComp != null && cellGroupId > 0 &&
-                            ctrlGroupComp.TryGetGroupControllerCells(cellGroupId, out List<IntVec3> cellGroupCells) &&
-                            cellGroupCells != null && cellGroupCells.Count > groupMaxSize)
-                        {
-                            lowerCommand.Disable("ULS_GroupTooLarge".Translate(groupMaxSize));
-                            break;
-                        }
-
-                        // 运行状态检测
-                        if (c.InLiftProcessForUI)
-                        {
-                            lowerCommand.Disable("ULS_LiftInProcess".Translate());
-
-                            break;
-                        }
-
-                        // 电力检测
-                        if (settings is { enableLiftPower: true } && !c.IsReadyForLiftPower())
-                        {
-                            lowerCommand.Disable("ULS_PowerOff".Translate());
-                            break;
-                        }
-
-                        // 存储状态检测
-                        if (c.HasStored)
-                        {
-                            anyStored = true;
-                            break;
-                        }
-
-                        // 多格组归属检测
-                        if (c.MultiCellGroupRootCell.IsValid)
-                        {
-                            anyInGroup = true;
-                            break;
-                        }
-                    }
-
-                    // 汇总错误信息
-                    if (missingController)
-                    {
-                        lowerCommand.Disable("ULS_MultiCellNeedControllerEveryCell".Translate());
-                    }
-                    else if (anyStored)
-                    {
-                        lowerCommand.Disable("ULS_MultiCellControllerHasStored".Translate());
-                    }
-                    else if (anyInGroup)
-                    {
-                        lowerCommand.Disable("ULS_MultiCellControllerInGroup".Translate());
-                    }
-                }
+                lowerCommand.Disable(multiCellDisableReason);
             }
         }
 

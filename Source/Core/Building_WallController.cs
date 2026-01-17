@@ -428,6 +428,9 @@ public partial class Building_WallController : Building, IThingHolder
 
         // 同步 Designation 和队列
         UpdateLiftDesignation();
+
+        // 立即刷新缓存，让 UI 响应更快
+        RefreshGizmoCache();
     }
 
 
@@ -462,7 +465,11 @@ public partial class Building_WallController : Building, IThingHolder
     internal int ControllerGroupId
     {
         get => controllerGroupId;
-        set => controllerGroupId = value;
+        set
+        {
+            controllerGroupId = value;
+            InvalidateGizmoCache(); // 分组变化时立即刷新缓存
+        }
     }
 
     // ============================================================
@@ -641,6 +648,9 @@ public partial class Building_WallController : Building, IThingHolder
             ApplyActivePowerInternal(active: true);
             cachedGroupComp?.RegisterAnimatingController(this);
         }
+
+        // 初始化 Gizmo 缓存
+        RefreshGizmoCache();
     }
 
 

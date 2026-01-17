@@ -91,19 +91,12 @@ public static class ULS_GizmoTextures
     // ============================================================
     public static readonly Texture2D LowerGroup = ContentFinder<Texture2D>.Get("UI/Down");
 
-    // ============================================================
-    // 【未来可能添加的其他图标】
-    // ============================================================
-    // 保留用于未来扩展的图标示例
-    // ============================================================
-
-    // 选择编组内所有成员图标（可选）
+    // 选择编组内所有成员图标
     public static readonly Texture2D SelectLinked = ContentFinder<Texture2D>.Get("UI/Commands/SelectAllLinked");
 
     // ============================================================
     // 【反转模式切换图标】
     // ============================================================
-    // 占位符图标（后期替换为自定义图标）
     // 用于 Gizmo 按钮：切换自动分组的反转模式
     // ============================================================
     public static readonly Texture2D ToggleInvertedMode = ContentFinder<Texture2D>.Get("UI/LiftMode");
