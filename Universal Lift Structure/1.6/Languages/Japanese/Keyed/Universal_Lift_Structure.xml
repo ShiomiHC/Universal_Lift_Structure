@@ -52,7 +52,7 @@
 
 
     <ULS_GroupBlacklistedAt>座標 {0} の構造がホワイトリストにありません</ULS_GroupBlacklistedAt>
-    <ULS_GroupNoLowerable>グループ内に下降可能な構造がありません</ULS_GroupNoLowerable>
+    <ULS_GroupNoLowerable>グループ内に下降可能な構造がありません（既に下降済みの構造など）</ULS_GroupNoLowerable>
 
     <ULS_GroupNoRaiseable>グループ内のすべての上昇予定構造がブロックされています</ULS_GroupNoRaiseable>
 
@@ -89,7 +89,8 @@
 
     <!-- [設定：コアと機能] -->
     <ULS_Settings_LiftControlMode>昇降制御モード</ULS_Settings_LiftControlMode>
-    <ULS_Settings_LiftControlMode_Desc>昇降を操作する方式を選択\nリモート制御：即座に発動；\nコンソール：昇降コンソールで統一操作；\n手動：コントローラー本体を直接操作</ULS_Settings_LiftControlMode_Desc>
+    <ULS_Settings_LiftControlMode_Desc>
+        昇降を操作する方式を選択\nリモート制御：即座に発動；\nコンソール：昇降コンソールで統一操作；\n手動：コントローラー本体を直接操作</ULS_Settings_LiftControlMode_Desc>
     <ULS_LiftControlMode_Remote>リモート制御</ULS_LiftControlMode_Remote>
     <ULS_LiftControlMode_Console>コンソール</ULS_LiftControlMode_Console>
     <ULS_LiftControlMode_Manual>手動</ULS_LiftControlMode_Manual>
@@ -97,7 +98,8 @@
     <ULS_Settings_GroupMaxSize>グループサイズ上限</ULS_Settings_GroupMaxSize>
 
     <ULS_Settings_EnableLiftPower>昇降時の追加電力消費を有効化</ULS_Settings_EnableLiftPower>
-    <ULS_Settings_EnableLiftPower_Desc>有効時：昇降プロセス中、参加する各コントローラーが追加で1000Wを消費；\n電力不足時は昇降を開始できず、昇降中に停電すると失敗</ULS_Settings_EnableLiftPower_Desc>
+    <ULS_Settings_EnableLiftPower_Desc>
+        有効時：昇降プロセス中、参加する各コントローラーが追加で1000Wを消費；\n電力不足時は昇降を開始できず、昇降中に停電すると失敗</ULS_Settings_EnableLiftPower_Desc>
 
     <ULS_Settings_LiftDurationHpSet>昇降所要時間倍率(耐久度基準): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>昇降所要時間倍率(重量基準): {0}</ULS_Settings_LiftDurationMassSet>

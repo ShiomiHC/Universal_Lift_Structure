@@ -125,7 +125,7 @@
                 <!-- 扫描间隔 -->
                 <checkIntervalTicks>60</checkIntervalTicks>
                 <!-- 升起延迟 -->
-                <closeDelayTicks>30</closeDelayTicks>
+                <closeDelayTicks>10</closeDelayTicks>
                 <!-- 开闭冷却 -->
                 <toggleCooldownTicks>180</toggleCooldownTicks>
             </li>

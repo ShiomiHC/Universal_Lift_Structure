@@ -38,12 +38,16 @@
 
     <ULS_LowerNotPlayerOwned>Only player-owned structures can be lowered</ULS_LowerNotPlayerOwned>
     <ULS_CannotPlace_ControllerExists>A structure controller already exists at this cell</ULS_CannotPlace_ControllerExists>
-    <ULS_CannotPlace_BlacklistedOverlay>This cell contains restricted structures ({0}), cannot place structure controller</ULS_CannotPlace_BlacklistedOverlay>
+    <ULS_CannotPlace_BlacklistedOverlay>This cell contains restricted structures ({0}), cannot place
+        structure controller</ULS_CannotPlace_BlacklistedOverlay>
 
     <!-- [Multi-Cell Structure Validation] -->
-    <ULS_MultiCellNeedControllerEveryCell>Multi-cell structures require controllers in every occupied cell</ULS_MultiCellNeedControllerEveryCell>
-    <ULS_MultiCellControllerHasStored>Some controllers in the group have stored structures, cannot lower multi-cell structure</ULS_MultiCellControllerHasStored>
-    <ULS_MultiCellControllerInGroup>Some controllers are already occupied by other multi-cell structure groups, cannot lower multi-cell structure</ULS_MultiCellControllerInGroup>
+    <ULS_MultiCellNeedControllerEveryCell>Multi-cell structures require controllers in every
+        occupied cell</ULS_MultiCellNeedControllerEveryCell>
+    <ULS_MultiCellControllerHasStored>Some controllers in the group have stored structures, cannot
+        lower multi-cell structure</ULS_MultiCellControllerHasStored>
+    <ULS_MultiCellControllerInGroup>Some controllers are already occupied by other multi-cell
+        structure groups, cannot lower multi-cell structure</ULS_MultiCellControllerInGroup>
     <ULS_MultiCellGroupAlreadyExists>This multi-cell structure is already in the lift queue</ULS_MultiCellGroupAlreadyExists>
 
     <!-- [Group Operation Validation] -->
@@ -52,12 +56,13 @@
 
 
     <ULS_GroupBlacklistedAt>Structure at {0} is not whitelisted</ULS_GroupBlacklistedAt>
-    <ULS_GroupNoLowerable>No lowerable structures in group</ULS_GroupNoLowerable>
+    <ULS_GroupNoLowerable>No lowerable structures in group(already lowered, etc.)</ULS_GroupNoLowerable>
 
     <ULS_GroupNoRaiseable>All raiseable structures in group are blocked</ULS_GroupNoRaiseable>
 
 
-    <ULS_AutoGroup_MixAutoAndManual>Auto controller groups and manual controller groups cannot be in the same group</ULS_AutoGroup_MixAutoAndManual>
+    <ULS_AutoGroup_MixAutoAndManual>Auto controller groups and manual controller groups cannot be in
+        the same group</ULS_AutoGroup_MixAutoAndManual>
 
     <!-- [Operation Results] -->
     <ULS_GroupLowerFailed>Group lower failed</ULS_GroupLowerFailed>
@@ -88,7 +93,9 @@
 
     <!-- [Settings: Core and Features] -->
     <ULS_Settings_LiftControlMode>Lift Control Mode</ULS_Settings_LiftControlMode>
-    <ULS_Settings_LiftControlMode_Desc>Choose how to control lifting\nRemote: takes effect immediately;\nConsole: unified operation through lift console;\nManual: operate the controller directly</ULS_Settings_LiftControlMode_Desc>
+    <ULS_Settings_LiftControlMode_Desc>Choose how to control lifting\nRemote: takes effect
+        immediately;\nConsole: unified operation through lift console;\nManual: operate the
+        controller directly</ULS_Settings_LiftControlMode_Desc>
     <ULS_LiftControlMode_Remote>Remote</ULS_LiftControlMode_Remote>
     <ULS_LiftControlMode_Console>Console</ULS_LiftControlMode_Console>
     <ULS_LiftControlMode_Manual>Manual</ULS_LiftControlMode_Manual>
@@ -96,7 +103,9 @@
     <ULS_Settings_GroupMaxSize>Group Size Limit</ULS_Settings_GroupMaxSize>
 
     <ULS_Settings_EnableLiftPower>Enable Lift Power Logic</ULS_Settings_EnableLiftPower>
-    <ULS_Settings_EnableLiftPower_Desc>When enabled: During lift operations, each participating controller consumes an additional 1000W; \nLift cannot start without sufficient power, power loss during lift will cause failure</ULS_Settings_EnableLiftPower_Desc>
+    <ULS_Settings_EnableLiftPower_Desc>When enabled: During lift operations, each participating
+        controller consumes an additional 1000W; \nLift cannot start without sufficient power, power
+        loss during lift will cause failure</ULS_Settings_EnableLiftPower_Desc>
 
     <ULS_Settings_LiftDurationHpSet>Lift Duration Multiplier (HP-based): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>Lift Duration Multiplier (Mass-based): {0}</ULS_Settings_LiftDurationMassSet>
@@ -114,7 +123,8 @@
     <ULS_Settings_OverlayDisplay>Overlay Display</ULS_Settings_OverlayDisplay>
     <ULS_Settings_OverlayDisplay_ShowStoredGhost>Show ghost of lowered structures</ULS_Settings_OverlayDisplay_ShowStoredGhost>
     <ULS_Settings_OverlayDisplay_ShowControllerCell>Show controller cell indicator</ULS_Settings_OverlayDisplay_ShowControllerCell>
-    <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>Show auto controller detection area projection</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+    <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>Show auto controller detection
+        area projection</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
 
     <!-- [Dialog: Group Settings] -->
     <ULS_GroupSetIdWithValue>Group Settings: {0}</ULS_GroupSetIdWithValue>
@@ -131,7 +141,8 @@
 
     <!-- [Auto Controller: Inverted Mode] -->
     <ULS_AutoGroup_InvertedWithValue>Inverted lift Mode: {0}</ULS_AutoGroup_InvertedWithValue>
-    <ULS_AutoGroup_InvertedDesc>Toggle lift mode for auto controller\nNormal mode: Lower when target detected\nInverted mode: Raise when target detected</ULS_AutoGroup_InvertedDesc>
+    <ULS_AutoGroup_InvertedDesc>Toggle lift mode for auto controller\nNormal mode: Lower when target
+        detected\nInverted mode: Raise when target detected</ULS_AutoGroup_InvertedDesc>
     <ULS_AutoGroup_Inverted_On>Enabled</ULS_AutoGroup_Inverted_On>
     <ULS_AutoGroup_Inverted_Off>Disabled</ULS_AutoGroup_Inverted_Off>
     <ULS_AutoGroup_Inverted_Mixed>Mixed</ULS_AutoGroup_Inverted_Mixed>

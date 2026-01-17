@@ -52,7 +52,7 @@
 
 
     <ULS_GroupBlacklistedAt>坐标 {0} 的结构未在白名单中</ULS_GroupBlacklistedAt>
-    <ULS_GroupNoLowerable>组内没有可被降下的结构</ULS_GroupNoLowerable>
+    <ULS_GroupNoLowerable>组内没有可被降下的结构（存在已降下的建筑等）</ULS_GroupNoLowerable>
 
     <ULS_GroupNoRaiseable>组内所有待升起结构均被阻挡</ULS_GroupNoRaiseable>
 
