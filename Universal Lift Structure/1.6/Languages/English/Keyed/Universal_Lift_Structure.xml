@@ -88,7 +88,7 @@
     <ULS_Tab_Other>Other</ULS_Tab_Other>
 
     <ULS_Section_Core>Core Settings</ULS_Section_Core>
-    <ULS_Section_Visual>UI Overlay</ULS_Section_Visual>
+    <ULS_Section_Visual>Visual settings</ULS_Section_Visual>
     <ULS_Section_Performance>Lift Duration</ULS_Section_Performance>
 
     <!-- [Settings: Core and Features] -->
@@ -125,6 +125,7 @@
     <ULS_Settings_OverlayDisplay_ShowControllerCell>Show controller cell indicator</ULS_Settings_OverlayDisplay_ShowControllerCell>
     <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>Show auto controller detection
         area projection</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+    <ULS_Settings_OverlayDisplay_HideControllerWhenStored>Hide controller when lowered</ULS_Settings_OverlayDisplay_HideControllerWhenStored>
 
     <!-- [Dialog: Group Settings] -->
     <ULS_GroupSetIdWithValue>Group Settings: {0}</ULS_GroupSetIdWithValue>

@@ -83,7 +83,7 @@
     <ULS_Tab_Other>其他</ULS_Tab_Other>
 
     <ULS_Section_Core>基础设置</ULS_Section_Core>
-    <ULS_Section_Visual>UI叠加层</ULS_Section_Visual>
+    <ULS_Section_Visual>视觉设置</ULS_Section_Visual>
     <ULS_Section_Performance>升降耗时</ULS_Section_Performance>
 
     <!-- [设置：核心与功能] -->
@@ -115,6 +115,7 @@
     <ULS_Settings_OverlayDisplay_ShowStoredGhost>显示降下的结构的虚影</ULS_Settings_OverlayDisplay_ShowStoredGhost>
     <ULS_Settings_OverlayDisplay_ShowControllerCell>显示存在控制器地块提示</ULS_Settings_OverlayDisplay_ShowControllerCell>
     <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>显示自动控制器的检测区域投影</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+    <ULS_Settings_OverlayDisplay_HideControllerWhenStored>降下时隐藏控制器</ULS_Settings_OverlayDisplay_HideControllerWhenStored>
 
     <!-- [对话框：组设置] -->
     <ULS_GroupSetIdWithValue>组设置:{0}</ULS_GroupSetIdWithValue>

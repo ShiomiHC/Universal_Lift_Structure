@@ -84,7 +84,7 @@
     <ULS_Tab_Other>その他</ULS_Tab_Other>
 
     <ULS_Section_Core>基本設定</ULS_Section_Core>
-    <ULS_Section_Visual>UIオーバーレイ</ULS_Section_Visual>
+    <ULS_Section_Visual>視覚設定</ULS_Section_Visual>
     <ULS_Section_Performance>昇降所要時間</ULS_Section_Performance>
 
     <!-- [設定：コアと機能] -->
@@ -118,6 +118,7 @@
     <ULS_Settings_OverlayDisplay_ShowStoredGhost>下降した構造の影を表示</ULS_Settings_OverlayDisplay_ShowStoredGhost>
     <ULS_Settings_OverlayDisplay_ShowControllerCell>コントローラー存在セルのヒントを表示</ULS_Settings_OverlayDisplay_ShowControllerCell>
     <ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>自動コントローラーの探知範囲を表示</ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection>
+    <ULS_Settings_OverlayDisplay_HideControllerWhenStored>下降時にコントローラーを非表示</ULS_Settings_OverlayDisplay_HideControllerWhenStored>
 
     <!-- [ダイアログ：グループ設定] -->
     <ULS_GroupSetIdWithValue>グループ設定:{0}</ULS_GroupSetIdWithValue>
