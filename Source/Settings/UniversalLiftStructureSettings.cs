@@ -71,6 +71,9 @@ public class UniversalLiftStructureSettings : ModSettings
     public bool showAutoGroupDetectionProjection; // 显示自动分组检测投影
 
 
+    public bool hideControllerWhenStored; // 降下时隐藏控制器（显露地面）
+
+
     // 【枚举字段】
     // LiftControlMode 是自定义枚举（定义在 LiftControlMode.cs 中）
     // 枚举会被序列化为其名称字符串
@@ -115,6 +118,7 @@ public class UniversalLiftStructureSettings : ModSettings
         Scribe_Values.Look(ref enableOverlayDisplay, "enableOverlayDisplay", true);
         Scribe_Values.Look(ref ShowControllerCell, "ShowControllerCell");
         Scribe_Values.Look(ref showAutoGroupDetectionProjection, "showAutoGroupDetectionProjection");
+        Scribe_Values.Look(ref hideControllerWhenStored, "hideControllerWhenStored");
         Scribe_Values.Look(ref liftControlMode, "liftControlMode");
         Scribe_Values.Look(ref liftDurationHpSet, "liftDurationHpSet", 1.0f);
         Scribe_Values.Look(ref liftDurationMassSet, "liftDurationMassSet", 1.0f);

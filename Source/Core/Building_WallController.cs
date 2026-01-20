@@ -650,7 +650,15 @@ public partial class Building_WallController : Building, IThingHolder
         }
 
         // 初始化 Gizmo 缓存
-        RefreshGizmoCache();
+        // 修复：存档加载时延迟刷新，避免在地图未完全初始化时（例如控制台尚未加载）产生错误缓存
+        if (respawningAfterLoad)
+        {
+            InvalidateGizmoCache(); // 仅标记失效，等玩家选中时再刷新
+        }
+        else
+        {
+            RefreshGizmoCache(); // 新建时立即刷新
+        }
     }
 
 

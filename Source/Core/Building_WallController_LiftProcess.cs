@@ -31,7 +31,7 @@ public partial class Building_WallController
     // ============================================================
     // 【是否处于升降过程中】
     // ============================================================
-    private bool InLiftProcess
+    internal bool InLiftProcess
     {
         get
         {

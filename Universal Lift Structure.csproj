@@ -66,6 +66,7 @@
         <Compile Include="Source\HarmonyPatches\Patch_GeothermalGenerator_Fix.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_SelectionDrawer_DrawSelectionOverlays.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_Thing_Print_HideStoredController.cs" />
         <Compile Include="Source\Job\JobDriver_FlickLiftStructure.cs" />
         <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
         <Compile Include="Source\Misc\ULS_StatPart_StoredMarketValue.cs" />
@@ -79,6 +80,7 @@
         <Compile Include="Source\Settings\UniversalLiftStructureSettings.cs" />
         <Compile Include="Source\Utilities\PooledList.cs" />
         <Compile Include="Source\Utilities\ULS_AutoGroupUtility.cs" />
+        <Compile Include="Source\Utilities\ULS_ControllerHideHelper.cs" />
         <Compile Include="Source\Utilities\ULS_Utility.cs" />
         <Compile Include="Source\WorkGiver\WorkGiver_FlickLiftStructure.cs" />
     </ItemGroup>

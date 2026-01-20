@@ -767,6 +767,71 @@ public class UniversalLiftStructureMod : Mod
             ref Settings.ShowControllerCell);
         listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_ShowAutoGroupDetectionProjection".Translate(),
             ref Settings.showAutoGroupDetectionProjection);
+        listing.GapLine();
+
+        // 保存旧值以检测改变
+        bool oldHideValue = Settings.hideControllerWhenStored;
+        listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_HideControllerWhenStored".Translate(),
+            ref Settings.hideControllerWhenStored);
+
+        // 如果值改变了，立即刷新所有控制器的渲染
+        if (oldHideValue != Settings.hideControllerWhenStored)
+        {
+            RefreshAllControllerGraphics();
+        }
+    }
+
+    // 刷新所有控制器的图形
+    private static void RefreshAllControllerGraphics()
+    {
+        if (Current.Game?.CurrentMap == null)
+        {
+            return;
+        }
+
+        Map map = Current.Game.CurrentMap;
+        var groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
+        if (groupComp == null)
+        {
+            return;
+        }
+
+        int refreshedCount = 0;
+        // 只刷新"有存储内容"的控制器（受配置影响）
+        foreach (var controller in groupComp.GetAllControllers())
+        {
+            if (controller is not { Spawned: true })
+            {
+                continue;
+            }
+
+            // 使用辅助类判断是否有存储内容
+            // 只有有存储内容的控制器才受开关影响，需要刷新
+            if (!ULS_ControllerHideHelper.HasStoredContent(controller))
+            {
+                continue;
+            }
+
+            // 获取控制器占据的所有单元格
+            CellRect occupiedRect = controller.OccupiedRect();
+
+            // 扩展一格以确保相邻网格也刷新
+            CellRect expandedRect = occupiedRect.ExpandedBy(1);
+
+            // 标记整个区域为脏
+            foreach (IntVec3 cell in expandedRect)
+            {
+                if (cell.InBounds(map))
+                {
+                    map.mapDrawer.MapMeshDirty(cell, MapMeshFlagDefOf.Buildings);
+                    map.mapDrawer.MapMeshDirty(cell, MapMeshFlagDefOf.Things);
+                }
+            }
+
+            refreshedCount++;
+        }
+
+        Log.Warning($"[ULS] 已刷新 {refreshedCount} 个控制器的渲染");
     }
 
     private void DrawPerformanceSection(Listing_Standard listing)

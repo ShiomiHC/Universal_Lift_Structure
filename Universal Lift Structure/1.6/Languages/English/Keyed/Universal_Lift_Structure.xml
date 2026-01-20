@@ -88,7 +88,7 @@
     <ULS_Tab_Other>Other</ULS_Tab_Other>
 
     <ULS_Section_Core>Core Settings</ULS_Section_Core>
-    <ULS_Section_Visual>Visual settings</ULS_Section_Visual>
+    <ULS_Section_Visual></ULS_Section_Visual>
     <ULS_Section_Performance>Lift Duration</ULS_Section_Performance>
 
     <!-- [Settings: Core and Features] -->
