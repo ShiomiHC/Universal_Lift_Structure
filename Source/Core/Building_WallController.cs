@@ -715,10 +715,22 @@ public partial class Building_WallController : Building, IThingHolder
         // ============================================================
         // storedCell 也保留了建筑在旧地图上的位置
         // 升起时会使用这个坐标，导致建筑生成在错误的位置
-        // 解决方案：重置为 Invalid，让系统使用当前控制器的 Position
+        // 同时需要转换 LinkMask 坐标，因为它们在升降动画期间使用
         // ============================================================
         if (HasStored && storedCell.IsValid)
         {
+            // 转换 LinkMask 坐标：从旧地图坐标系转换到新地图坐标系
+            // LinkMask 用于升降动画期间渲染 Linked 图形的连接状态
+            if (storedLinkMaskCells is { Count: > 0 })
+            {
+                IntVec3 offset = Position - storedCell;
+                for (int i = 0; i < storedLinkMaskCells.Count; i++)
+                {
+                    storedLinkMaskCells[i] += offset;
+                }
+            }
+
+            // 清除旧的存储位置
             storedCell = IntVec3.Invalid;
         }
         // ============================================================
