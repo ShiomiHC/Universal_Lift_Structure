@@ -661,6 +661,93 @@ public partial class Building_WallController : Building, IThingHolder
         }
     }
 
+    // ============================================================
+    // 【飞船地图交换前处理】
+    // ============================================================
+    public override void PreSwapMap()
+    {
+        base.PreSwapMap();
+
+        // 从旧地图的MapComponent中移除动画注册
+        if (InLiftProcess && cachedGroupComp != null)
+        {
+            cachedGroupComp.DeregisterAnimatingController(this);
+        }
+    }
+
+    // ============================================================
+    // 【飞船地图交换后处理】
+    // ============================================================
+    // 当建筑已被传输到新地图后调用（飞船着陆后）
+    //
+    // 【调用时机】
+    // - GravshipPlacementUtility.PostSwapMap() 遍历所有物体时
+    // - 在 SpawnSetup() 之后调用
+    //
+    // 【修复逻辑】
+    // - 清理旧地图的无效坐标（multiCellGroupRootCell、storedCell）
+    // - 让系统在后续操作中使用当前位置或重建多格组
+    // ============================================================
+    public override void PostSwapMap()
+    {
+        base.PostSwapMap();
+
+        // ============================================================
+        // 【清理无效的多格组坐标】
+        // ============================================================
+        // 飞船传输会改变控制器的位置，但 multiCellGroupRootCell 保留了旧地图的坐标
+        // 这导致 GetMultiCellMemberControllersOrSelf 在新地图上查询失败
+        // 解决方案：清除无效的坐标，让系统在需要时重建多格组
+        // ============================================================
+        if (multiCellGroupRootCell.IsValid)
+        {
+            ULS_MultiCellGroupMapComponent multiCellComp = Map?.GetComponent<ULS_MultiCellGroupMapComponent>();
+
+            // 如果旧地图的坐标在新地图上找不到对应的多格组记录，清除它
+            if (multiCellComp == null || !multiCellComp.TryGetGroup(multiCellGroupRootCell, out _))
+            {
+                multiCellGroupRootCell = IntVec3.Invalid;
+            }
+        }
+
+        // ============================================================
+        // 【清理无效的存储位置坐标】
+        // ============================================================
+        // storedCell 也保留了建筑在旧地图上的位置
+        // 升起时会使用这个坐标，导致建筑生成在错误的位置
+        // 解决方案：重置为 Invalid，让系统使用当前控制器的 Position
+        // ============================================================
+        if (HasStored && storedCell.IsValid)
+        {
+            storedCell = IntVec3.Invalid;
+        }
+
+        /*// ============================================================
+        // 【清除无效的LinkMask缓存】
+        // storedLinkMaskCells 中保存的是旧地图的绝对坐标
+        // 在新地图上这些坐标已经无效，需要清除缓存
+        // 升起建筑时，RimWorld会自动根据新地图的LinkGrid重新计算连接
+        // ============================================================
+        if (HasStored)
+        {
+            ClearStoredLinkMaskCache();
+        }*/
+
+
+        // ============================================================
+        // 【恢复升降动画状态】
+        // ============================================================
+        // 如果控制器处于升降过程中，需要重新注册到新地图的MapComponent
+        // 因为SpawnSetup在跨地图时不会执行动画恢复逻辑（respawningAfterLoad=false）
+        // ============================================================
+        if (!InLiftProcess || cachedGroupComp == null) return;
+        // 确保阻挡器在新地图上存在
+        EnsureLiftBlocker();
+        // 确保电力状态正确
+        ApplyActivePowerInternal(active: true);
+        // 重新注册到新地图的动画控制器集合
+        cachedGroupComp.RegisterAnimatingController(this);
+    }
 
     // ============================================================
     // 【序列化和反序列化】

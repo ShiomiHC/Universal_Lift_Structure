@@ -33,6 +33,8 @@
             <canPlaceOverWall>true</canPlaceOverWall>
             <!-- 允许作为结构上的叠放对象 -->
             <isPlaceOverableWall>true</isPlaceOverableWall>
+            <!-- 隐藏 -->
+            <isInert>true</isInert>
         </building>
 
         <!-- 名称-->
