@@ -12,7 +12,9 @@
                - Graphic_Multi：多方向贴图
                - Graphic_Random：随机贴图-->
             <graphicClass>Graphic_Single</graphicClass>
-            <drawSize>(1,1.5)</drawSize>
+            <!-- 禁止旋转 -->
+            <drawRotated>false</drawRotated>
+            <drawSize>(1.5,1.5)</drawSize>
             <drawOffset>(0,0,0.25)</drawOffset>
         </graphicData>
         <uiIconPath>Things/Building/Misc/ULS_Console</uiIconPath>
