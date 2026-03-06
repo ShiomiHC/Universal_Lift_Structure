@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-    <!-- 文件意图：控制器建筑的 Def 定义。 -->
+    <!-- 控制器 -->
     <ThingDef ParentName="BuildingBase" Name="ULS_WallControllerBase" Abstract="True">
         <!-- 逻辑类 -->
         <thingClass>Universal_Lift_Structure.Building_WallController</thingClass>
-        <!-- 注：动画更新由 MapComponent 托管，空闲时无 Tick 开销 -->
         <tickerType>Never</tickerType>
         <!-- 需求地形 -->
         <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
@@ -136,5 +135,9 @@
             <Steel>30</Steel>
             <ComponentIndustrial>5</ComponentIndustrial>
         </costList>
+        <!--研发前置：自动门-->
+        <researchPrerequisites Inherit="False">
+            <li>Autodoors</li>
+        </researchPrerequisites>
     </ThingDef>
 </Defs>
