@@ -67,6 +67,7 @@ public static class ULS_BackwardCompatibility
             // 派发给主控制器
             master.MultiCellGroupRootCell = record.rootCell;
             map.mapDrawer?.MapMeshDirty(master.Position, MapMeshFlagDefOf.Things);
+            map.mapDrawer?.MapMeshDirty(master.Position, MapMeshFlagDefOf.Buildings);
 
             // 派发给所有名册上的小弟
             if (record.memberControllerCells != null)
@@ -77,6 +78,7 @@ public static class ULS_BackwardCompatibility
                     {
                         member.MultiCellGroupRootCell = record.rootCell;
                         map.mapDrawer?.MapMeshDirty(memberCell, MapMeshFlagDefOf.Things);
+                        map.mapDrawer?.MapMeshDirty(memberCell, MapMeshFlagDefOf.Buildings);
                     }
                     else
                     {

@@ -750,6 +750,19 @@ public partial class Building_WallController : Building, IThingHolder
         }
 
         // ============================================================
+        // 【刚体变换：更新升降动画阻挡器位置】
+        // ============================================================
+        if (InLiftProcess && liftBlockerCell.IsValid && preSwapPosition.IsValid)
+        {
+            int deltaRotInt = Find.CurrentGravship?.Rotation.AsInt ?? 0;
+            Rot4 deltaRot = new Rot4(deltaRotInt);
+            bool hasRotation = deltaRotInt != 0;
+
+            IntVec3 oldOffset = liftBlockerCell - preSwapPosition;
+            liftBlockerCell = Position + (hasRotation ? oldOffset.RotatedBy(deltaRot) : oldOffset);
+        }
+
+        // ============================================================
         // 【恢复升降动画状态】
         // ============================================================
         if (InLiftProcess && cachedGroupComp != null)
@@ -839,6 +852,7 @@ public partial class Building_WallController : Building, IThingHolder
         {
             c.MultiCellGroupRootCell = Position;
             map.mapDrawer.MapMeshDirty(c.Position, MapMeshFlagDefOf.Things);
+            map.mapDrawer.MapMeshDirty(c.Position, MapMeshFlagDefOf.Buildings);
         }
     }
 

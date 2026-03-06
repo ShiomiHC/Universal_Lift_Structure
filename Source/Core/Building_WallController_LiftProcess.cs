@@ -207,6 +207,15 @@ public partial class Building_WallController
 
         // 状态改变后刷新 Gizmo 缓存
         InvalidateGizmoCache();
+
+        // 【Bug修复】飞船落地+降下结束时，可能因旧阻挡器生成的清理时序干扰而缺失对该格子的脏标动作。
+        // 主动标记脏网格，确保降下完成后 Thing.Print 前缀（Patch_Thing_Print_HideStoredController）能被立刻执行以正确展现/隐藏贴图。
+        Map map = Map;
+        if (map != null)
+        {
+            map.mapDrawer.MapMeshDirty(Position, MapMeshFlagDefOf.Things);
+            map.mapDrawer.MapMeshDirty(Position, MapMeshFlagDefOf.Buildings);
+        }
     }
 
 
