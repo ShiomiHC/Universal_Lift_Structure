@@ -64,7 +64,7 @@ public partial class Building_WallController
         }
 
         // 如果不是多格结构的一部分，直接返回（已包含自身）
-        if (!multiCellGroupRootCell.IsValid)
+        if (!MultiCellGroupRootCell.IsValid)
         {
             return;
         }
@@ -73,7 +73,7 @@ public partial class Building_WallController
 
         // 验证多格组组件和记录
         if (multiCellComp == null ||
-            !multiCellComp.TryGetGroup(multiCellGroupRootCell, out var record) ||
+            !multiCellComp.TryGetGroup(MultiCellGroupRootCell, out var record) ||
             record == null ||
             record.memberControllerCells == null)
         {

@@ -448,10 +448,14 @@ public partial class Building_WallController : Building, IThingHolder
     // 【分组相关字段】
     // ============================================================
 
-    // 多格结构的根单元格位置
-    // 用途：如果此控制器是多格建筑组的一部分，此字段指向组的根单元格
-    // Invalid 表示此控制器不是多格组的一部分
-    private IntVec3 multiCellGroupRootCell = IntVec3.Invalid;
+    // 多格结构的根单元格相对偏移
+    // 用途：如果此控制器是多格建筑组的一部分，rootCellOffset 记录根单元格相对于自身 Position 的偏移
+    // 配合 hasMultiCellGroup 一起使用，绝对坐标通过属性 MultiCellGroupRootCell 动态计算
+    private IntVec3 rootCellOffset = IntVec3.Zero;
+    private bool hasMultiCellGroup;
+
+    // 仅在加载旧存档时临时缓存旧绝对坐标，用于 PostLoadInit 阶段的兼容转换
+    private IntVec3 legacyRootCellForCompat = IntVec3.Invalid;
 
     // 控制器分组 ID
     // 用途：用于多个控制器的编组功能，同组控制器可以联动升降
@@ -464,10 +468,23 @@ public partial class Building_WallController : Building, IThingHolder
 
     // 多格结构根单元格（内部访问）
     // 用途：由 ULS_MultiCellGroupMapComponent 管理，标识此控制器所属的多格组
+    // 实现：通过 Position + rootCellOffset 动态计算绝对坐标
     internal IntVec3 MultiCellGroupRootCell
     {
-        get => multiCellGroupRootCell;
-        set => multiCellGroupRootCell = value;
+        get => hasMultiCellGroup ? (this.Position + rootCellOffset) : IntVec3.Invalid;
+        set
+        {
+            if (value.IsValid)
+            {
+                rootCellOffset = value - this.Position;
+                hasMultiCellGroup = true;
+            }
+            else
+            {
+                rootCellOffset = IntVec3.Zero;
+                hasMultiCellGroup = false;
+            }
+        }
     }
 
     // 控制器分组 ID（内部访问）
@@ -701,16 +718,20 @@ public partial class Building_WallController : Building, IThingHolder
         base.PostSwapMap();
 
         // ============================================================
-        // 【清理无效的多格组坐标】
+        // 【清理无效的多格组关联】
         // ============================================================
-        if (multiCellGroupRootCell.IsValid)
+        // 使用相对偏移后，纯平移不影响 rootCellOffset；但飞船旋转时偏移可能失效。
+        // 此处验证计算出的绝对根位置是否仍能在新地图 Component 中找到对应记录，
+        // 找不到则清除，由根控制器的 TryRebuildMultiCellGroupAfterTransfer 负责重建。
+        if (hasMultiCellGroup)
         {
+            IntVec3 computedRootCell = MultiCellGroupRootCell;
             ULS_MultiCellGroupMapComponent multiCellComp = Map?.GetComponent<ULS_MultiCellGroupMapComponent>();
 
-            // 如果旧地图的坐标在新地图上找不到对应的多格组记录，清除它
-            if (multiCellComp == null || !multiCellComp.TryGetGroup(multiCellGroupRootCell, out _))
+            if (multiCellComp == null || !multiCellComp.TryGetGroup(computedRootCell, out _))
             {
-                multiCellGroupRootCell = IntVec3.Invalid;
+                hasMultiCellGroup = false;
+                rootCellOffset = IntVec3.Zero;
             }
         }
 
@@ -862,7 +883,8 @@ public partial class Building_WallController : Building, IThingHolder
         Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
         Scribe_Values.Look(ref storedRotation, "storedRotation", Rot4.North);
         Scribe_Values.Look(ref storedCell, "storedCell", IntVec3.Invalid);
-        Scribe_Values.Look(ref multiCellGroupRootCell, "multiCellGroupRootCell", IntVec3.Invalid);
+        Scribe_Values.Look(ref rootCellOffset, "rootCellOffset", IntVec3.Zero);
+        Scribe_Values.Look(ref hasMultiCellGroup, "hasMultiCellGroup");
         Scribe_Values.Look(ref controllerGroupId, "controllerGroupId");
         Scribe_Values.Look(ref storedThingMarketValueIgnoreHp, "storedThingMarketValueIgnoreHp");
 
@@ -882,6 +904,12 @@ public partial class Building_WallController : Building, IThingHolder
         Scribe_Values.Look(ref liftActionIsRaise, "liftActionIsRaise");
         Scribe_Values.Look(ref liftActionStartCell, "liftActionStartCell", IntVec3.Invalid);
         Scribe_Values.Look(ref wantedLiftAction, "wantedLiftAction");
+
+        // 旧存档兼容：尝试读取旧标签 multiCellGroupRootCell
+        if (Scribe.mode == LoadSaveMode.LoadingVars)
+        {
+            Scribe_Values.Look(ref legacyRootCellForCompat, "multiCellGroupRootCell", IntVec3.Invalid);
+        }
 
         // 加载后处理
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -910,6 +938,13 @@ public partial class Building_WallController : Building, IThingHolder
             {
                 storedLinkMaskCells.Clear();
                 storedLinkMaskValues.Clear();
+            }
+
+            // 旧存档兼容：将旧绝对坐标转换为新相对偏移
+            if (legacyRootCellForCompat.IsValid && !hasMultiCellGroup)
+            {
+                MultiCellGroupRootCell = legacyRootCellForCompat;
+                legacyRootCellForCompat = IntVec3.Invalid;
             }
         }
     }
@@ -1149,12 +1184,12 @@ public partial class Building_WallController : Building, IThingHolder
         }
 
         // 如果是多格组根控制器，退费并移除整个组
-        if (map != null && multiCellGroupRootCell.IsValid)
+        if (map != null && MultiCellGroupRootCell.IsValid)
         {
             ULS_MultiCellGroupMapComponent multiCellComp = map.GetComponent<ULS_MultiCellGroupMapComponent>();
             if (multiCellComp != null)
             {
-                multiCellComp.RefundAndRemoveGroup(multiCellGroupRootCell);
+                multiCellComp.RefundAndRemoveGroup(MultiCellGroupRootCell);
                 base.Destroy(mode);
                 return;
             }

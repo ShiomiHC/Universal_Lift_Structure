@@ -308,7 +308,7 @@ public partial class Building_WallController
             storedCell = Position;
         }
 
-        IntVec3 rootCell = multiCellGroupRootCell;
+        IntVec3 rootCell = MultiCellGroupRootCell;
 
         // 生成物体
         GenSpawn.Spawn(storedThing, spawnLoc, map, storedRotation);
@@ -327,7 +327,7 @@ public partial class Building_WallController
             }
             else
             {
-                multiCellGroupRootCell = IntVec3.Invalid;
+                MultiCellGroupRootCell = IntVec3.Invalid;
             }
         }
 
