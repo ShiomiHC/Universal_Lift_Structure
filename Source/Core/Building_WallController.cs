@@ -739,13 +739,77 @@ public partial class Building_WallController : Building, IThingHolder
         // 如果控制器处于升降过程中，需要重新注册到新地图的MapComponent
         // 因为SpawnSetup在跨地图时不会执行动画恢复逻辑（respawningAfterLoad=false）
         // ============================================================
-        if (!InLiftProcess || cachedGroupComp == null) return;
-        // 确保阻挡器在新地图上存在
-        EnsureLiftBlocker();
-        // 确保电力状态正确
-        ApplyActivePowerInternal(active: true);
-        // 重新注册到新地图的动画控制器集合
-        cachedGroupComp.RegisterAnimatingController(this);
+        if (InLiftProcess && cachedGroupComp != null)
+        {
+            // 确保阻挡器在新地图上存在
+            EnsureLiftBlocker();
+            // 确保电力状态正确
+            ApplyActivePowerInternal(active: true);
+            // 重新注册到新地图的动画控制器集合
+            cachedGroupComp.RegisterAnimatingController(this);
+        }
+
+        // ============================================================
+        // 【重建多格组记录】
+        // ============================================================
+        // 飞船传输后多格组记录丢失（旧地图的 GroupRecord 不会跟随传输）
+        // 对于根格控制器（HasStored == true），根据存储建筑的 footprint
+        // 重新注册多格组记录并更新所有成员控制器的 multiCellGroupRootCell
+        // ============================================================
+        if (HasStored)
+        {
+            TryRebuildMultiCellGroupAfterTransfer();
+        }
+    }
+
+    // ============================================================
+    // 【飞船传输后重建多格组】
+    // ============================================================
+    // 根据当前根格的 Position 和存储建筑的 def.size + storedRotation
+    // 重新计算 footprint，查找所有成员控制器，并注册多格组记录
+    //
+    // 【调用时机】
+    // - PostSwapMap 末尾，仅对根格控制器（HasStored == true）调用
+    // - 此时所有控制器已 Spawn 到新地图，可通过 thingGrid 查找
+    //
+    // 【注意事项】
+    // - 单格建筑（def.size == IntVec2.One）无需重建，直接跳过
+    // - 如果任何格位缺少控制器，放弃重建（数据可能损坏）
+    // ============================================================
+    private void TryRebuildMultiCellGroupAfterTransfer()
+    {
+        Map map = Map;
+        Thing stored = StoredThing;
+        if (map == null || stored == null || stored.def.size == IntVec2.One)
+            return; // 单格建筑无需重建
+
+        ULS_MultiCellGroupMapComponent multiCellComp =
+            map.GetComponent<ULS_MultiCellGroupMapComponent>();
+        if (multiCellComp == null) return;
+
+        // 如果当前位置已有多格组记录，跳过（避免重复注册）
+        if (multiCellComp.HasGroup(Position)) return;
+
+        // 根据存储建筑的 footprint 枚举所有成员格
+        CellRect footprint = GenAdj.OccupiedRect(Position, storedRotation, stored.def.size);
+
+        List<IntVec3> memberCells = new List<IntVec3>();
+        List<Building_WallController> memberControllers = new List<Building_WallController>();
+
+        foreach (IntVec3 cell in footprint)
+        {
+            if (!ULS_Utility.TryGetControllerAt(map, cell, out var controller))
+                return; // 某格缺少控制器，放弃重建
+            memberCells.Add(cell);
+            memberControllers.Add(controller);
+        }
+
+        // 注册多格组记录
+        multiCellComp.TryAddGroup(new ULS_MultiCellGroupRecord(Position, Position, memberCells));
+
+        // 更新所有成员的 multiCellGroupRootCell
+        foreach (var c in memberControllers)
+            c.MultiCellGroupRootCell = Position;
     }
 
     // ============================================================
