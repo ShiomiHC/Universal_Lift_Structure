@@ -1,4 +1,4 @@
-﻿namespace Universal_Lift_Structure;
+namespace Universal_Lift_Structure;
 
 // ============================================================
 // 【多格建筑分组管理组件】
@@ -73,8 +73,21 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
 
     // --- 核心数据:分组记录列表 ---
     // 存储所有多格建筑的分组记录（会被序列化）
-    private List<ULS_MultiCellGroupRecord> groupRecords = new();
+    internal List<ULS_MultiCellGroupRecord> groupRecords = new();
 
+    // ============================================================
+    // 【飞船转移后延迟重建任务列队】
+    // ============================================================
+    // 当主控被传送时，因为其他组员可能还没生成，所以在下一帧 Tick 中统一执行重建
+    private HashSet<Building_WallController> pendingRebuildControllers = new HashSet<Building_WallController>();
+
+    public void RegisterPendingRebuild(Building_WallController controller)
+    {
+        if (controller != null)
+        {
+            pendingRebuildControllers.Add(controller);
+        }
+    }
 
     // --- 运行时索引：快速查询缓存 ---
     // rootCell → GroupRecord 映射（不被序列化，加载后重建）
@@ -121,15 +134,16 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
     }
 
     // ============================================================
-    // 【重建索引】
+    // 【重建索引与单向状态派发】
     // ============================================================
     // 从 groupRecords 重建 groupByRootCell 快速查询索引
+    // 并向该地图上的所有成员控制器单向派发（注入）多格组组长坐标
     //
     // 【重建流程】
     // 1. 清空 groupByRootCell
     // 2. 防御性检查：groupRecords 为 null 则创建新列表
-    // 3. 遍历 groupRecords，跳过无效记录
-    // 4. 将每个记录添加到 groupByRootCell 索引
+    // 3. 遍历 groupRecords 添加到快查字典索引
+    // 4. (SSOT重写) 主动为每个记录中的成员控制器强行设置 Runtime 的 MultiCellGroupRootCell
     //
     // 【调用时机】
     // - PostLoadInit：存档加载完成后
@@ -148,6 +162,44 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
             }
 
             groupByRootCell[record.rootCell] = record;
+        }
+    }
+
+    // ============================================================
+    // 【地图加载完成后的最终初始化】
+    // ============================================================
+    // 在此时刻，所有 Thing 均已完成 SpawnSetup（已加入 map.thingGrid）
+    // ============================================================
+    public override void FinalizeInit()
+    {
+        base.FinalizeInit();
+        
+        // 交由专门的兼容类，检查旧存档补足成员名单，并完成 SSOT 的组坐标运行时派发
+        ULS_BackwardCompatibility.CheckAndFixLegacyGroups(this, map);
+    }
+
+    // ============================================================
+    // 【引擎组件每帧滴答 (Tick)】
+    // ============================================================
+    // 处理需要在固定游戏时间尺度循环内运行的轻量任务（例如飞船落地后重建排队）
+    // ============================================================
+    public override void MapComponentTick()
+    {
+        base.MapComponentTick();
+        
+        if (pendingRebuildControllers.Count > 0)
+        {
+            using var _ = new PooledList<Building_WallController>(out var toRebuild);
+            toRebuild.AddRange(pendingRebuildControllers);
+            pendingRebuildControllers.Clear();
+
+            foreach (var controller in toRebuild)
+            {
+                if (controller != null && controller.Spawned && controller.HasStored)
+                {
+                    controller.TryRebuildMultiCellGroupAfterTransfer();
+                }
+            }
         }
     }
 
@@ -333,37 +385,41 @@ public class ULS_MultiCellGroupMapComponent : MapComponent
     // 【清理成员控制器标志】
     // ============================================================
     // 清空分组所有成员控制器的多格分组标志和状态
+    // (SSOT 变更: 主控也应该在这里被一并清空状态)
     //
     // 【清理操作】
     // - 将 MultiCellGroupRootCell 设为 IntVec3.Invalid
     // - 调用 ClearLiftProcessAndRemoveBlocker() 中断升降流程
     // - 移除升降阻挡器（LiftBlocker）
-    //
-    // 【为什么需要清理？】
-    // - 防止控制器保留过期的多格分组引用
-    // - 避免升降流程在分组销毁后继续执行
-    // - 确保控制器状态一致性
-    //
-    // 【参数说明】
-    // - record: 分组记录
     // ============================================================
     private void ClearMemberControllerFlags(ULS_MultiCellGroupRecord record)
     {
         Map mapInstance = map;
-        if (mapInstance is null || record?.memberControllerCells is null)
+        if (mapInstance is null || record == null)
         {
             return;
         }
 
-        foreach (var cell in record.memberControllerCells)
+        // 1. 清理主控本身（在 SSOT 重构后，主控不再属于 memberControllerCells 名单，所以必须单列清理）
+        if (record.masterControllerCell.IsValid && ULS_Utility.TryGetControllerAt(mapInstance, record.masterControllerCell, out Building_WallController masterController))
         {
-            if (!ULS_Utility.TryGetControllerAt(mapInstance, cell, out Building_WallController controller))
-            {
-                continue;
-            }
+            masterController.MultiCellGroupRootCell = IntVec3.Invalid;
+            masterController.ClearLiftProcessAndRemoveBlocker();
+        }
 
-            controller.MultiCellGroupRootCell = IntVec3.Invalid;
-            controller.ClearLiftProcessAndRemoveBlocker();
+        // 2. 清理所有成员
+        if (record.memberControllerCells != null)
+        {
+            foreach (var cell in record.memberControllerCells)
+            {
+                if (!ULS_Utility.TryGetControllerAt(mapInstance, cell, out Building_WallController controller))
+                {
+                    continue;
+                }
+
+                controller.MultiCellGroupRootCell = IntVec3.Invalid;
+                controller.ClearLiftProcessAndRemoveBlocker();
+            }
         }
     }
 }

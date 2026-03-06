@@ -54,6 +54,7 @@
         <Compile Include="Source\Core\Building_WallController_Power.cs" />
         <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />
         <Compile Include="Source\Core\Building_WallController_Utility.cs" />
+        <Compile Include="Source\Core\ULS_BackwardCompatibility.cs" />
         <Compile Include="Source\Core\ULS_GhostRenderer.cs" />
         <Compile Include="Source\Core\ULS_GizmoTextures.cs" />
         <Compile Include="Source\DefOf\ULS_DesignationDefOf.cs" />

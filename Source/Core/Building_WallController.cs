@@ -448,15 +448,6 @@ public partial class Building_WallController : Building, IThingHolder
     // 【分组相关字段】
     // ============================================================
 
-    // 多格结构的根单元格相对偏移
-    // 用途：如果此控制器是多格建筑组的一部分，rootCellOffset 记录根单元格相对于自身 Position 的偏移
-    // 配合 hasMultiCellGroup 一起使用，绝对坐标通过属性 MultiCellGroupRootCell 动态计算
-    private IntVec3 rootCellOffset = IntVec3.Zero;
-    private bool hasMultiCellGroup;
-
-    // 仅在加载旧存档时临时缓存旧绝对坐标，用于 PostLoadInit 阶段的兼容转换
-    private IntVec3 legacyRootCellForCompat = IntVec3.Invalid;
-
     // 控制器分组 ID
     // 用途：用于多个控制器的编组功能，同组控制器可以联动升降
     // \u003c 1 表示无效分组 ID
@@ -468,24 +459,8 @@ public partial class Building_WallController : Building, IThingHolder
 
     // 多格结构根单元格（内部访问）
     // 用途：由 ULS_MultiCellGroupMapComponent 管理，标识此控制器所属的多格组
-    // 实现：通过 Position + rootCellOffset 动态计算绝对坐标
-    internal IntVec3 MultiCellGroupRootCell
-    {
-        get => hasMultiCellGroup ? (this.Position + rootCellOffset) : IntVec3.Invalid;
-        set
-        {
-            if (value.IsValid)
-            {
-                rootCellOffset = value - this.Position;
-                hasMultiCellGroup = true;
-            }
-            else
-            {
-                rootCellOffset = IntVec3.Zero;
-                hasMultiCellGroup = false;
-            }
-        }
-    }
+    // 设计演进：变更为纯内存属性（不序列化）。由 MapComponent 的加载期统一单向派发。
+    internal IntVec3 MultiCellGroupRootCell { get; set; } = IntVec3.Invalid;
 
     // 控制器分组 ID（内部访问）
     // 用途：由 ULS_ControllerGroupMapComponent 管理，用于分组联动功能
@@ -506,7 +481,7 @@ public partial class Building_WallController : Building, IThingHolder
     // 存储的建筑物（私有访问）
     // 用途：快速访问内部容器中的第一个物品（唯一物品）
     // 返回：容器中的建筑物，如果为空则返回 null
-    private Thing StoredThing
+    internal Thing StoredThing
     {
         get
         {
@@ -720,20 +695,10 @@ public partial class Building_WallController : Building, IThingHolder
         // ============================================================
         // 【清理无效的多格组关联】
         // ============================================================
-        // 使用相对偏移后，纯平移不影响 rootCellOffset；但飞船旋转时偏移可能失效。
-        // 此处验证计算出的绝对根位置是否仍能在新地图 Component 中找到对应记录，
-        // 找不到则清除，由根控制器的 TryRebuildMultiCellGroupAfterTransfer 负责重建。
-        if (hasMultiCellGroup)
-        {
-            IntVec3 computedRootCell = MultiCellGroupRootCell;
-            ULS_MultiCellGroupMapComponent multiCellComp = Map?.GetComponent<ULS_MultiCellGroupMapComponent>();
-
-            if (multiCellComp == null || !multiCellComp.TryGetGroup(computedRootCell, out _))
-            {
-                hasMultiCellGroup = false;
-                rootCellOffset = IntVec3.Zero;
-            }
-        }
+        // 在大一统单点事实架构下，该属性已改为纯内存字段。
+        // 由于飞船着陆时（PostSwapMap）会触发物理引擎重建并抛弃老地图 Component，
+        // 我们只需将其清空：稍后主控制器将通过 TryRebuildMultiCellGroupAfterTransfer 负责为所有成员重新派发最新坐标。
+        MultiCellGroupRootCell = IntVec3.Invalid;
 
         // ============================================================
         // 【刚体变换：更新存储数据以适配飞船旋转】
@@ -799,7 +764,12 @@ public partial class Building_WallController : Building, IThingHolder
         // ============================================================
         if (HasStored)
         {
-            TryRebuildMultiCellGroupAfterTransfer();
+            // 推迟到新地图首次 Tick 执行，确保所有组员格同时已在这个瞬间完成落位 (飞船引擎生成时序避让)
+            var multiCellComp = Map?.GetComponent<ULS_MultiCellGroupMapComponent>();
+            if (multiCellComp != null)
+            {
+                multiCellComp.RegisterPendingRebuild(this);
+            }
         }
     }
 
@@ -817,11 +787,11 @@ public partial class Building_WallController : Building, IThingHolder
     // - 单格建筑（def.size == IntVec2.One）无需重建，直接跳过
     // - 如果任何格位缺少控制器，放弃重建（数据可能损坏）
     // ============================================================
-    private void TryRebuildMultiCellGroupAfterTransfer()
+    internal void TryRebuildMultiCellGroupAfterTransfer()
     {
         Map map = Map;
         Thing stored = StoredThing;
-        if (map == null || stored == null || stored.def.size == IntVec2.One)
+        if (map == null || stored == null || stored.def == null || stored.def.size == IntVec2.One)
             return; // 单格建筑无需重建
 
         ULS_MultiCellGroupMapComponent multiCellComp =
@@ -829,9 +799,11 @@ public partial class Building_WallController : Building, IThingHolder
         if (multiCellComp == null) return;
 
         // 如果当前位置已有多格组记录，跳过（避免重复注册）
+        // 这里必须使用主控当前的新位置（Position）查询
         if (multiCellComp.HasGroup(Position)) return;
 
-        // 根据存储建筑的 footprint 枚举所有成员格
+        // 根据存储建筑此时（已经过刚体旋转变换）的 footprint 枚举所有成员格
+        // storedRotation 在 PostSwapMap 的刚才已经正确的加上了 delta 旋转
         CellRect footprint = GenAdj.OccupiedRect(Position, storedRotation, stored.def.size);
 
         List<IntVec3> memberCells = new List<IntVec3>();
@@ -840,17 +812,34 @@ public partial class Building_WallController : Building, IThingHolder
         foreach (IntVec3 cell in footprint)
         {
             if (!ULS_Utility.TryGetControllerAt(map, cell, out var controller))
+            {
                 return; // 某格缺少控制器，放弃重建
-            memberCells.Add(cell);
-            memberControllers.Add(controller);
+            }
+
+            // ULS_MultiCellGroupRecord 设计上，memberControllers 不包含主控(自己)
+            if (cell != Position)
+            {
+                memberCells.Add(cell);
+            }
+            memberControllers.Add(controller); // 给所有人派发时需要包含主控
         }
 
-        // 注册多格组记录
+        // 注册多格组记录（Record中的 rootCell, masterControllerCell 均填自己）
         multiCellComp.TryAddGroup(new ULS_MultiCellGroupRecord(Position, Position, memberCells));
 
-        // 更新所有成员的 multiCellGroupRootCell
+        // ============================================================
+        // 【Bug 修复】派发 MultiCellGroupRootCell 后强制刷新渲染
+        // ============================================================
+        // 成员格的隐藏贴图由 Patch_Thing_Print_HideStoredController（Thing.Print Prefix）控制。
+        // Print() 属于静态网格批渲染，只在格子被标脏（MapMeshDirty）时才会重新调用。
+        // 若不主动触发脏标，飞船传输后成员格会保持旧贴图直到其他建筑变化才刷新。
+        // ============================================================
+        // 统一向所有包含在足迹内的小弟以及自己，单向派发最新的组坐标并触发重绘
         foreach (var c in memberControllers)
+        {
             c.MultiCellGroupRootCell = Position;
+            map.mapDrawer.MapMeshDirty(c.Position, MapMeshFlagDefOf.Things);
+        }
     }
 
     // ============================================================
@@ -879,12 +868,9 @@ public partial class Building_WallController : Building, IThingHolder
     {
         base.ExposeData();
 
-        // 序列化存储相关字段
         Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
         Scribe_Values.Look(ref storedRotation, "storedRotation", Rot4.North);
         Scribe_Values.Look(ref storedCell, "storedCell", IntVec3.Invalid);
-        Scribe_Values.Look(ref rootCellOffset, "rootCellOffset", IntVec3.Zero);
-        Scribe_Values.Look(ref hasMultiCellGroup, "hasMultiCellGroup");
         Scribe_Values.Look(ref controllerGroupId, "controllerGroupId");
         Scribe_Values.Look(ref storedThingMarketValueIgnoreHp, "storedThingMarketValueIgnoreHp");
 
@@ -904,12 +890,6 @@ public partial class Building_WallController : Building, IThingHolder
         Scribe_Values.Look(ref liftActionIsRaise, "liftActionIsRaise");
         Scribe_Values.Look(ref liftActionStartCell, "liftActionStartCell", IntVec3.Invalid);
         Scribe_Values.Look(ref wantedLiftAction, "wantedLiftAction");
-
-        // 旧存档兼容：尝试读取旧标签 multiCellGroupRootCell
-        if (Scribe.mode == LoadSaveMode.LoadingVars)
-        {
-            Scribe_Values.Look(ref legacyRootCellForCompat, "multiCellGroupRootCell", IntVec3.Invalid);
-        }
 
         // 加载后处理
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -938,13 +918,6 @@ public partial class Building_WallController : Building, IThingHolder
             {
                 storedLinkMaskCells.Clear();
                 storedLinkMaskValues.Clear();
-            }
-
-            // 旧存档兼容：将旧绝对坐标转换为新相对偏移
-            if (legacyRootCellForCompat.IsValid && !hasMultiCellGroup)
-            {
-                MultiCellGroupRootCell = legacyRootCellForCompat;
-                legacyRootCellForCompat = IntVec3.Invalid;
             }
         }
     }
