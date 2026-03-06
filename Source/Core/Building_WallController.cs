@@ -90,6 +90,16 @@ public partial class Building_WallController : Building, IThingHolder
     private float storedThingMarketValueIgnoreHp;
 
     // ============================================================
+    // 【飞船传输前快照（非持久化）】
+    // ============================================================
+    // 在 PreSwapMap 时记录当前绝对位置和朝向
+    // 用于 PostSwapMap 计算刚体变换（旋转 + 平移）
+    // ============================================================
+
+    // 传输前控制器的绝对位置
+    private IntVec3 preSwapPosition = IntVec3.Invalid;
+
+    // ============================================================
     // 【升降动作状态字段】
     // ============================================================
     // 这些字段用于 Manual/Console 模式下的 Designation 系统
@@ -673,20 +683,18 @@ public partial class Building_WallController : Building, IThingHolder
         {
             cachedGroupComp.DeregisterAnimatingController(this);
         }
+
+        // ============================================================
+        // 【记录传输前快照】
+        // ============================================================
+        // 在建筑被移出旧地图之前，记录其绝对位置
+        // PostSwapMap 中用于计算刚体旋转变换
+        // ============================================================
+        preSwapPosition = Position;
     }
 
     // ============================================================
     // 【飞船地图交换后处理】
-    // ============================================================
-    // 当建筑已被传输到新地图后调用（飞船着陆后）
-    //
-    // 【调用时机】
-    // - GravshipPlacementUtility.PostSwapMap() 遍历所有物体时
-    // - 在 SpawnSetup() 之后调用
-    //
-    // 【修复逻辑】
-    // - 清理旧地图的无效坐标（multiCellGroupRootCell、storedCell）
-    // - 让系统在后续操作中使用当前位置或重建多格组
     // ============================================================
     public override void PostSwapMap()
     {
@@ -694,10 +702,6 @@ public partial class Building_WallController : Building, IThingHolder
 
         // ============================================================
         // 【清理无效的多格组坐标】
-        // ============================================================
-        // 飞船传输会改变控制器的位置，但 multiCellGroupRootCell 保留了旧地图的坐标
-        // 这导致 GetMultiCellMemberControllersOrSelf 在新地图上查询失败
-        // 解决方案：清除无效的坐标，让系统在需要时重建多格组
         // ============================================================
         if (multiCellGroupRootCell.IsValid)
         {
@@ -711,50 +715,66 @@ public partial class Building_WallController : Building, IThingHolder
         }
 
         // ============================================================
-        // 【清理无效的存储位置坐标】
+        // 【刚体变换：更新存储数据以适配飞船旋转】
         // ============================================================
-        // storedCell 也保留了建筑在旧地图上的位置
-        // 升起时会使用这个坐标，导致建筑生成在错误的位置
-        // 同时需要转换 LinkMask 坐标，因为它们在升降动画期间使用
-        // ============================================================
-        if (HasStored && storedCell.IsValid)
+        if (HasStored && preSwapPosition.IsValid)
         {
-            // 转换 LinkMask 坐标：从旧地图坐标系转换到新地图坐标系
-            // LinkMask 用于升降动画期间渲染 Linked 图形的连接状态
-            if (storedLinkMaskCells is { Count: > 0 })
+            // 对于非可旋转建筑（如控制器本身），自身Rotation无法反映飞船的旋转情况。
+            // 真实旋转增量即为飞船着陆时的 Rotation（相对于其内部北向原图偏移）。
+            int deltaRotInt = Find.CurrentGravship?.Rotation.AsInt ?? 0;
+            Rot4 deltaRot = new Rot4(deltaRotInt);
+            bool hasRotation = deltaRotInt != 0;
+
+            // --------------------------------------------------------
+            // 更新 storedCell：将建筑左下角坐标从旧地图变换到新地图
+            // --------------------------------------------------------
+            if (storedCell.IsValid)
             {
-                IntVec3 offset = Position - storedCell;
-                for (int i = 0; i < storedLinkMaskCells.Count; i++)
-                {
-                    storedLinkMaskCells[i] += offset;
-                }
+                IntVec3 oldOffset = storedCell - preSwapPosition;
+                storedCell = Position + (hasRotation ? oldOffset.RotatedBy(deltaRot) : oldOffset);
             }
 
-            // 清除旧的存储位置
-            storedCell = IntVec3.Invalid;
+            // --------------------------------------------------------
+            // 更新 storedRotation：叠加旋转增量
+            // --------------------------------------------------------
+            if (hasRotation)
+            {
+                storedRotation = new Rot4((storedRotation.AsInt + deltaRotInt) % 4);
+            }
+
+            // --------------------------------------------------------
+            // 更新 storedLinkMaskCells：每个格子的坐标做同样的刚体变换
+            // --------------------------------------------------------
+            if (storedLinkMaskCells is { Count: > 0 })
+            {
+                for (int i = 0; i < storedLinkMaskCells.Count; i++)
+                {
+                    IntVec3 cellOffset = storedLinkMaskCells[i] - preSwapPosition;
+                    storedLinkMaskCells[i] = Position + (hasRotation ? cellOffset.RotatedBy(deltaRot) : cellOffset);
+
+                    if (hasRotation && storedLinkMaskValues != null && i < storedLinkMaskValues.Count)
+                    {
+                        // 循环左移 deltaRotInt 位（在 4 位掩码内）
+                        int mask = storedLinkMaskValues[i];
+                        mask = ((mask << deltaRotInt) | (mask >> (4 - deltaRotInt))) & 0xF;
+                        storedLinkMaskValues[i] = (byte)mask;
+                    }
+                }
+            }
         }
+
         // ============================================================
         // 【恢复升降动画状态】
         // ============================================================
-        // 如果控制器处于升降过程中，需要重新注册到新地图的MapComponent
-        // 因为SpawnSetup在跨地图时不会执行动画恢复逻辑（respawningAfterLoad=false）
-        // ============================================================
         if (InLiftProcess && cachedGroupComp != null)
         {
-            // 确保阻挡器在新地图上存在
             EnsureLiftBlocker();
-            // 确保电力状态正确
             ApplyActivePowerInternal(active: true);
-            // 重新注册到新地图的动画控制器集合
             cachedGroupComp.RegisterAnimatingController(this);
         }
 
         // ============================================================
         // 【重建多格组记录】
-        // ============================================================
-        // 飞船传输后多格组记录丢失（旧地图的 GroupRecord 不会跟随传输）
-        // 对于根格控制器（HasStored == true），根据存储建筑的 footprint
-        // 重新注册多格组记录并更新所有成员控制器的 multiCellGroupRootCell
         // ============================================================
         if (HasStored)
         {
