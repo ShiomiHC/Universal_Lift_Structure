@@ -86,6 +86,7 @@
     <ULS_Section_Core>基本設定</ULS_Section_Core>
     <ULS_Section_Visual>視覚設定</ULS_Section_Visual>
     <ULS_Section_Performance>昇降所要時間</ULS_Section_Performance>
+    <ULS_Section_Compatibility>互換性オプション</ULS_Section_Compatibility>
 
     <!-- [設定：コアと機能] -->
     <ULS_Settings_LiftControlMode>昇降制御モード</ULS_Settings_LiftControlMode>
@@ -100,6 +101,9 @@
     <ULS_Settings_EnableLiftPower>昇降時の追加電力消費を有効化</ULS_Settings_EnableLiftPower>
     <ULS_Settings_EnableLiftPower_Desc>
         有効時：昇降プロセス中、参加する各コントローラーが追加で1000Wを消費；\n電力不足時は昇降を開始できず、昇降中に停電すると失敗</ULS_Settings_EnableLiftPower_Desc>
+
+    <ULS_Settings_LowerButtonOnController>コントローラー本体に下降ボタンを表示</ULS_Settings_LowerButtonOnController>
+    <ULS_Settings_LowerButtonOnController_Desc>このオプションを有効にすると、コントローラー本体に直接下降ボタンが表示されます</ULS_Settings_LowerButtonOnController_Desc>
 
     <ULS_Settings_LiftDurationHpSet>昇降所要時間倍率(耐久度基準): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>昇降所要時間倍率(重量基準): {0}</ULS_Settings_LiftDurationMassSet>

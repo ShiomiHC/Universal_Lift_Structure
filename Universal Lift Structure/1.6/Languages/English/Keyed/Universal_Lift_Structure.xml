@@ -90,6 +90,7 @@
     <ULS_Section_Core>Core Settings</ULS_Section_Core>
     <ULS_Section_Visual></ULS_Section_Visual>
     <ULS_Section_Performance>Lift Duration</ULS_Section_Performance>
+    <ULS_Section_Compatibility>Compatibility Options</ULS_Section_Compatibility>
 
     <!-- [Settings: Core and Features] -->
     <ULS_Settings_LiftControlMode>Lift Control Mode</ULS_Settings_LiftControlMode>
@@ -106,6 +107,9 @@
     <ULS_Settings_EnableLiftPower_Desc>When enabled: During lift operations, each participating
         controller consumes an additional 1000W; \nLift cannot start without sufficient power, power
         loss during lift will cause failure</ULS_Settings_EnableLiftPower_Desc>
+
+    <ULS_Settings_LowerButtonOnController>Show lower button on controller body</ULS_Settings_LowerButtonOnController>
+    <ULS_Settings_LowerButtonOnController_Desc>Enable this option to display the lower button directly on the controller body</ULS_Settings_LowerButtonOnController_Desc>
 
     <ULS_Settings_LiftDurationHpSet>Lift Duration Multiplier (HP-based): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>Lift Duration Multiplier (Mass-based): {0}</ULS_Settings_LiftDurationMassSet>

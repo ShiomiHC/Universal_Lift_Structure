@@ -233,8 +233,38 @@ public partial class Building_WallController
 
         yield return raiseCommand;
 
-        // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
+        // 备用降下入口：开启后在控制器本体显示降下按钮，供其他 Mod 拦截 GetGizmos Postfix 时使用
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
+        if (settings is { lowerButtonOnController: true } && Faction == Faction.OfPlayer)
+        {
+            LiftControlMode mode = settings.liftControlMode;
+            Command_Action lowerCommand = new()
+            {
+                defaultLabel = "ULS_LowerGroup".Translate(),
+                defaultDesc = "ULS_LowerGroupDesc".Translate(),
+                icon = ULS_GizmoTextures.LowerGroup,
+                action = () =>
+                {
+                    if (mode is LiftControlMode.Remote)
+                    {
+                        GizmoLowerGroup(Position);
+                    }
+                    else
+                    {
+                        SetWantedLiftAction(ULS_LiftActionRequest.Lower, Position);
+                    }
+                }
+            };
+
+            if (!CanLowerSingleCellBuilding(out string disableReason))
+            {
+                lowerCommand.Disable(disableReason);
+            }
+
+            yield return lowerCommand;
+        }
+
+        // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
         if (wantedLiftAction != ULS_LiftActionRequest.None &&
             settings is { liftControlMode: not LiftControlMode.Remote })
         {

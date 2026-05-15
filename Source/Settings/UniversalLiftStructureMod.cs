@@ -424,6 +424,12 @@ public class UniversalLiftStructureMod : Mod
             }
             case SettingsTab.Other:
             {
+                listing.Label("ULS_Section_Compatibility".Translate());
+                listing.GapLine();
+                listing.CheckboxLabeled("ULS_Settings_LowerButtonOnController".Translate(),
+                    ref Settings.lowerButtonOnController,
+                    "ULS_Settings_LowerButtonOnController_Desc".Translate());
+
                 listing.Gap();
                 if (listing.ButtonText("ULS_Settings_ResetToDefault".Translate()))
                 {

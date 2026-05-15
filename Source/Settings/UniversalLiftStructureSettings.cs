@@ -90,21 +90,10 @@ public class UniversalLiftStructureSettings : ModSettings
     public bool enableLiftPower = true; // 启用升降功率消耗
 
 
-    // ============================================================
-    // 【ExposeData() 方法】★★★ 核心重点 ★★★
-    // ============================================================
-    // 这是 Scribe 序列化系统的入口点。
-    //
-    // 【调用时机】
-    // - 保存设置时（Scribe.mode == LoadSaveMode.Saving）
-    // - 加载设置时（Scribe.mode == LoadSaveMode.LoadingVars）
-    // - 加载完成后（Scribe.mode == LoadSaveMode.PostLoadInit）
-    //
-    // 【工作原理】
-    // - 保存时：Scribe 读取字段值并写入 XML
-    // - 加载时：Scribe 从 XML 读取值并赋给字段
-    // - 同一个方法处理两种情况！（通过 ref 参数实现）
-    // ============================================================
+    public bool lowerButtonOnController; // 在控制器本体上也显示降下按钮（兼容其他 Mod 时的备用入口）
+
+
+    // ExposeData() 方法
     public override void ExposeData()
     {
         // 【重要】必须调用基类的 ExposeData()
@@ -123,6 +112,7 @@ public class UniversalLiftStructureSettings : ModSettings
         Scribe_Values.Look(ref liftDurationHpSet, "liftDurationHpSet", 1.0f);
         Scribe_Values.Look(ref liftDurationMassSet, "liftDurationMassSet", 1.0f);
         Scribe_Values.Look(ref enableLiftPower, "enableLiftPower", true);
+        Scribe_Values.Look(ref lowerButtonOnController, "lowerButtonOnController");
 
         // 加载完成后初始化
         // 【Scribe.mode 的所有值】
@@ -330,6 +320,7 @@ public class UniversalLiftStructureSettings : ModSettings
         groupMaxSize = 20; // 默认组最大尺寸：20 | Default group max size: 20
         liftControlMode = LiftControlMode.Console; // 默认控制模式：控制台 | Default control mode: Console
         enableLiftPower = true; // 默认启用升降功率消耗 | Default: enable lift power consumption
+        lowerButtonOnController = false;
 
         // 视觉设置 | Visual Settings
         showStoredGhostOverlay = true; // 默认显示收纳的建筑虚影 | Default: show stored ghost overlay

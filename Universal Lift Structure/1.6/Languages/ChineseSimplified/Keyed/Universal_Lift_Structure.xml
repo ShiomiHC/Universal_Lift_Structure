@@ -85,6 +85,7 @@
     <ULS_Section_Core>基础设置</ULS_Section_Core>
     <ULS_Section_Visual>视觉设置</ULS_Section_Visual>
     <ULS_Section_Performance>升降耗时</ULS_Section_Performance>
+    <ULS_Section_Compatibility>兼容性选项</ULS_Section_Compatibility>
 
     <!-- [设置：核心与功能] -->
     <ULS_Settings_LiftControlMode>升降控制模式</ULS_Settings_LiftControlMode>
@@ -97,6 +98,9 @@
 
     <ULS_Settings_EnableLiftPower>启用升降额外耗电逻辑</ULS_Settings_EnableLiftPower>
     <ULS_Settings_EnableLiftPower_Desc>启用时：升降过程中，每个参与的控制器额外耗电1000W； \n缺电时无法开始升降，升降途中断电将失败</ULS_Settings_EnableLiftPower_Desc>
+
+    <ULS_Settings_LowerButtonOnController>在控制器本体显示降下按钮</ULS_Settings_LowerButtonOnController>
+    <ULS_Settings_LowerButtonOnController_Desc>启用此项以允许在控制器本体上显示降下按钮</ULS_Settings_LowerButtonOnController_Desc>
 
     <ULS_Settings_LiftDurationHpSet>升降耗时倍率(基于耐久): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>升降耗时倍率(基于重量): {0}</ULS_Settings_LiftDurationMassSet>
