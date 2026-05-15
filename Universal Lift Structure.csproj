@@ -67,6 +67,7 @@
         <Compile Include="Source\HarmonyPatches\Patch_GeothermalGenerator_Fix.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_SelectionDrawer_DrawSelectionOverlays.cs" />
+        <Compile Include="Source\HarmonyPatches\Patch_ShuttleLanding_IgnoreController.cs" />
         <Compile Include="Source\HarmonyPatches\Patch_Thing_Print_HideStoredController.cs" />
         <Compile Include="Source\Job\JobDriver_FlickLiftStructure.cs" />
         <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
