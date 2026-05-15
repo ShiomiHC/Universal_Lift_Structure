@@ -105,6 +105,9 @@
     <ULS_Settings_LowerButtonOnController>コントローラー本体に下降ボタンを表示</ULS_Settings_LowerButtonOnController>
     <ULS_Settings_LowerButtonOnController_Desc>このオプションを有効にすると、コントローラー本体に直接下降ボタンが表示されます</ULS_Settings_LowerButtonOnController_Desc>
 
+    <ULS_Settings_EnemiesIgnoreLiftController>敵が昇降コントローラーを破壊できない</ULS_Settings_EnemiesIgnoreLiftController>
+    <ULS_Settings_EnemiesIgnoreLiftConsole>昇降コンソールも保護する</ULS_Settings_EnemiesIgnoreLiftConsole>
+
     <ULS_Settings_LiftDurationHpSet>昇降所要時間倍率(耐久度基準): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>昇降所要時間倍率(重量基準): {0}</ULS_Settings_LiftDurationMassSet>
 

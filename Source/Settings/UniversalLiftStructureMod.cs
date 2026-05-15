@@ -105,6 +105,13 @@ public class UniversalLiftStructureMod : Mod
         // PatchAll() 会自动扫描程序集中所有带 [HarmonyPatch] 特性的类
         Harmony harmony = new(HarmonyId);
         harmony.PatchAll();
+
+        // Def 字段调整须等 DefDatabase 加载完毕后执行
+        // 设置持久化后，启动时根据已保存的开关状态重新应用一次
+        LongEventHandler.ExecuteWhenFinished(() =>
+            ULS_DefAdjuster.ApplyImmunity(
+                Settings.enemiesIgnoreLiftController,
+                Settings.enemiesIgnoreLiftConsole));
     }
 
     // ============================================================
@@ -763,6 +770,39 @@ public class UniversalLiftStructureMod : Mod
             new Rect(groupMaxSizeRow.xMax - 100f, groupMaxSizeRow.y, 100f, groupMaxSizeRow.height);
         Widgets.Label(groupMaxSizeLabelRect, "ULS_Settings_GroupMaxSize".Translate());
         Widgets.TextFieldNumeric(groupMaxSizeFieldRect, ref Settings.groupMaxSize, ref groupMaxSizeBuffer, 1, 5000);
+
+        listing.GapLine();
+
+        // 主开关：敌人忽略升降控制器
+        bool ctlBefore = Settings.enemiesIgnoreLiftController;
+        listing.CheckboxLabeled("ULS_Settings_EnemiesIgnoreLiftController".Translate(),
+            ref Settings.enemiesIgnoreLiftController);
+
+        // 子开关：同时保护升降控制台（缩进 24px，主开关关闭时禁用）
+        bool consoleBefore = Settings.enemiesIgnoreLiftConsole;
+        Rect consoleSubRect = listing.GetRect(Text.LineHeight);
+        consoleSubRect.x += 24f;
+        consoleSubRect.width -= 24f;
+        bool consoleDisabled = !Settings.enemiesIgnoreLiftController;
+        if (consoleDisabled)
+        {
+            GUI.color = Color.gray;
+        }
+
+        Widgets.CheckboxLabeled(consoleSubRect,
+            "ULS_Settings_EnemiesIgnoreLiftConsole".Translate(),
+            ref Settings.enemiesIgnoreLiftConsole,
+            disabled: consoleDisabled);
+        GUI.color = Color.white;
+
+        // 任一开关变化时立即重新应用 def 字段
+        if (ctlBefore != Settings.enemiesIgnoreLiftController ||
+            consoleBefore != Settings.enemiesIgnoreLiftConsole)
+        {
+            ULS_DefAdjuster.ApplyImmunity(
+                Settings.enemiesIgnoreLiftController,
+                Settings.enemiesIgnoreLiftConsole);
+        }
     }
 
     private void DrawVisualSection(Listing_Standard listing)

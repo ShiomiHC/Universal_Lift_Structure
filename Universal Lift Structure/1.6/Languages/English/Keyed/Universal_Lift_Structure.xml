@@ -111,6 +111,9 @@
     <ULS_Settings_LowerButtonOnController>Show lower button on controller body</ULS_Settings_LowerButtonOnController>
     <ULS_Settings_LowerButtonOnController_Desc>Enable this option to display the lower button directly on the controller body</ULS_Settings_LowerButtonOnController_Desc>
 
+    <ULS_Settings_EnemiesIgnoreLiftController>Enemies cannot destroy lift controllers</ULS_Settings_EnemiesIgnoreLiftController>
+    <ULS_Settings_EnemiesIgnoreLiftConsole>Also protect lift console</ULS_Settings_EnemiesIgnoreLiftConsole>
+
     <ULS_Settings_LiftDurationHpSet>Lift Duration Multiplier (HP-based): {0}</ULS_Settings_LiftDurationHpSet>
     <ULS_Settings_LiftDurationMassSet>Lift Duration Multiplier (Mass-based): {0}</ULS_Settings_LiftDurationMassSet>
 

@@ -93,6 +93,14 @@ public class UniversalLiftStructureSettings : ModSettings
     public bool lowerButtonOnController; // 在控制器本体上也显示降下按钮（兼容其他 Mod 时的备用入口）
 
 
+    // 是否令敌人 AI 忽略升降控制器（通过将 useHitPoints 置 false 实现免疫）
+    // 持久化；启动时由 LongEventHandler 重新应用到 def
+    public bool enemiesIgnoreLiftController;
+
+    // 是否同时保护升降控制台（子选项，仅 enemiesIgnoreLiftController 开启时生效）
+    public bool enemiesIgnoreLiftConsole;
+
+
     // ExposeData() 方法
     public override void ExposeData()
     {
@@ -113,6 +121,8 @@ public class UniversalLiftStructureSettings : ModSettings
         Scribe_Values.Look(ref liftDurationMassSet, "liftDurationMassSet", 1.0f);
         Scribe_Values.Look(ref enableLiftPower, "enableLiftPower", true);
         Scribe_Values.Look(ref lowerButtonOnController, "lowerButtonOnController");
+        Scribe_Values.Look(ref enemiesIgnoreLiftController, "enemiesIgnoreLiftController");
+        Scribe_Values.Look(ref enemiesIgnoreLiftConsole, "enemiesIgnoreLiftConsole");
 
         // 加载完成后初始化
         // 【Scribe.mode 的所有值】
@@ -321,6 +331,10 @@ public class UniversalLiftStructureSettings : ModSettings
         liftControlMode = LiftControlMode.Console; // 默认控制模式：控制台 | Default control mode: Console
         enableLiftPower = true; // 默认启用升降功率消耗 | Default: enable lift power consumption
         lowerButtonOnController = false;
+
+        // 运行时设置（不持久化，此处与初始默认值保持一致）
+        enemiesIgnoreLiftController = false;
+        enemiesIgnoreLiftConsole = false;
 
         // 视觉设置 | Visual Settings
         showStoredGhostOverlay = true; // 默认显示收纳的建筑虚影 | Default: show stored ghost overlay

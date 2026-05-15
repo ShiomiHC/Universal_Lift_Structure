@@ -165,6 +165,8 @@ public class ULS_ControllerGroupMapComponent : MapComponent
     {
         base.FinalizeInit();
         RebuildIndexFromMap();
+        // 地图加载/进入时修复因保护模式存档导致 HP=-1 的建筑实例
+        ULS_DefAdjuster.TryRestoreHpOnMap(map);
     }
 
     // ============================================================
