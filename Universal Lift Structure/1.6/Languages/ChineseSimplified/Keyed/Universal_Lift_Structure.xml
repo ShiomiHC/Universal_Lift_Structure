@@ -39,6 +39,7 @@
     <ULS_LowerNotPlayerOwned>仅允许降下玩家所有的结构</ULS_LowerNotPlayerOwned>
     <ULS_CannotPlace_ControllerExists>该格已存在升降控制器</ULS_CannotPlace_ControllerExists>
     <ULS_CannotPlace_BlacklistedOverlay>该格结构存在非白名单结构（{0}），无法放置升降控制器</ULS_CannotPlace_BlacklistedOverlay>
+    <ULS_CannotPlace_BridgeNeedsWater>桥版升降控制器只能建造在水面上</ULS_CannotPlace_BridgeNeedsWater>
 
     <!-- [多格结构验证] -->
     <ULS_MultiCellNeedControllerEveryCell>多格结构要求其占格内填满升降控制器</ULS_MultiCellNeedControllerEveryCell>

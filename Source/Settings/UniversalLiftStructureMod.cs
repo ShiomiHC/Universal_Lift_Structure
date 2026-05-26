@@ -1,148 +1,61 @@
 ﻿namespace Universal_Lift_Structure;
 
-// ============================================================
-// 【Mod 入口类】
-// ============================================================
-// 此类是 Mod 的入口点，负责初始化、配置管理和设置界面
-//
-// 【继承关系】
-// - 继承自 Mod：RimWorld 的 Mod 基类
-//
-// 【核心职责】
-// 1. Mod 初始化：在构造函数中应用 Harmony 补丁和加载设置
-// 2. 设置管理：提供静态访问点 Settings 供全局使用
-// 3. 设置界面：实现复杂的多标签页设置窗口
-//
-// 【设置界面结构】
-// - General（常规）标签：包含三个子分区（核心/视觉/性能）
-// - Filter（过滤器）标签：黑名单管理，支持按 Mod 筛选和搜索
-// - Other（其他）标签：重置按钮等杂项功能
-//
-// 【UI 系统说明】
-// - 使用 TabDrawer 绘制标签页头部
-// - 使用 Listing_Standard 进行垂直布局
-// - 使用 Widgets 绘制各种 UI 控件
-// - 使用 ScrollView 处理长列表内容
-//
-// 【Harmony 集成】
-// - 在构造函数中自动扫描并应用所有 Harmony 补丁
-// - Harmony ID: shiomi.UniversalLiftStructure
-// ============================================================
 public class UniversalLiftStructureMod : Mod
 {
-    // Harmony 补丁的唯一标识符
-    // 用于区分不同 Mod 的补丁，避免冲突
     private const string HarmonyId = "shiomi.UniversalLiftStructure";
 
-
-    // ============================================================
-    // 【内部枚举定义】
-    // ============================================================
-
-    // 设置窗口的主标签页类型
     private enum SettingsTab
     {
-        General, // 常规设置（包含核心/视觉/性能三个子分区）
-        Filter, // 过滤器设置（黑名单管理）
-        Other // 其他设置（重置等）
+        General,
+        Filter,
+        Other
     }
 
-    // General 标签页的子分区类型
     private enum GeneralSection
     {
-        Core, // 核心设置（控制模式、分组大小等）
-        Visual, // 视觉设置（覆盖层显示等）
-        Performance // 性能设置（升降时长系数等）
+        Core,
+        Visual,
+        Performance
     }
 
-    // ============================================================
-    // 【静态字段】
-    // ============================================================
-
-    // 全局设置实例
-    // 整个 Mod 通过此静态字段访问配置
     public static UniversalLiftStructureSettings Settings;
 
-    // ============================================================
-    // 【UI 状态字段】
-    // ============================================================
-    // 这些字段仅用于跟踪 UI 状态，不会被序列化保存
-
-    // 当前选中的标签页
     private SettingsTab currentTab = SettingsTab.General;
-
-    // General 标签页中当前选中的子分区
     private GeneralSection currentSection = GeneralSection.Core;
 
+    private string selectedModPackageId;
+    private string selectedModName;
 
-    // Filter 标签页：当前选中的 Mod 过滤器
-    private string selectedModPackageId; // Mod 的唯一 ID
-    private string selectedModName; // Mod 的显示名称
+    private string blacklistSearch = string.Empty;
+    private Vector2 blacklistTreeScrollPosition = Vector2.zero;
+    private readonly HashSet<string> expandedThingClassKeys = new(StringComparer.Ordinal);
 
-    // Filter 标签页：黑名单搜索和 UI 状态
-    private string blacklistSearch = string.Empty; // 搜索框内容
-    private Vector2 blacklistTreeScrollPosition = Vector2.zero; // 滚动位置
-    private readonly HashSet<string> expandedThingClassKeys = new(StringComparer.Ordinal); // 展开的分类
-
-    // General 标签页：分组大小输入缓冲
     private string groupMaxSizeBuffer = string.Empty;
 
-    // ============================================================
-    // 【构造函数】
-    // ============================================================
-    // RimWorld 在加载 Mod 时自动调用此构造函数
-    // 【执行内容】
-    // 1. 加载设置：从 XML 文件读取用户配置
-    // 2. 应用补丁：扫描并应用所有 Harmony 补丁类
-    // ============================================================
     public UniversalLiftStructureMod(ModContentPack content) : base(content)
     {
-        // 加载或创建设置实例
-        // 如果是首次运行，会使用默认值
         Settings = GetSettings<UniversalLiftStructureSettings>();
 
-        // 创建 Harmony 实例并应用所有补丁
-        // PatchAll() 会自动扫描程序集中所有带 [HarmonyPatch] 特性的类
         Harmony harmony = new(HarmonyId);
         harmony.PatchAll();
 
-        // Def 字段调整须等 DefDatabase 加载完毕后执行
-        // 设置持久化后，启动时根据已保存的开关状态重新应用一次
+        // Def 字段调整须等 DefDatabase 加载完毕后执行；启动时根据已保存开关状态重新应用一次
         LongEventHandler.ExecuteWhenFinished(() =>
             ULS_DefAdjuster.ApplyImmunity(
                 Settings.enemiesIgnoreLiftController,
                 Settings.enemiesIgnoreLiftConsole));
     }
 
-    // ============================================================
-    // 【设置类别名称】
-    // ============================================================
-    // 在游戏的 Mod 设置列表中显示的名称
-    // ============================================================
     public override string SettingsCategory()
     {
-        // 返回本地化的 Mod 名称
         return "ULS_SettingsCategory".Translate();
     }
 
-
-    // ============================================================
-    // 【设置窗口绘制方法】
-    // ============================================================
-    // RimWorld 在打开 Mod 设置窗口时调用此方法
-    // 【参数】
-    // inRect：可用的绘制区域
-    // 【实现】
-    // 使用 switch 根据当前标签页绘制不同内容
-    // ============================================================
     public override void DoSettingsWindowContents(Rect inRect)
     {
-        // 计算标签页内容区域（排除标签页头部高度）
         Rect tabBaseRect = new(inRect.x, inRect.y + TabDrawer.TabHeight, inRect.width,
             inRect.height - TabDrawer.TabHeight);
 
-        // 创建标签页列表
-        // 每个 TabRecord 包含：显示文本、点击回调、是否选中的判断函数
         List<TabRecord> tabs = new()
         {
             new("ULS_Tab_General".Translate(), () => currentTab = SettingsTab.General,
@@ -153,29 +66,8 @@ public class UniversalLiftStructureMod : Mod
                 () => currentTab == SettingsTab.Other)
         };
 
-        // 绘制标签页头部
         TabDrawer.DrawTabs(tabBaseRect, tabs);
 
-        // ============================================================
-        // 【Listing_Standard 布局工具】
-        // ============================================================
-        // Listing_Standard 是 RimWorld UI 的核心布局工具
-        // 它会自动管理垂直布局和元素间距
-        //
-        // 【基本用法】
-        // 1. 创建实例：Listing_Standard listing = new();
-        // 2. 开始绘制：listing.Begin(区域);
-        // 3. 添加元素：listing.Label(), listing.CheckboxLabeled() 等
-        // 4. 结束绘制：listing.End();
-        //
-        // 【常用方法】
-        // - Label(text)：显示文本
-        // - CheckboxLabeled(text, ref value)：复选框
-        // - Gap(pixels)：添加间距
-        // - GapLine()：添加分隔线
-        // - GetRect(height)：获取指定高度的矩形区域
-        // - ButtonText(text)：按钮，返回是否被点击
-        // ============================================================
         Listing_Standard listing = new();
         listing.Begin(tabBaseRect);
 
@@ -221,7 +113,6 @@ public class UniversalLiftStructureMod : Mod
 
                 listingSettings.End();
 
-                // End the main listing started outside (if any, though here we replaced the whole block)
                 listing.End();
                 return;
             }
@@ -239,12 +130,6 @@ public class UniversalLiftStructureMod : Mod
 
                 listing.GapLine();
 
-                // ============================================================
-                // 【手动布局示例】
-                // ============================================================
-                // 有时 Listing_Standard 的自动布局不够灵活
-                // 这时可以用 GetRect() 获取区域，然后手动分割
-                // ============================================================
                 Rect searchRow = listing.GetRect(Text.LineHeight);
                 Rect searchLabelRect = new(searchRow.x, searchRow.y, 60f, searchRow.height);
                 const float modButtonWidth = 160f;
@@ -254,19 +139,6 @@ public class UniversalLiftStructureMod : Mod
                     modButtonRect.xMin - (searchLabelRect.xMax + 6f) - 6f - 26f, searchRow.height);
                 Rect searchClearRect = new(modButtonRect.xMin - 24f, searchRow.y, 24f, 24f);
 
-                // ============================================================
-                // 【Widgets 控件库】
-                // ============================================================
-                // Widgets 是 RimWorld UI 的核心控件库，提供各种 UI 元素
-                //
-                // 【常用方法】
-                // - Widgets.Label(rect, text)：在指定区域显示文本
-                // - Widgets.TextField(rect, text)：文本输入框，返回新的文本值
-                // - Widgets.ButtonText(rect, text)：文本按钮，返回是否被点击
-                // - Widgets.ButtonImage(rect, texture)：图片按钮，返回是否被点击
-                // - Widgets.CheckboxLabeled(rect, text, ref value)：带标签的复选框
-                // - Widgets.DrawHighlight(rect)：绘制高亮背景
-                // ============================================================
                 Widgets.Label(searchLabelRect, "ULS_Settings_Search".Translate());
                 blacklistSearch = Widgets.TextField(searchFieldRect, blacklistSearch);
                 if (Widgets.ButtonImage(searchClearRect, TexButton.CloseXSmall))
@@ -298,20 +170,6 @@ public class UniversalLiftStructureMod : Mod
                 Rect outerRect = listing.GetRect(listHeight);
                 float viewHeight = GetThingClassTreeViewHeight(groups, searchLower);
                 Rect viewRect = new(0f, 0f, outerRect.width - 16f, viewHeight);
-                // ============================================================
-                // 【ScrollView 滚动视图】
-                // ============================================================
-                // 当内容超过可视区域时，使用滚动视图
-                //
-                // 【用法】
-                // 1. BeginScrollView(外部区域, ref 滚动位置, 内部视图区域)
-                // 2. 在内部绘制内容
-                // 3. EndScrollView()
-                //
-                // 【注意】
-                // - blacklistTreeScrollPosition 是 Vector2，存储滚动位置
-                // - viewRect 定义了完整的内容尺寸
-                // ============================================================
                 Widgets.BeginScrollView(outerRect, ref blacklistTreeScrollPosition, viewRect);
 
                 float y = 0f;
@@ -773,12 +631,11 @@ public class UniversalLiftStructureMod : Mod
 
         listing.GapLine();
 
-        // 主开关：敌人忽略升降控制器
         bool ctlBefore = Settings.enemiesIgnoreLiftController;
         listing.CheckboxLabeled("ULS_Settings_EnemiesIgnoreLiftController".Translate(),
             ref Settings.enemiesIgnoreLiftController);
 
-        // 子开关：同时保护升降控制台（缩进 24px，主开关关闭时禁用）
+        // 子选项缩进 24px，主开关关闭时置灰
         bool consoleBefore = Settings.enemiesIgnoreLiftConsole;
         Rect consoleSubRect = listing.GetRect(Text.LineHeight);
         consoleSubRect.x += 24f;
@@ -815,19 +672,16 @@ public class UniversalLiftStructureMod : Mod
             ref Settings.showAutoGroupDetectionProjection);
         listing.GapLine();
 
-        // 保存旧值以检测改变
         bool oldHideValue = Settings.hideControllerWhenStored;
         listing.CheckboxLabeled("ULS_Settings_OverlayDisplay_HideControllerWhenStored".Translate(),
             ref Settings.hideControllerWhenStored);
 
-        // 如果值改变了，立即刷新所有控制器的渲染
         if (oldHideValue != Settings.hideControllerWhenStored)
         {
             RefreshAllControllerGraphics();
         }
     }
 
-    // 刷新所有控制器的图形
     private static void RefreshAllControllerGraphics()
     {
         if (Current.Game?.CurrentMap == null)
@@ -843,7 +697,7 @@ public class UniversalLiftStructureMod : Mod
         }
 
         int refreshedCount = 0;
-        // 只刷新"有存储内容"的控制器（受配置影响）
+        // 只刷新有存储内容的控制器（受 hideControllerWhenStored 开关影响）
         foreach (var controller in groupComp.GetAllControllers())
         {
             if (controller is not { Spawned: true })
@@ -851,20 +705,14 @@ public class UniversalLiftStructureMod : Mod
                 continue;
             }
 
-            // 使用辅助类判断是否有存储内容
-            // 只有有存储内容的控制器才受开关影响，需要刷新
             if (!ULS_ControllerHideHelper.HasStoredContent(controller))
             {
                 continue;
             }
 
-            // 获取控制器占据的所有单元格
-            CellRect occupiedRect = controller.OccupiedRect();
+            // 扩展一格确保相邻网格也一并刷新
+            CellRect expandedRect = controller.OccupiedRect().ExpandedBy(1);
 
-            // 扩展一格以确保相邻网格也刷新
-            CellRect expandedRect = occupiedRect.ExpandedBy(1);
-
-            // 标记整个区域为脏
             foreach (IntVec3 cell in expandedRect)
             {
                 if (cell.InBounds(map))
@@ -921,11 +769,9 @@ public class UniversalLiftStructureMod : Mod
 
         foreach (var map in maps)
         {
-            // 1. 清空全局请求队列
             var mapComp = map.GetComponent<ULS_LiftRequestMapComponent>();
             mapComp?.ClearAllRequests();
 
-            // 2. 清除所有控制器的状态
             List<Thing> things = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
             foreach (var t in things)
             {

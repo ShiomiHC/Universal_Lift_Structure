@@ -1,20 +1,10 @@
 
 namespace Universal_Lift_Structure;
 
-// ============================================================
-// 【向前兼容与重构时序处理类 (SSOT)】
-// ============================================================
-// 此类用于处理由于大一统（SSOT）架构引发的读档时序问题，
-// 以及处理旧版本存档中缺少重要关联数据的情况。
-// ============================================================
+// 处理旧版存档缺少关联数据的时序问题（SSOT 架构迁移）
 public static class ULS_BackwardCompatibility
 {
-    // ============================================================
-    // 【核心方法：检查旧组并派发 SSOT 属性】
-    // ============================================================
-    // 调用时机：ULS_MultiCellGroupMapComponent.FinalizeInit()
-    // 此时刻地图所有的 Thing 都已存在于 map.thingGrid 中。
-    // ============================================================
+    // 调用时机：ULS_MultiCellGroupMapComponent.FinalizeInit()，此时所有 Thing 已存在于 map.thingGrid
     public static void CheckAndFixLegacyGroups(ULS_MultiCellGroupMapComponent comp, Map map)
     {
         if (comp == null || map == null) return;
@@ -31,15 +21,12 @@ public static class ULS_BackwardCompatibility
             if (record == null || !record.rootCell.IsValid)
                 continue;
 
-            // 尝试获取主控制器
             if (!ULS_Utility.TryGetControllerAt(map, record.masterControllerCell, out Building_WallController master))
             {
-                continue; // 没找到主控制器，跳过
+                continue;
             }
 
-            // 1. 旧存档兼容修复：
-            // 如果是极早期的存档，Record 中的 memberControllerCells 可能是空的（因为以前小弟各记各的）。
-            // 为了适配 SSOT 架构，我们需要为该 Record 补全小弟名单，并利用 StoredThing 的占位来寻找所有成员。
+            // 旧存档兼容修复：极早期存档的 memberControllerCells 可能为空（以前小弟各记各的），基于 footprint 重建
             bool needsFix = (record.memberControllerCells == null || record.memberControllerCells.Count == 0);
 
             if (needsFix && master.HasStored && master.StoredThing.def.size != IntVec2.One)
@@ -51,7 +38,6 @@ public static class ULS_BackwardCompatibility
 
                 foreach (IntVec3 cell in footprint)
                 {
-                    // 剔除组长自己
                     if (cell != master.Position)
                     {
                         record.memberControllerCells.Add(cell);
@@ -60,16 +46,11 @@ public static class ULS_BackwardCompatibility
                 Log.Message($"[ULS 向后兼容] 补全完毕。该多格组补回了 {record.memberControllerCells.Count} 名成员。");
             }
 
-            // 2. SSOT 单点事实属性派发：
-            // 将 ULS_MultiCellGroupMapComponent 里的身份，统一单向硬注入到每个控制器的运行内存。
-            // 同时标脏对应格子，确保 Thing.Print 重新判断隐藏状态（静态网格渲染缓存问题）。
-
-            // 派发给主控制器
+            // SSOT 派发：将 GroupMapComponent 的身份单向注入到各控制器运行内存，并标脏格子（静态网格缓存问题）
             master.MultiCellGroupRootCell = record.rootCell;
             map.mapDrawer?.MapMeshDirty(master.Position, MapMeshFlagDefOf.Things);
             map.mapDrawer?.MapMeshDirty(master.Position, MapMeshFlagDefOf.Buildings);
 
-            // 派发给所有名册上的小弟
             if (record.memberControllerCells != null)
             {
                 foreach (IntVec3 memberCell in record.memberControllerCells)

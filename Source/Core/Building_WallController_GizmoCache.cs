@@ -1,10 +1,6 @@
 namespace Universal_Lift_Structure;
 
-// ============================================================
-// 【Gizmo 禁用原因枚举】
-// ============================================================
 // 缓存升起/降下按钮的禁用原因，避免每帧重复计算
-// ============================================================
 public enum GizmoDisableReason
 {
     // 未禁用，按钮可用
@@ -35,21 +31,8 @@ public enum GizmoDisableReason
     NotPlayerOwned,
 }
 
-// ============================================================
-// 【墙体控制器：Gizmo 缓存扩展】
-// ============================================================
-// 实现 Gizmo 状态缓存，避免每帧重复计算
-//
-// 【设计思路】
-// - 将"是否通电"、"组内状态"等检查从 UI 渲染循环移到 Tick 中
-// - Gizmo 补丁仅读取缓存的标志位
-// - 在关键状态变化时立即刷新缓存
-// ============================================================
 public partial class Building_WallController
 {
-    // ============================================================
-    // 【缓存字段】
-    // ============================================================
 
     // 升起按钮的禁用原因
     private GizmoDisableReason cachedRaiseDisableReason = GizmoDisableReason.None;
@@ -60,9 +43,6 @@ public partial class Building_WallController
     // 缓存更新时的游戏 tick
     private int gizmoCacheTick = -1;
 
-    // ============================================================
-    // 【缓存属性】
-    // ============================================================
 
     // 升起按钮禁用原因（只读）
     public GizmoDisableReason CachedRaiseDisableReason => cachedRaiseDisableReason;
@@ -73,21 +53,10 @@ public partial class Building_WallController
     // 缓存是否有效（事件驱动模式：由 InvalidateGizmoCache 标记失效）
     public bool IsGizmoCacheValid => gizmoCacheTick >= 0;
 
-    // ============================================================
-    // 【刷新 Gizmo 缓存】
-    // ============================================================
-    // 重新计算升起按钮的禁用状态
-    //
-    // 【调用时机】
-    // - Tick() 中每 250 ticks 调用
-    // - 关键状态变化时强制调用（分组变化/电力变化）
-    // - Gizmo 渲染时如果缓存失效则调用
-    // ============================================================
     public void RefreshGizmoCache()
     {
         gizmoCacheTick = Find.TickManager?.TicksGame ?? 0;
 
-        // 重置缓存
         cachedRaiseDisableReason = GizmoDisableReason.None;
         cachedGroupMaxSizeArg = 0;
 
@@ -105,7 +74,6 @@ public partial class Building_WallController
         ULS_ControllerGroupMapComponent groupComp = cachedGroupComp;
         int groupId = controllerGroupId;
 
-        // 检查组是否存在或有效
         if (groupComp == null || groupId < 1 ||
             !groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) ||
             groupCells == null || groupCells.Count == 0)
@@ -114,7 +82,6 @@ public partial class Building_WallController
             return;
         }
 
-        // 检查组大小限制
         if (groupCells.Count > groupMaxSize)
         {
             cachedRaiseDisableReason = GizmoDisableReason.GroupTooLarge;
@@ -122,7 +89,6 @@ public partial class Building_WallController
             return;
         }
 
-        // 检查组内成员状态
         bool hasStored = false;
         bool isBusy = false;
         bool selfPowerOff = false; // 当前控制器自身断电
@@ -177,7 +143,6 @@ public partial class Building_WallController
             return;
         }
 
-        // 控制台模式检查
         if ((settings?.liftControlMode ?? LiftControlMode.Remote) == LiftControlMode.Console)
         {
             if (!ULS_Utility.TryGetNearestLiftConsoleByDistance(currentMap, Position, out _))
@@ -193,32 +158,11 @@ public partial class Building_WallController
         }
     }
 
-    // ============================================================
-    // 【标记缓存失效】
-    // ============================================================
-    // 强制下次 Gizmo 渲染时刷新缓存
-    //
-    // 【调用场景】
-    // - 分组变化时
-    // - 电力状态变化时
-    // - 存储状态变化时
-    // ============================================================
     public void InvalidateGizmoCache()
     {
         gizmoCacheTick = -1;
     }
 
-    // ============================================================
-    // 【获取禁用原因的翻译字符串】
-    // ============================================================
-    // 将枚举转换为对应的翻译 key
-    //
-    // - reason: 禁用原因枚举
-    // - groupMaxSizeArg: GroupTooLarge 时的参数
-    //
-    // 【返回值】
-    // - 翻译后的字符串
-    // ============================================================
     public static string GetDisableReasonString(GizmoDisableReason reason, int groupMaxSizeArg = 0)
     {
         return reason switch
@@ -235,18 +179,6 @@ public partial class Building_WallController
         };
     }
 
-    // ============================================================
-    // 【验证单格建筑降下可行性】
-    // ============================================================
-    // 供 Patch_Building_GetGizmos 调用，验证单格建筑是否可以降下
-    // 注意：与 RefreshGizmoCache 不同，此方法检查的是「降下」而非「升起」的条件
-    //
-    // - disableReason: 输出参数，禁用原因字符串
-    //
-    // 【返回值】
-    // - true: 可以降下
-    // - false: 不能降下，disableReason 包含原因
-    // ============================================================
     public bool CanLowerSingleCellBuilding(out string disableReason)
     {
         disableReason = string.Empty;
@@ -264,7 +196,6 @@ public partial class Building_WallController
         ULS_ControllerGroupMapComponent groupComp = cachedGroupComp;
         int groupId = controllerGroupId;
 
-        // 检查组是否存在或有效
         if (groupComp == null || groupId < 1 ||
             !groupComp.TryGetGroupControllerCells(groupId, out List<IntVec3> groupCells) ||
             groupCells == null || groupCells.Count == 0)
@@ -272,14 +203,12 @@ public partial class Building_WallController
             return true; // 无分组，默认允许
         }
 
-        // 检查组大小限制
         if (groupCells.Count > groupMaxSize)
         {
             disableReason = "ULS_GroupTooLarge".Translate(groupMaxSize);
             return false;
         }
 
-        // 检查组内成员状态（针对降下操作）
         bool selfPowerOff = false;
         bool otherPowerIssue = false;
 
@@ -309,7 +238,6 @@ public partial class Building_WallController
             }
         }
 
-        // 优先显示自身断电，其次显示组内部分断电
         if (selfPowerOff)
         {
             disableReason = "ULS_PowerOff".Translate();
@@ -325,18 +253,6 @@ public partial class Building_WallController
         return true;
     }
 
-    // ============================================================
-    // 【验证多格建筑降下可行性】
-    // ============================================================
-    // 供 Patch_Building_GetGizmos 调用，验证多格建筑是否可以降下
-    //
-    // - building: 要降下的多格建筑
-    // - disableReason: 输出参数，禁用原因字符串
-    //
-    // 【返回值】
-    // - true: 可以降下
-    // - false: 不能降下，disableReason 包含原因
-    // ============================================================
     public bool CanLowerMultiCellBuilding(Building building, out string disableReason)
     {
         disableReason = string.Empty;

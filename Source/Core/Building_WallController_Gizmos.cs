@@ -2,20 +2,11 @@ namespace Universal_Lift_Structure;
 
 public partial class Building_WallController
 {
-    // ============================================================
-    // 【获取交互按钮 (Gizmos)】
-    // ============================================================
-    // 获取该控制器的交互按钮 (Gizmos)
-    //
-    // 【返回值】
-    // - Gizmo 列表
-    // ============================================================
     public override IEnumerable<Gizmo> GetGizmos()
     {
         // 确保电力状态正确（边缘情况：Mod设置运行时变更）
         EnsureIdlePowerIfFeatureDisabled();
 
-        // 获取基类 Gizmos
         foreach (Gizmo gizmo in base.GetGizmos())
         {
             yield return gizmo;
@@ -45,7 +36,6 @@ public partial class Building_WallController
 
             if (!anyNotPlayerOwned)
             {
-                // [设置分组ID] 按钮
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_GroupSetIdWithValue".Translate(controllerGroupId),
@@ -54,7 +44,6 @@ public partial class Building_WallController
                     action = delegate { OnGizmoAction_SetGroupId(selectedControllers); }
                 };
 
-                // [选择组内所有控制器] 按钮
                 yield return new Command_Action
                 {
                     defaultLabel = "ULS_SelectGroupControllers".Translate(),
@@ -65,7 +54,6 @@ public partial class Building_WallController
             }
 
 
-            // [合并编组] 按钮 (选中2个以上时显示)
             if (selectedControllers.Count >= 2 && !anyNotPlayerOwned)
             {
                 yield return new Command_Action
@@ -78,7 +66,6 @@ public partial class Building_WallController
             }
 
 
-            // [拆分编组] 按钮 (不包含多格建筑时显示)
             if (!anyNotPlayerOwned && !AnySelectedControllerInMultiCellHiddenGroup(selectedControllers))
             {
                 yield return new Command_Action
@@ -91,20 +78,17 @@ public partial class Building_WallController
             }
 
 
-            // [自动编组过滤] 按钮
             if (!anyNotPlayerOwned && Map != null && GetComp<ULS_AutoGroupMarker>() != null)
             {
                 ULS_AutoGroupMapComponent autoGroupComp = Map.GetComponent<ULS_AutoGroupMapComponent>();
                 if (autoGroupComp != null)
                 {
-                    // 扩展选中的控制器，包含多格组
                     List<Building_WallController> expandedList = new List<Building_WallController>();
                     ExpandSelectedControllersToMultiCellHiddenGroupMembers(Map, selectedControllers, expandedList);
                     HashSet<int> groupIds = new HashSet<int>();
                     bool allAreAutoGroup = true;
 
 
-                    // 检查所有选中的控制器是否都支持自动编组
                     foreach (var controller in expandedList)
                     {
                         if (controller != null && controller.Map == Map && controller.Spawned)
@@ -131,7 +115,6 @@ public partial class Building_WallController
                         ULS_AutoGroupType currentType = ULS_AutoGroupType.Friendly;
 
 
-                        // 检查选中组的过滤类型是否一致
                         foreach (int gid in groupIds)
                         {
                             ULS_AutoGroupType groupType =
@@ -166,8 +149,6 @@ public partial class Building_WallController
                             action = delegate { OnGizmoAction_SetAutoGroupFilter(groupIds); }
                         };
 
-                        // [反转模式切换] 按钮
-                        // 检查选中组的反转模式状态是否一致
                         bool hasInvertedState = false;
                         bool mixedInverted = false;
                         bool currentInverted = false;
@@ -211,7 +192,6 @@ public partial class Building_WallController
         }
 
 
-        // [升起编组] 按钮 (核心功能)
         Command_Action raiseCommand = new Command_Action
         {
             defaultLabel = "ULS_RaiseGroup".Translate(),
@@ -264,7 +244,6 @@ public partial class Building_WallController
             yield return lowerCommand;
         }
 
-        // 添加取消升降 Gizmo（仅 Manual/Console 模式且存在期望状态时）
         if (wantedLiftAction != ULS_LiftActionRequest.None &&
             settings is { liftControlMode: not LiftControlMode.Remote })
         {
@@ -275,7 +254,6 @@ public partial class Building_WallController
                 icon = TexCommand.ClearPrioritizedWork,
                 action = delegate
                 {
-                    // 重置期望状态并更新 Designation
                     wantedLiftAction = ULS_LiftActionRequest.None;
                     UpdateLiftDesignation();
                 }
@@ -296,19 +274,16 @@ public partial class Building_WallController
         UniversalLiftStructureSettings settings = UniversalLiftStructureMod.Settings;
         LiftControlMode controlMode = settings?.liftControlMode ?? LiftControlMode.Remote;
 
-        // 电力检查
         if (settings is { enableLiftPower: true } && !IsReadyForLiftPower())
         {
             return;
         }
 
-        // Remote 模式：直接执行
         if (controlMode == LiftControlMode.Remote)
         {
             TryRaiseGroup(showMessage: true);
             RefreshGizmoCache(); // 立即刷新缓存，让 UI 响应更快
         }
-        // Manual/Console 模式：设置期望状态
         else
         {
             wantedLiftAction = ULS_LiftActionRequest.Raise;
@@ -365,7 +340,6 @@ public partial class Building_WallController
                         groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
                         mapLocal.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
 
-                        // 立即刷新所有相关控制器的缓存，让 UI 响应更快
                         foreach (var ctrl in expandedList)
                         {
                             ctrl?.RefreshGizmoCache();
@@ -417,7 +391,6 @@ public partial class Building_WallController
 
         map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
 
-        // 立即刷新所有相关控制器的缓存，让 UI 响应更快
         foreach (var ctrl in expandedList)
         {
             ctrl?.RefreshGizmoCache();
@@ -446,7 +419,6 @@ public partial class Building_WallController
                 groupComp.AssignControllerCellsToGroup(cellsToAssign, newGroupId);
                 map.GetComponent<ULS_AutoGroupMapComponent>()?.NotifyAutoGroupsDirty();
 
-                // 立即刷新所有被拆分控制器的缓存，让 UI 响应更快
                 foreach (var ctrl in selectedControllers)
                 {
                     ctrl?.RefreshGizmoCache();
@@ -522,7 +494,6 @@ public partial class Building_WallController
             }
         }
 
-        // 统一设置所有分组的反转模式状态
         foreach (int gid in groupIds)
         {
             autoGroupComp.SetGroupInvertedMode(gid, targetInverted);

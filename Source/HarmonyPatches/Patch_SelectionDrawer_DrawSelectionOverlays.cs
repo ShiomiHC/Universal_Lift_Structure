@@ -1,17 +1,9 @@
 ﻿namespace Universal_Lift_Structure;
 
-// ============================================================
-// 【Harmony 补丁：SelectionDrawer.DrawSelectionOverlays】
-// ============================================================
-// 作用：绘制地图层面的全局覆盖层（Overlay）。
-// 主要包含：
-// - 控制器位置的填充高亮（白色方块），方便玩家快速识别控制器位置。
-// - 自动编组范围的投影（彩色条纹），显示友好/中立/敌对的自动感应范围。
-// ============================================================
 [HarmonyPatch(typeof(SelectionDrawer), nameof(SelectionDrawer.DrawSelectionOverlays))]
 public static class Patch_SelectionDrawer_DrawSelectionOverlays
 {
-    // 复用列表以避免每帧分配内存
+    // 复用列表，避免每帧分配内存
     private static readonly List<IntVec3> TmpFillCells = new();
     private static readonly List<Matrix4x4> TmpFillMatrices = new();
 
@@ -20,11 +12,7 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
     private static readonly List<IntVec3> TmpHostileCells = new();
     private static readonly List<IntVec3> TmpNeutralCells = new();
 
-    // ============================================================
-    // 【扫描范围缓存类】
-    // ============================================================
-    // 用于减少每帧重复计算扫描范围的开销
-    // ============================================================
+    // 缓存扫描范围，减少每帧重复计算
     private sealed class ScanCache
     {
         public int membershipHash; // 组成员哈希，用于检测成员是否变动
@@ -35,20 +23,13 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
     private static readonly Dictionary<int, ScanCache> ScanCacheByGroupId = new();
     private static readonly HashSet<IntVec3> TmpScanSet = new();
 
-    // ============================================================
-    // 【后置补丁】
-    // ============================================================
-    // 执行自定义覆盖层绘制
-    // ============================================================
     public static void Postfix()
     {
-        // 仅在游戏进行中绘制
         if (Current.ProgramState is not ProgramState.Playing)
         {
             return;
         }
 
-        // 截图模式下隐藏
         if (Find.ScreenshotModeHandler.Active)
         {
             return;
@@ -60,7 +41,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             return;
         }
 
-        // 检查全局开关和子开关
         bool overlayMaster = settings.enableOverlayDisplay;
         bool showFill = overlayMaster && settings.ShowControllerCell;
         bool showAutoProjection = overlayMaster && settings.showAutoGroupDetectionProjection;
@@ -75,16 +55,13 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             return;
         }
 
-        // 提前获取 groupComp，两个功能都可能需要使用
         ULS_ControllerGroupMapComponent groupComp = map.GetComponent<ULS_ControllerGroupMapComponent>();
         if (groupComp is null)
         {
             return;
         }
 
-        // --- 1. 绘制控制器填充高亮 ---
-        // 优化：使用 groupComp.GetAllControllers() 而非遍历 allBuildingsColonist
-        // 复杂度从 O(总建筑数) 降至 O(控制器数)
+        // 绘制控制器填充高亮（用 GetAllControllers() 而非 allBuildingsColonist，复杂度从 O(总建筑数) 降至 O(控制器数)）
         if (showFill)
         {
             HashSet<Building_WallController> allControllers = groupComp.GetAllControllers();
@@ -104,10 +81,8 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
                 if (TmpFillCells.Count > 0)
                 {
                     const float altOffset = 0.001f;
-                    // 使用淡白色填充
                     Color fillColor = new Color(0.98f, 0.97f, 0.96f, 0.35f);
 
-                    // 使用 Instanced 绘制提高性能
                     Material fillMat = MaterialPool.MatFrom(BaseContent.WhiteTex, ShaderDatabase.Transparent, fillColor,
                         renderQueue: 2900);
                     fillMat.enableInstancing = true;
@@ -135,13 +110,10 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             }
         }
 
-        // --- 2. 绘制自动编组投影 ---
         if (!showAutoProjection)
         {
             return;
         }
-
-        // groupComp 已在上方定义并验证过非空
 
         ULS_AutoGroupMapComponent autoGroupComp = map.GetComponent<ULS_AutoGroupMapComponent>();
         if (autoGroupComp is null)
@@ -174,7 +146,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             }
 
 
-            // 寻找组代表（第一个控制器），用于获取 AutoGroupMarker 组件属性
             Building_WallController representative = null;
             foreach (var t in groupCells)
             {
@@ -201,7 +172,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
             ULS_AutoGroupType filterType = autoGroupComp.GetOrInitGroupFilterType(groupId, props.autoGroupType);
 
 
-            // 检查缓存有效性（基于成员哈希和半径）
             int membershipHash = ULS_Utility.ComputeMembershipHash(groupCells);
             if (!ScanCacheByGroupId.TryGetValue(groupId, out ScanCache cache) || cache == null)
             {
@@ -209,7 +179,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
                 ScanCacheByGroupId[groupId] = cache;
             }
 
-            // 如果缓存失效，重新计算扫描范围
             if (cache.scanCells == null || cache.scanCells.Count == 0 || cache.membershipHash != membershipHash ||
                 cache.maxRadius != maxRadius)
             {
@@ -223,7 +192,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
                 continue;
             }
 
-            // 根据类型分类到不同的绘制列表
             var targetList = filterType switch
             {
                 ULS_AutoGroupType.Friendly => TmpFriendlyCells,
@@ -235,7 +203,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         }
 
 
-        // 统一绘制各个类型的条纹
         if (TmpFriendlyCells.Count > 0)
         {
             GenDraw.DrawDiagonalStripes(TmpFriendlyCells, new Color(0.25f, 1.00f, 0.25f, 0.22f), altOffset: 0.0020f);
@@ -253,9 +220,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
     }
 
 
-    // ============================================================
-    // 【构建扫描单元格列表】
-    // ============================================================
     private static List<IntVec3> BuildScanCells(Map map, List<IntVec3> groupCells, int maxRadius)
     {
         if (maxRadius < 0) maxRadius = 0;
@@ -265,7 +229,6 @@ public static class Patch_SelectionDrawer_DrawSelectionOverlays
         {
             foreach (var center in groupCells)
             {
-                // 简单的矩形扫描
                 for (int dx = -maxRadius; dx <= maxRadius; dx++)
                 {
                     for (int dz = -maxRadius; dz <= maxRadius; dz++)
