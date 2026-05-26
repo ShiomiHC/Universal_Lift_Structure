@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+    <!-- 桥版控制器在"桥铺设态"下铺设的可承重桥地形。
+         仅由 Comp_ULS_Bridge 通过 SetTerrain/RemoveTopLayer 切换；不出现在玩家建造菜单。
+         affordances 模仿 vanilla HeavyBridge，确保桥上可建造任意建筑（含重型炮塔）。 -->
+    <TerrainDef ParentName="BridgeBase">
+        <defName>ULS_LiftBridge</defName>
+        <!-- 名称：见本地化 -->
+        <label />
+        <!-- 描述：见本地化 -->
+        <description />
+        <!-- 桥面贴图：复用 vanilla 灰色金属底图 + 主灰色调染色。
+             BridgeBase 强制 edgeType=Hard → ShaderDatabase.TerrainHard，不做 alpha 混合（强制画整张 RGB），
+             专属透明贴图会变成纯白；用 vanilla 既有贴图最稳。 -->
+        <texturePath>Terrain/Surfaces/GenericFloorTile</texturePath>
+        <color>(0.5, 0.5, 0.5)</color>
+        <!-- 向南一格的"支撑柱"贴图：vanilla core BridgeProps（木桥支撑柱），所有用户都有。 -->
+        <bridgePropsPath>Terrain/Misc/BridgeProps</bridgePropsPath>
+        <!-- 太空地图场景：vanilla core BridgeSpaceProps -->
+        <spaceBridgePropsPath>Terrain/Misc/BridgeSpaceProps</spaceBridgePropsPath>
+        <!-- 承重等级与 HeavyBridge 一致 -->
+        <affordances>
+            <li>Light</li>
+            <li>Medium</li>
+            <li>Heavy</li>
+            <li>Walkable</li>
+        </affordances>
+        <!-- 隐藏建造菜单：仅由 Comp 代码生成 -->
+        <designationCategory Inherit="False" IsNull="True" />
+        <!-- 玩家不能自行建造，无 costList/无 statBases.WorkToBuild；保留基类的 destroyBuildingsOnDestroyed/layerable/bridge 等 -->
+        <statBases>
+            <Flammability>0</Flammability>
+        </statBases>
+        <!-- 炸弹易破阈值与 HeavyBridge 一致 -->
+        <destroyOnBombDamageThreshold>45</destroyOnBombDamageThreshold>
+    </TerrainDef>
+</Defs>

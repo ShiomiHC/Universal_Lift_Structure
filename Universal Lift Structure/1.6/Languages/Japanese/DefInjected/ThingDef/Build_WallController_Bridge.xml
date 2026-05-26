@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 橋上昇降コントローラー類 -->
+<LanguageData>
+    <!-- 橋上昇降コントローラー（手動） -->
+    <ULS_WallController_Bridge.label>昇降コントローラー（橋）</ULS_WallController_Bridge.label>
+    <ULS_WallController_Bridge.description>水上に建造できる昇降制御装置。</ULS_WallController_Bridge.description>
+
+    <!-- 橋上昇降コントローラー（自動） -->
+    <ULS_WallController_BridgeAuto.label>昇降コントローラー（橋/自動）</ULS_WallController_BridgeAuto.label>
+    <ULS_WallController_BridgeAuto.description>水上に建造できる自動昇降制御装置。</ULS_WallController_BridgeAuto.description>
+</LanguageData>

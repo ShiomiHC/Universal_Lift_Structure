@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+    <!-- Odyssey 启用时：
+         (1) 向桥版控制器研究前置追加 HeavyBridges
+         (2) 把 ULS_LiftBridge 的支撑柱贴图升级为 HeavyBridgeProps，与 Odyssey 金属桥风格一致
+         非 Odyssey 时保持 vanilla core 默认（木质支撑柱）。 -->
+    <!-- PatchOperationFindMod 比较的是 Mod 的 Name（显示名，区分大小写），不是 PackageId。
+         vanilla DLC 约定写 "Odyssey" / "Royalty" / "Ideology" / "Biotech" / "Anomaly"。 -->
+    <Operation Class="PatchOperationFindMod">
+        <mods>
+            <li>Odyssey</li>
+        </mods>
+        <match Class="PatchOperationSequence">
+            <operations>
+                <!-- 手动桥控制器 -->
+                <li Class="PatchOperationAdd">
+                    <xpath>/Defs/ThingDef[defName="ULS_WallController_Bridge"]/researchPrerequisites</xpath>
+                    <value>
+                        <li>HeavyBridges</li>
+                    </value>
+                </li>
+                <!-- 自动桥控制器 -->
+                <li Class="PatchOperationAdd">
+                    <xpath>/Defs/ThingDef[defName="ULS_WallController_BridgeAuto"]/researchPrerequisites</xpath>
+                    <value>
+                        <li>HeavyBridges</li>
+                    </value>
+                </li>
+                <!-- 升降桥面：支撑柱升级为金属版本 -->
+                <li Class="PatchOperationReplace">
+                    <xpath>/Defs/TerrainDef[defName="ULS_LiftBridge"]/bridgePropsPath</xpath>
+                    <value>
+                        <bridgePropsPath>Terrain/Misc/HeavyBridgeProps</bridgePropsPath>
+                    </value>
+                </li>
+                <!-- 升降桥面：太空场景支撑柱升级为金属版本 -->
+                <li Class="PatchOperationReplace">
+                    <xpath>/Defs/TerrainDef[defName="ULS_LiftBridge"]/spaceBridgePropsPath</xpath>
+                    <value>
+                        <spaceBridgePropsPath>Terrain/Misc/HeavyBridgeSpaceProps</spaceBridgePropsPath>
+                    </value>
+                </li>
+            </operations>
+        </match>
+    </Operation>
+</Patch>

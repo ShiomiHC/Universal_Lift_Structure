@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桥版升降控制器（手动 / 自动） -->
+<LanguageData>
+    <!-- 手动桥控制器 -->
+    <ULS_WallController_Bridge.label>升降控制器（桥）</ULS_WallController_Bridge.label>
+    <ULS_WallController_Bridge.description>允许建造于水面的升降控制装置。</ULS_WallController_Bridge.description>
+
+    <!-- 自动桥控制器 -->
+    <ULS_WallController_BridgeAuto.label>升降控制器（桥/自动）</ULS_WallController_BridgeAuto.label>
+    <ULS_WallController_BridgeAuto.description>允许建造于水面的自动升降控制装置。</ULS_WallController_BridgeAuto.description>
+</LanguageData>

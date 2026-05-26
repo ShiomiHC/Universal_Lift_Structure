@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桥版控制器使用的地形 -->
+<LanguageData>
+    <!-- 升降桥面 -->
+    <ULS_LiftBridge.label>升降桥面</ULS_LiftBridge.label>
+    <ULS_LiftBridge.description>由桥版升降控制器在"桥铺设态"下自动生成的可承重桥面.</ULS_LiftBridge.description>
+</LanguageData>

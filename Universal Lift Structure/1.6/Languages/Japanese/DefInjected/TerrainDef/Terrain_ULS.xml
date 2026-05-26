@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 橋上コントローラーが使用する地形 -->
+<LanguageData>
+    <!-- 昇降橋面 -->
+    <ULS_LiftBridge.label>昇降橋面</ULS_LiftBridge.label>
+    <ULS_LiftBridge.description>橋上昇降コントローラーが「橋展開状態」のときに自動生成する耐荷重橋面。</ULS_LiftBridge.description>
+</LanguageData>

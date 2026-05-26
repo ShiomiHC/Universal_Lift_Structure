@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bridge Lift Controllers -->
+<LanguageData>
+    <!-- Bridge Lift Controller (manual) -->
+    <ULS_WallController_Bridge.label>lift controller (bridge)</ULS_WallController_Bridge.label>
+    <ULS_WallController_Bridge.description>A lift control device that can be built over water.</ULS_WallController_Bridge.description>
+
+    <!-- Bridge Lift Controller (auto) -->
+    <ULS_WallController_BridgeAuto.label>lift controller (bridge/auto)</ULS_WallController_BridgeAuto.label>
+    <ULS_WallController_BridgeAuto.description>An automatic lift control device that can be built over water.</ULS_WallController_BridgeAuto.description>
+</LanguageData>

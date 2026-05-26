@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+    <!-- 桥版升降控制器（手动）：建在水面，桥铺设态=桥可建造，桥撤除态=水面恢复 -->
+    <ThingDef ParentName="ULS_WallControllerBase">
+        <defName>ULS_WallController_Bridge</defName>
+        <!-- 水面不满足 Heavy；改由 PlaceWorker 接管"必须建在水面"的唯一地形约束 -->
+        <terrainAffordanceNeeded Inherit="False" IsNull="True" />
+        <!-- 沿用基础贴图与图标；后续如需要再换专属 -->
+        <graphicData>
+            <texPath>Things/Building/Linked/ULS_WallController_Atlas</texPath>
+            <linkFlags>
+                <li>Custom4</li>
+            </linkFlags>
+        </graphicData>
+        <uiIconPath>Things/Building/Linked/ULS_WallController_Bridge_Icon</uiIconPath>
+        <!-- 桥控制器包含的 Comp：电力 / 电源开关 / 桥地形开关 -->
+        <comps>
+            <li Class="CompProperties_Power">
+                <compClass>CompPowerTrader</compClass>
+                <basePowerConsumption>1</basePowerConsumption>
+            </li>
+            <li Class="CompProperties_Flickable" />
+            <li Class="Universal_Lift_Structure.CompProperties_ULS_Bridge" />
+        </comps>
+        <!-- 工作量 = 基础 400 + HeavyBridge 2500 -->
+        <statBases>
+            <WorkToBuild>2900</WorkToBuild>
+        </statBases>
+        <!-- 造价 = 基础控制器 30 钢 + HeavyBridge 14 钢 + 1 工业元件 -->
+        <costList>
+            <Steel>44</Steel>
+            <ComponentIndustrial>1</ComponentIndustrial>
+        </costList>
+        <!-- 显式声明 researchPrerequisites（即便与基类相同），避免 Odyssey patch 的 PatchOperationAdd
+             因 xpath 在继承前的原始 XML 里找不到该节点而失败。 -->
+        <researchPrerequisites Inherit="False">
+            <li>Electricity</li>
+        </researchPrerequisites>
+    </ThingDef>
+
+    <!-- 桥版升降控制器（自动） -->
+    <ThingDef ParentName="ULS_WallControllerBase">
+        <defName>ULS_WallController_BridgeAuto</defName>
+        <terrainAffordanceNeeded Inherit="False" IsNull="True" />
+        <graphicData>
+            <texPath>Things/Building/Linked/ULS_WallController_Auto_Atlas</texPath>
+            <linkFlags>
+                <li>Custom8</li>
+            </linkFlags>
+        </graphicData>
+        <uiIconPath>Things/Building/Linked/ULS_WallController_Bridge_Auto_Icon</uiIconPath>
+        <comps>
+            <li Class="CompProperties_Power">
+                <compClass>CompPowerTrader</compClass>
+                <basePowerConsumption>5</basePowerConsumption>
+            </li>
+            <li Class="CompProperties_Flickable" />
+            <li Class="Universal_Lift_Structure.CompProperties_ULS_AutoGroupMarker">
+                <autoGroupType>Friendly</autoGroupType>
+                <maxRadius>2</maxRadius>
+                <checkIntervalTicks>60</checkIntervalTicks>
+                <closeDelayTicks>10</closeDelayTicks>
+                <toggleCooldownTicks>180</toggleCooldownTicks>
+            </li>
+            <li Class="Universal_Lift_Structure.CompProperties_ULS_Bridge" />
+        </comps>
+        <statBases>
+            <WorkToBuild>2900</WorkToBuild>
+        </statBases>
+        <costList>
+            <Steel>44</Steel>
+            <ComponentIndustrial>5</ComponentIndustrial>
+        </costList>
+        <researchPrerequisites Inherit="False">
+            <li>Autodoors</li>
+        </researchPrerequisites>
+    </ThingDef>
+</Defs>
