@@ -99,9 +99,10 @@ public partial class Building_WallController
     }
 
 
-    // 控制器被销毁时清算 stored 建筑：等价于其被"击杀"。
-    // 走 KillFinalize 死亡掉落（def.killedLeavings：石块 / 金属残骸 ≈ 25%）而非全额退款，
-    // 与"桥控制器损毁 → 同格 edifice 也跟随损毁"的一体化语义保持一致。
+    // 控制器被销毁时清算 stored 建筑：走 Deconstruct 路径返还少量材料。
+    // 选择 Deconstruct 而非 KillFinalize：vanilla 墙类 leaveResourcesWhenKilled=false，
+    // 走击杀路径将不返还任何材料；Deconstruct 按 def.resourcesFractionWhenDeconstructed
+    // （默认 0.5）返还成本列表，符合"控制器损毁 → 内部建筑跟随拆除"的语义。
     // 注：storedThing 处于 unspawned 状态，Thing.Destroy 不会触发 DeSpawn → 不会自动产生 leavings；
     //     必须先手动调用 GenLeaving.DoLeavingsFor 落地资源，再 Destroy 弃置实体。
     internal void DestroyStored(Map map)
@@ -134,7 +135,7 @@ public partial class Building_WallController
 
         if (map != null)
         {
-            GenLeaving.DoLeavingsFor(storedThing, map, DestroyMode.KillFinalize);
+            GenLeaving.DoLeavingsFor(storedThing, map, DestroyMode.Deconstruct);
         }
 
         storedThing.Destroy();
