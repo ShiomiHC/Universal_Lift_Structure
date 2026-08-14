@@ -1,0 +1,15 @@
+# 白名单式：默认忽略仓根下一切，逐项放行公开内容。
+/*
+!/.gitignore
+!/LICENSE
+!/Source/
+!/Properties/
+!/Universal Lift Structure/
+!/Universal Lift Structure.csproj
+!/Universal Lift Structure.sln
+
+# 放行目录内部的再排除
+Source/TR/
+**/obj/
+**/bin/
+Universal Lift Structure/1.6/Assemblies/*.dll

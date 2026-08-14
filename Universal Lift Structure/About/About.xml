@@ -7,4 +7,19 @@
         <li>1.6</li>
     </supportedVersions>
     <packageId>shiomi.UniversalLiftStructure</packageId>
+
+    <!-- Harmony 为运行时硬依赖：全部 HarmonyPatches/ 依赖它，缺失即启动崩溃，不是可选增强 -->
+    <modDependencies>
+        <li>
+            <packageId>brrainz.harmony</packageId>
+            <displayName>Harmony</displayName>
+            <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+        </li>
+    </modDependencies>
+
+    <!-- Harmony 须先于本 mod 加载，补丁才有可用的 Harmony 实例 -->
+    <loadAfter>
+        <li>Ludeon.RimWorld</li>
+        <li>brrainz.harmony</li>
+    </loadAfter>
 </ModMetaData>

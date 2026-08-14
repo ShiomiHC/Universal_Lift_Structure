@@ -4,7 +4,8 @@
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
         Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <!-- 缺省 Release：仅 Release 配置定义了 OutputPath，Debug 缺省会把产物落到默认 bin\ 而非 Mod 的 Assemblies -->
+        <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{730797A8-A01C-44D8-8FFD-C4BC29519738}</ProjectGuid>
         <OutputType>Library</OutputType>
@@ -14,6 +15,15 @@
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>10</LangVersion>
+        <Nullable>disable</Nullable>
+        <!-- 关掉隐式 mscorlib：游戏跑在 Unity 自带的 Mono corlib 上，其 API 面比 .NET Framework 4.8
+             的引用程序集更宽（如 Dictionary.Remove(key, out value)）。改由下方显式引用 Managed 目录里
+             游戏真正加载的那套 BCL，避免「按 4.8 面编译、在 Mono 面运行」的错配。 -->
+        <NoStdLib>true</NoStdLib>
+        <NoConfig>true</NoConfig>
+        <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
+        <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
+        <RimWorldManaged>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldManaged>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -24,89 +34,75 @@
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
+    <!-- 引用一律 HintPath 直指游戏与 workshop 的真实 DLL，工程内不留 PackageReference。
+         旧式 csproj 消费 PackageReference 依赖 VS 安装里的 NuGet targets，dotnet CLI 不注入，
+         引用会整批解析不到；零包之后 dotnet build 可直接构建，TestRunner 的冷启动闭环才有 build 入口。 -->
     <ItemGroup>
         <Reference Include="0Harmony">
-            <HintPath>C:\Users\CCH\.nuget\packages\lib.harmony\2.4.2\lib\net48\0Harmony.dll</HintPath>
+            <HintPath>D:\SteamLibrary\steamapps\workshop\content\294100\839005762\1.6\Assemblies\0Harmony.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Xml" />
+        <Reference Include="Assembly-CSharp">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <!-- 升降剪裁渲染直接操作 Mesh/Material/Graphics，不在 CoreModule 之外另需模块；
+             AssetBundleModule 供 1.6/AssetBundles 的着色器包加载使用 -->
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>D:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="mscorlib">
+            <HintPath>$(RimWorldManaged)\mscorlib.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+            <HintPath>$(RimWorldManaged)\System.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Core">
+            <HintPath>$(RimWorldManaged)\System.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Data">
+            <HintPath>$(RimWorldManaged)\System.Data.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+            <HintPath>$(RimWorldManaged)\System.Xml.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <!-- 游戏侧类型（含 Verse 的多个 struct）经 netstandard 门面暴露 ValueType 等基元，缺它即 CS0012 -->
+        <Reference Include="netstandard">
+            <HintPath>$(RimWorldManaged)\netstandard.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="Source\Components\Comp_ULS_Bridge.cs" />
-        <Compile Include="Source\Components\CompLiftConsole.cs" />
-        <Compile Include="Source\Components\ULS_AutoGroupMarker.cs" />
-        <Compile Include="Source\Components\ULS_AutoGroupMapComponent.cs" />
-        <Compile Include="Source\Components\ULS_ControllerGroupMapComponent.cs" />
-        <Compile Include="Source\Components\ULS_LiftRequest.cs" />
-        <Compile Include="Source\Components\ULS_LiftRequestMapComponent.cs" />
-        <Compile Include="Source\Components\ULS_MultiCellGroupMapComponent.cs" />
-        <Compile Include="Source\Components\ULS_MultiCellGroupRecord.cs" />
-        <Compile Include="Source\Core\Building_LiftBlocker.cs" />
-        <Compile Include="Source\Core\Building_WallController.cs" />
-        <Compile Include="Source\Core\Building_WallController_Gizmos.cs" />
-        <Compile Include="Source\Core\Building_WallController_GizmoCache.cs" />
-        <Compile Include="Source\Core\Building_WallController_Group.cs" />
-        <Compile Include="Source\Core\Building_WallController_GroupHelpers.cs" />
-        <Compile Include="Source\Core\Building_WallController_LiftProcess.cs" />
-        <Compile Include="Source\Core\Building_WallController_Power.cs" />
-        <Compile Include="Source\Core\Building_WallController_RaiseLower.cs" />
-        <Compile Include="Source\Core\Building_WallController_Utility.cs" />
-        <Compile Include="Source\Core\ULS_BackwardCompatibility.cs" />
-        <Compile Include="Source\Core\ULS_GhostRenderer.cs" />
-        <Compile Include="Source\Core\ULS_GizmoTextures.cs" />
-        <Compile Include="Source\DefOf\ULS_DesignationDefOf.cs" />
-        <Compile Include="Source\DefOf\ULS_JobDefOf.cs" />
-        <Compile Include="Source\DefOf\ULS_TerrainDefOf.cs" />
-        <Compile Include="Source\DefOf\ULS_ThingDefOf.cs" />
-        <Compile Include="Source\GlobalUsings.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_Building_GetGizmos.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_CompPowerTrader_PowerOn.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_DrawManager_DynamicThings.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_GeothermalGenerator_Fix.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_PlaySettings_DoMapControls.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_SelectionDrawer_DrawSelectionOverlays.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_ShuttleLanding_IgnoreController.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_TerrainGrid_BridgeFoundationDestroyed.cs" />
-        <Compile Include="Source\HarmonyPatches\Patch_Thing_Print_HideStoredController.cs" />
-        <Compile Include="Source\Job\JobDriver_FlickLiftStructure.cs" />
-        <Compile Include="Source\Misc\ULS_PlaceRule_WallController.cs" />
-        <Compile Include="Source\Misc\ULS_StatPart_StoredMarketValue.cs" />
-        <Compile Include="Source\Misc\ULS_Dialog_SetControllerGroupId.cs" />
-        <Compile Include="Source\Rendering\ULS_LiftClipRenderer.cs" />
-        <Compile Include="Source\Rendering\ULS_Materials.cs" />
-        <Compile Include="Source\Rendering\ULS_ShaderTypeDefOf.cs" />
-        <Compile Include="Source\Rendering\ULS_Textures.cs" />
-        <Compile Include="Source\Settings\LiftControlMode.cs" />
-        <Compile Include="Source\Settings\UniversalLiftStructureMod.cs" />
-        <Compile Include="Source\Settings\UniversalLiftStructureSettings.cs" />
-        <Compile Include="Source\Utilities\PooledList.cs" />
-        <Compile Include="Source\Utilities\ULS_AutoGroupUtility.cs" />
-        <Compile Include="Source\Utilities\ULS_ControllerHideHelper.cs" />
-        <Compile Include="Source\Utilities\ULS_DefAdjuster.cs" />
-        <Compile Include="Source\Utilities\ULS_Utility.cs" />
-        <Compile Include="Source\WorkGiver\WorkGiver_FlickLiftStructure.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Universal Lift Structure\1.6\Assemblies\Universal_Lift_Structure.dll" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4633" />
+        <!-- 递归通配：新增 / 移动 / 分子夹文件无需再维护本表。
+             Exclude 的 Source\TR 是 TestRunner 工程的源码根，须留在主 DLL 之外——
+             它由 Source\TR\ULSTestRunner.csproj 单独编成第二个 DLL，且不得进入发布内容。 -->
+        <Compile Include="Properties\**\*.cs" Exclude="Properties\obj\**\*.cs" />
+        <Compile Include="Source\**\*.cs" Exclude="Source\TR\**\*.cs;Source\**\obj\**\*.cs" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Universal Lift Structure\UI\" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment
-    it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
-
 </Project>
